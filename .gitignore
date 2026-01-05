@@ -1,0 +1,6 @@
+﻿# Ignorar archivo de configuración con credenciales
+App.config
+
+# También es buena idea ignorar las carpetas de compilación
+bin/
+obj/
