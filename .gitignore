@@ -1,6 +1,24 @@
-﻿# Ignorar archivo de configuración con credenciales
+﻿# Configuración sensible
 App.config
 
-# También es buena idea ignorar las carpetas de compilación
+# Compilación
 bin/
 obj/
+
+# Visual Studio
+.vs/
+*.user
+*.vbproj.user
+*.suo
+
+# NuGet
+packages/
+
+# Temporales
+*.log
+*.tmp
+*.bak
+
+# Sistema
+Thumbs.db
+.DS_Store
