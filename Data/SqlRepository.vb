@@ -1,5 +1,4 @@
 ﻿Imports System.Configuration
-Imports GymPaymentControl.SqlRepository
 Imports MySql.Data.MySqlClient
 
 Public Module SqlRepository

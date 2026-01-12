@@ -32,6 +32,16 @@ GymPaymentControl
   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
 </summary>
 </member>
+<member name="P:GymPaymentControl.My.Resources.Resources.ic_cancel_c_28x28">
+<summary>
+  Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:GymPaymentControl.My.Resources.Resources.ic_cash_register_60x60">
+<summary>
+  Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+</summary>
+</member>
 <member name="P:GymPaymentControl.My.Resources.Resources.ic_client_37x35">
 <summary>
   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
@@ -88,6 +98,11 @@ GymPaymentControl
 </summary>
 </member>
 <member name="P:GymPaymentControl.My.Resources.Resources.ic_okay_28x28">
+<summary>
+  Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:GymPaymentControl.My.Resources.Resources.ic_pay_month_28x32">
 <summary>
   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
 </summary>
