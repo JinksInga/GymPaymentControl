@@ -3,6 +3,7 @@ Imports System.Configuration
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 Imports MySql.Data.MySqlClient
+Imports System.Linq
 
 Public Class FrmListDebtors
     '
@@ -14,7 +15,8 @@ Public Class FrmListDebtors
         CargarIndividuales()
 
         '
-        CargarDatosGrupales()
+        DgvIndividual.RowsDefaultCellStyle.Padding = New Padding(0, 2, 0, 2)
+        CargarGrupales()
 
     End Sub
     '
@@ -57,7 +59,7 @@ Public Class FrmListDebtors
         Dim dgv = DirectCast(sender, DataGridView)
         If e.RowIndex < 0 Then Exit Sub
 
-        Dim fila = TryCast(dgv.Rows(e.RowIndex).DataBoundItem, PaymentDTO)
+        Dim fila = TryCast(dgv.Rows(e.RowIndex).DataBoundItem, IndividualPaymentDTO)
         If fila Is Nothing Then Exit Sub
 
         ' Solo actuamos si es la fila naranja de resumen
@@ -92,6 +94,24 @@ Public Class FrmListDebtors
         End If
 
     End Sub
+    Private Sub DgvIndividual_DataBindingComplete(sender As Object, e As DataGridViewBindingCompleteEventArgs) Handles DgvIndividual.DataBindingComplete
+
+        Dim dgv = DirectCast(sender, DataGridView)
+
+        ' Recorremos las filas una vez que los datos están cargados
+        For Each row As DataGridViewRow In dgv.Rows
+            Dim fila = TryCast(row.DataBoundItem, IndividualPaymentDTO)
+
+            ' Si la fila es de resumen, le damos el protagonismo visual
+            If fila IsNot Nothing AndAlso fila.EsFilaResumen Then
+                ' Aquí aplicamos el tamaño más grande que usabas antes
+                row.Height = 28
+            Else
+                ' Altura normal para las filas blancas
+                row.Height = 26
+            End If
+        Next
+    End Sub
     '
     '
     '
@@ -101,34 +121,34 @@ Public Class FrmListDebtors
     '
     '
     '
-    Private Sub BtnNewMonthlyPayments_Click(sender As Object, e As EventArgs) Handles BtnNewMonthlyPayments.Click
-        '
-        ' 1. Mensaje de confirmación
-        Dim respuesta As DialogResult = MessageBox.Show(
-            "¿Desea generar los cargos de mensualidad para el mes actual? " & vbCrLf &
-            "Esto afectará a todos los clientes y grupos activos.",
-            "Confirmar Generación Masiva",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question)
+    'Private Sub BtnNewMonthlyPayments_Click(sender As Object, e As EventArgs) Handles BtnNewMonthlyPayments.Click
+    '    '
+    '    ' 1. Mensaje de confirmación
+    '    Dim respuesta As DialogResult = MessageBox.Show(
+    '        "¿Desea generar los cargos de mensualidad para el mes actual? " & vbCrLf &
+    '        "Esto afectará a todos los clientes y grupos activos.",
+    '        "Confirmar Generación Masiva",
+    '        MessageBoxButtons.YesNo,
+    '        MessageBoxIcon.Question)
 
-        If respuesta = DialogResult.Yes Then
-            Try
-                ' 2. Llamamos al método que ya tenemos en el PaymentManager
-                Dim payMgr As New PaymentManager()
-                payMgr.GenerarMorososMensuales()
+    '    If respuesta = DialogResult.Yes Then
+    '        Try
+    '            ' 2. Llamamos al método que ya tenemos en el PaymentManager
+    '            Dim payMgr As New PaymentManager()
+    '            payMgr.GenerarMorososMensuales()
 
-                MessageBox.Show("Mensualidades generadas correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information)
+    '            MessageBox.Show("Mensualidades generadas correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
-                ' 3. Refrescamos el DataGridView para ver los nuevos morosos
-                CargarIndividuales()
-                CargarDatosGrupales()
-                'CargarGrids()
+    '            ' 3. Refrescamos el DataGridView para ver los nuevos morosos
+    '            CargarIndividuales()
+    '            CargarDatosGrupales()
+    '            'CargarGrids()
 
-            Catch ex As Exception
-                MessageBox.Show("Hubo un error: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-            End Try
-        End If
-    End Sub
+    '        Catch ex As Exception
+    '            MessageBox.Show("Hubo un error: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+    '        End Try
+    '    End If
+    'End Sub
     '
     '
     '
@@ -145,7 +165,7 @@ Public Class FrmListDebtors
             DgvIndividual.AutoGenerateColumns = False ' Evita que se añadan columnas extra
 
             ' Usamos la declaración explícita para mayor claridad
-            Dim listaIndiv As List(Of PaymentDTO) = payMgr.ObtenerListaMorososIndividuales()
+            Dim listaIndiv As List(Of IndividualPaymentDTO) = payMgr.ObtenerListaMorososIndividuales()
 
             DgvIndividual.DataSource = Nothing
             DgvIndividual.DataSource = listaIndiv ' Carga tus datos en tu diseño
@@ -159,7 +179,7 @@ Public Class FrmListDebtors
 
             ' El bucle para contar (Opción sin errores de Count)
             Dim numMorosos As Integer = 0
-            For Each item As PaymentDTO In listaIndiv
+            For Each item As IndividualPaymentDTO In listaIndiv
                 If Not item.EsFilaResumen Then
                     numMorosos += 1
                 End If
@@ -174,53 +194,144 @@ Public Class FrmListDebtors
     '
     '
     ' En FrmListaMorosos
-    Private Sub CargarDatosGrupales()
+    Private Sub CargarGrupales()
         Try
             Dim payMgr As New PaymentManager()
+            Dim listaGrup As List(Of GroupPaymentDTO) = payMgr.ObtenerListaGrupalesCompacta()
 
-            ' Usamos la declaración explícita que es más clara
-            Dim listaGrupales As List(Of PaymentDTO) = payMgr.ObtenerListaMorososGrupales()
+            With DgvFamilyGroup
 
-            DataGridView2.DataSource = Nothing
-            DataGridView2.DataSource = listaGrupales
+                .AutoGenerateColumns = False ' Evita que se añadan columnas extra
+                ' 1. Limpiamos y asignamos
+                .DataSource = Nothing
+                .DataSource = listaGrup
 
-            ' Lógica de conteo manual para evitar el error de indización
-            Dim numIntegrantesConDeuda As Integer = 0
+                ' 2. IMPORTANTE: Solo formateamos si hay datos y las columnas existen
+                'If .Columns.Contains("APagarProrrateo") Then
+                '    .Columns("APagarProrrateo").DefaultCellStyle.Format = "C2"
+                '    .Columns("APagarProrrateo").HeaderText = "A PAGAR"
+                'End If
 
-            For Each fila As PaymentDTO In listaGrupales
-                ' Solo contamos a las personas, no las filas naranjas de resumen
-                ' Nota: En grupos, un solo integrante puede aparecer en varios meses de deuda
-                If Not fila.EsFilaResumen Then
-                    ' Si quieres contar cuántas líneas de cobro hay:
-                    numIntegrantesConDeuda += 1
-                End If
-            Next
+                'If DgvPrueba.Columns.Contains("PrcPgs") Then
+                '    .Columns("PrcPgs").DefaultCellStyle.Format = "C2"
+                '    .Columns("PrcPgs").HeaderText = "PRECIO"
+                'End If
 
-            ' Actualizamos el Label con el resultado
-            LblToditos.Text = numIntegrantesConDeuda & " Registros de integrantes con deuda."
+                ' Contamos solo las filas donde NomGrp no está vacío (que es la cabecera de cada pago real)
+                ' Usamos .Where para filtrar y luego .Count para contar el resultado
+                ' LINQ: Contamos solo las filas que NO son resumen
+                Dim totalPagos = listaGrup.Where(Function(x) x.EsFilaResumen = False).Count()
+                LblToditos.Text = totalPagos & " - Pagos pendientes."
+
+                .DataSource = Nothing
+                .DataSource = listaGrup
+            End With
+
 
         Catch ex As Exception
-            MessageBox.Show("Error al cargar datos grupales: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MsgBox("Error al cargar grupales: " & ex.Message)
         End Try
     End Sub
 
-    Private Sub DgvIndividual_DataBindingComplete(sender As Object, e As DataGridViewBindingCompleteEventArgs) Handles DgvIndividual.DataBindingComplete
+    Private Sub DgvPrueba_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvPrueba.CellContentClick
 
-        Dim dgv = DirectCast(sender, DataGridView)
-
-        ' Recorremos las filas una vez que los datos están cargados
-        For Each row As DataGridViewRow In dgv.Rows
-            Dim fila = TryCast(row.DataBoundItem, PaymentDTO)
-
-            ' Si la fila es de resumen, le damos el protagonismo visual
-            If fila IsNot Nothing AndAlso fila.EsFilaResumen Then
-                ' Aquí aplicamos el tamaño más grande que usabas antes
-                row.Height = 28
-            Else
-                ' Altura normal para las filas blancas
-                row.Height = 26
-            End If
-        Next
     End Sub
 
+    Private Sub DgvPrueba_CellFormatting(sender As Object, e As DataGridViewCellFormattingEventArgs) Handles DgvPrueba.CellFormatting
+
+
+
+    End Sub
+
+    Private Sub DgvFamilyGroup_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvFamilyGroup.CellContentClick
+
+    End Sub
+
+    Private Sub DgvFamilyGroup_CellFormatting(sender As Object, e As DataGridViewCellFormattingEventArgs) Handles DgvFamilyGroup.CellFormatting
+
+        Dim dgv = DirectCast(sender, DataGridView)
+        If e.RowIndex < 0 OrElse dgv.Rows(e.RowIndex).DataBoundItem Is Nothing Then Return
+
+        Dim filaObj = DirectCast(dgv.Rows(e.RowIndex).DataBoundItem, GroupPaymentDTO)
+        Dim colName As String = dgv.Columns(e.ColumnIndex).Name
+
+        ' --- LÓGICA PARA LA FILA NARANJA (RESUMEN) ---
+        If filaObj.EsFilaResumen Then
+            e.CellStyle.BackColor = Color.FromArgb(255, 192, 128)
+            e.CellStyle.ForeColor = Color.Red
+            e.CellStyle.Font = New Font(dgv.Font, FontStyle.Bold)
+
+            ' AQUÍ ESTÁ EL "CASE": Decide qué mostrar en cada columna
+            Select Case colName
+                Case "total_pgs_gf" ' <--- Nombre (Name) de la columna TOTAL
+                    e.Value = filaObj.TextoColTotal ' Muestra "DEBE :"
+                    e.FormattingApplied = True
+
+                Case "dias_mes_gf" ' <--- Nombre (Name) de la columna Nº DE DIAS
+                    e.Value = filaObj.TextoColDias ' Muestra "X MESES"
+                    e.FormattingApplied = True
+
+                Case "a_pagar_gf" ' <--- Nombre (Name) de la columna A PAGAR
+                    ' Aquí no tocamos e.Value para que se vea el monto acumulado
+                    e.FormattingApplied = False
+
+                Case Else
+                    ' Todo lo demás (Integrantes, Grupo, Precio) se limpia
+                    e.Value = ""
+                    e.FormattingApplied = True
+            End Select
+
+            ' --- LÓGICA PARA LAS FILAS NORMALES (BLANCAS) ---
+        Else
+            ' Aseguramos que las columnas de moneda se vean bien
+            If colName = "total_pgs_gf" Or colName = "a_pagar_gf" Then
+                e.CellStyle.Format = "N2"
+            End If
+        End If
+
+    End Sub
+
+    'Private Sub DgvFamilyGroup_CellPainting(sender As Object, e As DataGridViewCellPaintingEventArgs) Handles DgvFamilyGroup.CellPainting
+    '    ' 1. Validaciones básicas
+    '    If e.RowIndex < 0 OrElse e.ColumnIndex < 0 Then Return
+    '    Dim dgv = DirectCast(sender, DataGridView)
+
+    '    If dgv.Rows(e.RowIndex).DataBoundItem Is Nothing Then Return
+    '    Dim filaObj = DirectCast(dgv.Rows(e.RowIndex).DataBoundItem, GroupPaymentDTO)
+
+    '    ' 2. SOLO PARA LA FILA RESUMEN (NARANJA)
+    '    If filaObj.EsFilaResumen Then
+    '        ' --- CORRECCIÓN DEL ERROR DE SINTAXIS ---
+    '        ' En VB.NET se usa "And Not" en lugar de "& ~"
+    '        e.Paint(e.ClipBounds, DataGridViewPaintParts.All And Not DataGridViewPaintParts.ContentForeground)
+
+    '        Dim colName As String = dgv.Columns(e.ColumnIndex).Name
+    '        Dim textoADibujar As String = ""
+
+    '        ' 3. DETERMINAR QUÉ TEXTO PINTAR
+    '        Select Case colName
+    '            Case "TotalSinProrrateo"
+    '                textoADibujar = "DEBE :"
+    '            Case "DiasDelMes"
+    '                textoADibujar = filaObj.TextoAuxiliar ' Ejemplo: "2 MESES"
+    '            Case "APagarProrrateo"
+    '                ' Para el monto total, dejamos que el sistema lo pinte normal
+    '                e.Paint(e.ClipBounds, DataGridViewPaintParts.ContentForeground)
+    '                e.Handled = True
+    '                Return
+    '        End Select
+
+    '        ' 4. DIBUJAR EL TEXTO MANUALMENTE
+    '        If Not String.IsNullOrEmpty(textoADibujar) Then
+    '            ' Configuramos la fuente y el color rojo
+    '            Using fontNegrita As New Font(dgv.Font, FontStyle.Bold)
+    '                ' Alineamos a la derecha y centrado verticalmente
+    '                Dim flags As TextFormatFlags = TextFormatFlags.Right Or TextFormatFlags.VerticalCenter
+    '                TextRenderer.DrawText(e.Graphics, textoADibujar, fontNegrita, e.CellBounds, Color.Red, flags)
+    '            End Using
+    '        End If
+
+    '        e.Handled = True ' Confirmamos que ya pintamos la celda
+    '    End If
+    'End Sub
 End Class

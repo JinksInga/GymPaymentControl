@@ -30,7 +30,7 @@ Public Class FrmPresentation
         '| * Mostramos el formualrio 'FrmUserPassword'
         '| * Ocultamos el formulario 'FrmPresentation'
 
-        SetProgress(33, "Iniciando conexión con la Base de Datos", Color.Red)
+        SetProgress(33, "Iniciando conexión con la Base de Datos.", Color.Red)
         Await Task.Delay(500)
 
         If Not Await Task.Run(AddressOf CheckConnection) Then
@@ -38,10 +38,10 @@ Public Class FrmPresentation
             Return
         End If
 
-        SetProgress(66, "Conexión exitosa. Preparando entorno de trabajo", Color.Green)
+        SetProgress(66, "Conexión exitosa.", Color.Green)
         Await Task.Delay(600)
 
-        SetProgress(100, "Iniciando el programa", Color.DarkGreen)
+        SetProgress(100, "Iniciando el programa.", Color.Black)
         Await Task.Delay(600)
 
         Dim login As New FrmUserPassword()

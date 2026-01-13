@@ -26,12 +26,6 @@ Partial Class FrmListDebtors
         Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle8 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle9 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle5 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle6 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle7 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle10 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle18 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle19 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
@@ -42,6 +36,12 @@ Partial Class FrmListDebtors
         Dim DataGridViewCellStyle15 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle16 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle17 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle5 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle6 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle7 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.LblInformacion = New System.Windows.Forms.Label()
         Me.StsStatusBar = New System.Windows.Forms.StatusStrip()
         Me.SlblTitle = New System.Windows.Forms.ToolStripStatusLabel()
@@ -59,19 +59,6 @@ Partial Class FrmListDebtors
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.RbPayGroup = New System.Windows.Forms.RadioButton()
         Me.DgvFamilyGroup = New System.Windows.Forms.DataGridView()
-        Me.nom_cli_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.nom_grp = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.fdi_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.prc_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.dsc_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.total_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.ndias_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.pagar_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.empty = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.id_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.id_grp = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.num_intgrntes_grp = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.grupo_familiar = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.DgvIndividual = New System.Windows.Forms.DataGridView()
         Me.Nombre = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Apellido = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -91,7 +78,16 @@ Partial Class FrmListDebtors
         Me.BtnNewMonthlyPayments = New System.Windows.Forms.Button()
         Me.LblSolitos = New System.Windows.Forms.Label()
         Me.LblToditos = New System.Windows.Forms.Label()
-        Me.DataGridView2 = New System.Windows.Forms.DataGridView()
+        Me.DgvPrueba = New System.Windows.Forms.DataGridView()
+        Me.nom_cli_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.nom_grp = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.fdi_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.prc_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.dsc_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.total_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.dias_mes_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.a_pagar_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.empty = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.StsStatusBar.SuspendLayout()
         Me.PnlSearch.SuspendLayout()
         CType(Me.ErrorProvider, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -99,7 +95,7 @@ Partial Class FrmListDebtors
         CType(Me.DgvFamilyGroup, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.DgvIndividual, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PbLogo, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.DataGridView2, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.DgvPrueba, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'LblInformacion
@@ -166,7 +162,7 @@ Partial Class FrmListDebtors
         Me.BtnClose.ForeColor = System.Drawing.Color.Brown
         Me.BtnClose.Image = Global.GymPaymentControl.My.Resources.Resources.ic_close_22x22
         Me.BtnClose.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnClose.Location = New System.Drawing.Point(1103, 624)
+        Me.BtnClose.Location = New System.Drawing.Point(1250, 60)
         Me.BtnClose.Margin = New System.Windows.Forms.Padding(0, 56, 0, 0)
         Me.BtnClose.Name = "BtnClose"
         Me.BtnClose.Padding = New System.Windows.Forms.Padding(0, 4, 0, 2)
@@ -318,7 +314,7 @@ Partial Class FrmListDebtors
         Me.DgvFamilyGroup.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1
         Me.DgvFamilyGroup.ColumnHeadersHeight = 32
         Me.DgvFamilyGroup.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
-        Me.DgvFamilyGroup.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.nom_cli_gf, Me.nom_grp, Me.fdi_pgs_gf, Me.prc_pgs_gf, Me.dsc_pgs_gf, Me.total_pgs_gf, Me.ndias_pgs_gf, Me.pagar_pgs_gf, Me.empty, Me.id_pgs_gf, Me.id_grp, Me.num_intgrntes_grp, Me.grupo_familiar})
+        Me.DgvFamilyGroup.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.nom_cli_gf, Me.nom_grp, Me.fdi_pgs_gf, Me.prc_pgs_gf, Me.dsc_pgs_gf, Me.total_pgs_gf, Me.dias_mes_gf, Me.a_pagar_gf, Me.empty})
         DataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
         DataGridViewCellStyle8.BackColor = System.Drawing.Color.MistyRose
         DataGridViewCellStyle8.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
@@ -327,7 +323,7 @@ Partial Class FrmListDebtors
         DataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText
         DataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
         Me.DgvFamilyGroup.DefaultCellStyle = DataGridViewCellStyle8
-        Me.DgvFamilyGroup.Location = New System.Drawing.Point(1012, 5)
+        Me.DgvFamilyGroup.Location = New System.Drawing.Point(25, 284)
         Me.DgvFamilyGroup.Margin = New System.Windows.Forms.Padding(16, 0, 0, 16)
         Me.DgvFamilyGroup.MultiSelect = False
         Me.DgvFamilyGroup.Name = "DgvFamilyGroup"
@@ -344,143 +340,8 @@ Partial Class FrmListDebtors
         Me.DgvFamilyGroup.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
         Me.DgvFamilyGroup.RowTemplate.Height = 24
         Me.DgvFamilyGroup.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
-        Me.DgvFamilyGroup.Size = New System.Drawing.Size(211, 46)
+        Me.DgvFamilyGroup.Size = New System.Drawing.Size(1054, 400)
         Me.DgvFamilyGroup.TabIndex = 91
-        '
-        'nom_cli_gf
-        '
-        Me.nom_cli_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.nom_cli_gf.HeaderText = "INTEGRANTES"
-        Me.nom_cli_gf.Name = "nom_cli_gf"
-        Me.nom_cli_gf.ReadOnly = True
-        Me.nom_cli_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.nom_cli_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.nom_cli_gf.Width = 184
-        '
-        'nom_grp
-        '
-        Me.nom_grp.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.nom_grp.HeaderText = "NOMBRE DEL GRUPO"
-        Me.nom_grp.Name = "nom_grp"
-        Me.nom_grp.ReadOnly = True
-        Me.nom_grp.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.nom_grp.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.nom_grp.Width = 272
-        '
-        'fdi_pgs_gf
-        '
-        Me.fdi_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        Me.fdi_pgs_gf.DefaultCellStyle = DataGridViewCellStyle2
-        Me.fdi_pgs_gf.HeaderText = "MES Y AÑO"
-        Me.fdi_pgs_gf.Name = "fdi_pgs_gf"
-        Me.fdi_pgs_gf.ReadOnly = True
-        Me.fdi_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.fdi_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.fdi_pgs_gf.Width = 128
-        '
-        'prc_pgs_gf
-        '
-        Me.prc_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.prc_pgs_gf.DefaultCellStyle = DataGridViewCellStyle3
-        Me.prc_pgs_gf.HeaderText = "PRECIO"
-        Me.prc_pgs_gf.Name = "prc_pgs_gf"
-        Me.prc_pgs_gf.ReadOnly = True
-        Me.prc_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.prc_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.prc_pgs_gf.Width = 88
-        '
-        'dsc_pgs_gf
-        '
-        Me.dsc_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        DataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.dsc_pgs_gf.DefaultCellStyle = DataGridViewCellStyle4
-        Me.dsc_pgs_gf.HeaderText = "DSCNTO"
-        Me.dsc_pgs_gf.Name = "dsc_pgs_gf"
-        Me.dsc_pgs_gf.ReadOnly = True
-        Me.dsc_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.dsc_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.dsc_pgs_gf.Width = 88
-        '
-        'total_pgs_gf
-        '
-        Me.total_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        DataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.total_pgs_gf.DefaultCellStyle = DataGridViewCellStyle5
-        Me.total_pgs_gf.HeaderText = "TOTAL"
-        Me.total_pgs_gf.Name = "total_pgs_gf"
-        Me.total_pgs_gf.ReadOnly = True
-        Me.total_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.total_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.total_pgs_gf.Width = 88
-        '
-        'ndias_pgs_gf
-        '
-        Me.ndias_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        DataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.ndias_pgs_gf.DefaultCellStyle = DataGridViewCellStyle6
-        Me.ndias_pgs_gf.HeaderText = "Nº DE DIAS"
-        Me.ndias_pgs_gf.Name = "ndias_pgs_gf"
-        Me.ndias_pgs_gf.ReadOnly = True
-        Me.ndias_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.ndias_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.ndias_pgs_gf.Width = 88
-        '
-        'pagar_pgs_gf
-        '
-        Me.pagar_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        DataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.pagar_pgs_gf.DefaultCellStyle = DataGridViewCellStyle7
-        Me.pagar_pgs_gf.HeaderText = "A PAGAR"
-        Me.pagar_pgs_gf.Name = "pagar_pgs_gf"
-        Me.pagar_pgs_gf.ReadOnly = True
-        Me.pagar_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.pagar_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.pagar_pgs_gf.Width = 88
-        '
-        'empty
-        '
-        Me.empty.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.empty.HeaderText = ""
-        Me.empty.MinimumWidth = 4
-        Me.empty.Name = "empty"
-        Me.empty.ReadOnly = True
-        Me.empty.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.empty.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.empty.Width = 4
-        '
-        'id_pgs_gf
-        '
-        Me.id_pgs_gf.HeaderText = "id_pgs"
-        Me.id_pgs_gf.Name = "id_pgs_gf"
-        Me.id_pgs_gf.ReadOnly = True
-        Me.id_pgs_gf.Visible = False
-        Me.id_pgs_gf.Width = 50
-        '
-        'id_grp
-        '
-        Me.id_grp.HeaderText = "id_grp"
-        Me.id_grp.Name = "id_grp"
-        Me.id_grp.ReadOnly = True
-        Me.id_grp.Visible = False
-        Me.id_grp.Width = 50
-        '
-        'num_intgrntes_grp
-        '
-        Me.num_intgrntes_grp.HeaderText = "num_intgrntes_grp"
-        Me.num_intgrntes_grp.Name = "num_intgrntes_grp"
-        Me.num_intgrntes_grp.ReadOnly = True
-        Me.num_intgrntes_grp.Visible = False
-        Me.num_intgrntes_grp.Width = 50
-        '
-        'grupo_familiar
-        '
-        Me.grupo_familiar.HeaderText = "grupo_familiar"
-        Me.grupo_familiar.Name = "grupo_familiar"
-        Me.grupo_familiar.ReadOnly = True
-        Me.grupo_familiar.Visible = False
-        Me.grupo_familiar.Width = 250
         '
         'DgvIndividual
         '
@@ -524,7 +385,7 @@ Partial Class FrmListDebtors
         Me.DgvIndividual.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
         Me.DgvIndividual.RowTemplate.Height = 24
         Me.DgvIndividual.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
-        Me.DgvIndividual.Size = New System.Drawing.Size(1052, 536)
+        Me.DgvIndividual.Size = New System.Drawing.Size(1052, 98)
         Me.DgvIndividual.TabIndex = 2
         '
         'Nombre
@@ -714,7 +575,7 @@ Partial Class FrmListDebtors
         Me.BtnNewMonthlyPayments.ForeColor = System.Drawing.Color.DarkGreen
         Me.BtnNewMonthlyPayments.Image = Global.GymPaymentControl.My.Resources.Resources.ic_pay_month_28x32
         Me.BtnNewMonthlyPayments.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnNewMonthlyPayments.Location = New System.Drawing.Point(1103, 504)
+        Me.BtnNewMonthlyPayments.Location = New System.Drawing.Point(1250, 133)
         Me.BtnNewMonthlyPayments.Margin = New System.Windows.Forms.Padding(24, 0, 24, 0)
         Me.BtnNewMonthlyPayments.Name = "BtnNewMonthlyPayments"
         Me.BtnNewMonthlyPayments.Size = New System.Drawing.Size(140, 64)
@@ -741,13 +602,124 @@ Partial Class FrmListDebtors
         Me.LblToditos.TabIndex = 95
         Me.LblToditos.Text = "LblToditos"
         '
-        'DataGridView2
+        'DgvPrueba
         '
-        Me.DataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.DataGridView2.Location = New System.Drawing.Point(25, 440)
-        Me.DataGridView2.Name = "DataGridView2"
-        Me.DataGridView2.Size = New System.Drawing.Size(1517, 248)
-        Me.DataGridView2.TabIndex = 97
+        Me.DgvPrueba.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.DgvPrueba.Location = New System.Drawing.Point(898, 12)
+        Me.DgvPrueba.Name = "DgvPrueba"
+        Me.DgvPrueba.Size = New System.Drawing.Size(181, 39)
+        Me.DgvPrueba.TabIndex = 97
+        '
+        'nom_cli_gf
+        '
+        Me.nom_cli_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.nom_cli_gf.DataPropertyName = "Integrantes"
+        Me.nom_cli_gf.HeaderText = "INTEGRANTES"
+        Me.nom_cli_gf.Name = "nom_cli_gf"
+        Me.nom_cli_gf.ReadOnly = True
+        Me.nom_cli_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.nom_cli_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.nom_cli_gf.Width = 184
+        '
+        'nom_grp
+        '
+        Me.nom_grp.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.nom_grp.DataPropertyName = "NomGrp"
+        Me.nom_grp.HeaderText = "NOMBRE DEL GRUPO"
+        Me.nom_grp.Name = "nom_grp"
+        Me.nom_grp.ReadOnly = True
+        Me.nom_grp.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.nom_grp.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.nom_grp.Width = 272
+        '
+        'fdi_pgs_gf
+        '
+        Me.fdi_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.fdi_pgs_gf.DataPropertyName = "FechaLarga"
+        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        Me.fdi_pgs_gf.DefaultCellStyle = DataGridViewCellStyle2
+        Me.fdi_pgs_gf.HeaderText = "MES Y AÑO"
+        Me.fdi_pgs_gf.Name = "fdi_pgs_gf"
+        Me.fdi_pgs_gf.ReadOnly = True
+        Me.fdi_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.fdi_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.fdi_pgs_gf.Width = 128
+        '
+        'prc_pgs_gf
+        '
+        Me.prc_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.prc_pgs_gf.DataPropertyName = "PrcPgs"
+        DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.prc_pgs_gf.DefaultCellStyle = DataGridViewCellStyle3
+        Me.prc_pgs_gf.HeaderText = "PRECIO"
+        Me.prc_pgs_gf.Name = "prc_pgs_gf"
+        Me.prc_pgs_gf.ReadOnly = True
+        Me.prc_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.prc_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.prc_pgs_gf.Width = 88
+        '
+        'dsc_pgs_gf
+        '
+        Me.dsc_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.dsc_pgs_gf.DataPropertyName = "DscPgs"
+        DataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.dsc_pgs_gf.DefaultCellStyle = DataGridViewCellStyle4
+        Me.dsc_pgs_gf.HeaderText = "DSCNTO"
+        Me.dsc_pgs_gf.Name = "dsc_pgs_gf"
+        Me.dsc_pgs_gf.ReadOnly = True
+        Me.dsc_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.dsc_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.dsc_pgs_gf.Width = 88
+        '
+        'total_pgs_gf
+        '
+        Me.total_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.total_pgs_gf.DataPropertyName = "TextoColTotal"
+        DataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.total_pgs_gf.DefaultCellStyle = DataGridViewCellStyle5
+        Me.total_pgs_gf.HeaderText = "TOTAL"
+        Me.total_pgs_gf.Name = "total_pgs_gf"
+        Me.total_pgs_gf.ReadOnly = True
+        Me.total_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.total_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.total_pgs_gf.Width = 88
+        '
+        'dias_mes_gf
+        '
+        Me.dias_mes_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.dias_mes_gf.DataPropertyName = "TextoColDias"
+        DataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.dias_mes_gf.DefaultCellStyle = DataGridViewCellStyle6
+        Me.dias_mes_gf.HeaderText = "Nº DE DIAS"
+        Me.dias_mes_gf.Name = "dias_mes_gf"
+        Me.dias_mes_gf.ReadOnly = True
+        Me.dias_mes_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.dias_mes_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.dias_mes_gf.Width = 88
+        '
+        'a_pagar_gf
+        '
+        Me.a_pagar_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.a_pagar_gf.DataPropertyName = "APagarProrrateo"
+        DataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.a_pagar_gf.DefaultCellStyle = DataGridViewCellStyle7
+        Me.a_pagar_gf.HeaderText = "A PAGAR"
+        Me.a_pagar_gf.Name = "a_pagar_gf"
+        Me.a_pagar_gf.ReadOnly = True
+        Me.a_pagar_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.a_pagar_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.a_pagar_gf.Width = 88
+        '
+        'empty
+        '
+        Me.empty.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.empty.HeaderText = ""
+        Me.empty.MinimumWidth = 4
+        Me.empty.Name = "empty"
+        Me.empty.ReadOnly = True
+        Me.empty.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.empty.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.empty.Width = 4
         '
         'FrmListDebtors
         '
@@ -767,7 +739,7 @@ Partial Class FrmListDebtors
         Me.Controls.Add(Me.PbLogo)
         Me.Controls.Add(Me.BtnPayMonth)
         Me.Controls.Add(Me.StsStatusBar)
-        Me.Controls.Add(Me.DataGridView2)
+        Me.Controls.Add(Me.DgvPrueba)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Location = New System.Drawing.Point(20, 20)
         Me.MaximizeBox = False
@@ -783,7 +755,7 @@ Partial Class FrmListDebtors
         CType(Me.DgvFamilyGroup, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.DgvIndividual, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PbLogo, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.DataGridView2, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.DgvPrueba, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -808,24 +780,11 @@ Partial Class FrmListDebtors
     Friend WithEvents Panel1 As Panel
     Friend WithEvents RbPayGroup As RadioButton
     Friend WithEvents DgvFamilyGroup As DataGridView
-    Friend WithEvents nom_cli_gf As DataGridViewTextBoxColumn
-    Friend WithEvents nom_grp As DataGridViewTextBoxColumn
-    Friend WithEvents fdi_pgs_gf As DataGridViewTextBoxColumn
-    Friend WithEvents prc_pgs_gf As DataGridViewTextBoxColumn
-    Friend WithEvents dsc_pgs_gf As DataGridViewTextBoxColumn
-    Friend WithEvents total_pgs_gf As DataGridViewTextBoxColumn
-    Friend WithEvents ndias_pgs_gf As DataGridViewTextBoxColumn
-    Friend WithEvents pagar_pgs_gf As DataGridViewTextBoxColumn
-    Friend WithEvents empty As DataGridViewTextBoxColumn
-    Friend WithEvents id_pgs_gf As DataGridViewTextBoxColumn
-    Friend WithEvents id_grp As DataGridViewTextBoxColumn
-    Friend WithEvents num_intgrntes_grp As DataGridViewTextBoxColumn
-    Friend WithEvents grupo_familiar As DataGridViewTextBoxColumn
     Friend WithEvents DgvIndividual As DataGridView
     Friend WithEvents BtnNewMonthlyPayments As Button
     Friend WithEvents LblToditos As Label
     Friend WithEvents LblSolitos As Label
-    Friend WithEvents DataGridView2 As DataGridView
+    Friend WithEvents DgvPrueba As DataGridView
     Friend WithEvents Nombre As DataGridViewTextBoxColumn
     Friend WithEvents Apellido As DataGridViewTextBoxColumn
     Friend WithEvents TextoEdad As DataGridViewTextBoxColumn
@@ -839,4 +798,13 @@ Partial Class FrmListDebtors
     Friend WithEvents fdi_pgs As DataGridViewTextBoxColumn
     Friend WithEvents id_pgs As DataGridViewTextBoxColumn
     Friend WithEvents cliente As DataGridViewTextBoxColumn
+    Friend WithEvents nom_cli_gf As DataGridViewTextBoxColumn
+    Friend WithEvents nom_grp As DataGridViewTextBoxColumn
+    Friend WithEvents fdi_pgs_gf As DataGridViewTextBoxColumn
+    Friend WithEvents prc_pgs_gf As DataGridViewTextBoxColumn
+    Friend WithEvents dsc_pgs_gf As DataGridViewTextBoxColumn
+    Friend WithEvents total_pgs_gf As DataGridViewTextBoxColumn
+    Friend WithEvents dias_mes_gf As DataGridViewTextBoxColumn
+    Friend WithEvents a_pagar_gf As DataGridViewTextBoxColumn
+    Friend WithEvents empty As DataGridViewTextBoxColumn
 End Class
