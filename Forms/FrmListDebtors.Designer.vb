@@ -23,25 +23,25 @@ Partial Class FrmListDebtors
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle8 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle9 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle10 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle18 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle19 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle11 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle12 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle13 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle14 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle15 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle16 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle17 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle5 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle6 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle7 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle20 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle27 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle28 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle21 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle22 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle23 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle24 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle25 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle26 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle29 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle37 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle38 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle30 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle31 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle32 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle33 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle34 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle35 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle36 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.LblInformacion = New System.Windows.Forms.Label()
         Me.StsStatusBar = New System.Windows.Forms.StatusStrip()
         Me.SlblTitle = New System.Windows.Forms.ToolStripStatusLabel()
@@ -59,6 +59,15 @@ Partial Class FrmListDebtors
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.RbPayGroup = New System.Windows.Forms.RadioButton()
         Me.DgvFamilyGroup = New System.Windows.Forms.DataGridView()
+        Me.nom_cli_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.nom_grp = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.fdi_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.PrcPgsGf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.DscPgsGf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.TtlPgsGf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.NumDiasGf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.APgrGf = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.empty = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.DgvIndividual = New System.Windows.Forms.DataGridView()
         Me.Nombre = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Apellido = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -75,19 +84,9 @@ Partial Class FrmListDebtors
         Me.cliente = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.PbLogo = New System.Windows.Forms.PictureBox()
         Me.BtnPayMonth = New System.Windows.Forms.Button()
-        Me.BtnNewMonthlyPayments = New System.Windows.Forms.Button()
+        Me.BtnPaymentGenerator = New System.Windows.Forms.Button()
         Me.LblSolitos = New System.Windows.Forms.Label()
         Me.LblToditos = New System.Windows.Forms.Label()
-        Me.DgvPrueba = New System.Windows.Forms.DataGridView()
-        Me.nom_cli_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.nom_grp = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.fdi_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.prc_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.dsc_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.total_pgs_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.dias_mes_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.a_pagar_gf = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.empty = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.StsStatusBar.SuspendLayout()
         Me.PnlSearch.SuspendLayout()
         CType(Me.ErrorProvider, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -95,7 +94,6 @@ Partial Class FrmListDebtors
         CType(Me.DgvFamilyGroup, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.DgvIndividual, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PbLogo, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.DgvPrueba, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'LblInformacion
@@ -118,7 +116,7 @@ Partial Class FrmListDebtors
         Me.StsStatusBar.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SlblTitle, Me.SlblMessage})
         Me.StsStatusBar.Location = New System.Drawing.Point(0, 713)
         Me.StsStatusBar.Name = "StsStatusBar"
-        Me.StsStatusBar.Size = New System.Drawing.Size(1544, 46)
+        Me.StsStatusBar.Size = New System.Drawing.Size(1252, 46)
         Me.StsStatusBar.SizingGrip = False
         Me.StsStatusBar.TabIndex = 4
         Me.StsStatusBar.Text = "stsBarra"
@@ -162,7 +160,7 @@ Partial Class FrmListDebtors
         Me.BtnClose.ForeColor = System.Drawing.Color.Brown
         Me.BtnClose.Image = Global.GymPaymentControl.My.Resources.Resources.ic_close_22x22
         Me.BtnClose.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnClose.Location = New System.Drawing.Point(1250, 60)
+        Me.BtnClose.Location = New System.Drawing.Point(1103, 133)
         Me.BtnClose.Margin = New System.Windows.Forms.Padding(0, 56, 0, 0)
         Me.BtnClose.Name = "BtnClose"
         Me.BtnClose.Padding = New System.Windows.Forms.Padding(0, 4, 0, 2)
@@ -249,7 +247,7 @@ Partial Class FrmListDebtors
         'Label
         '
         Me.Label.AutoSize = True
-        Me.Label.Location = New System.Drawing.Point(1080, 184)
+        Me.Label.Location = New System.Drawing.Point(1022, 9)
         Me.Label.Name = "Label"
         Me.Label.Size = New System.Drawing.Size(55, 13)
         Me.Label.TabIndex = 87
@@ -304,44 +302,155 @@ Partial Class FrmListDebtors
         Me.DgvFamilyGroup.AllowUserToDeleteRows = False
         Me.DgvFamilyGroup.AllowUserToResizeColumns = False
         Me.DgvFamilyGroup.AllowUserToResizeRows = False
-        DataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control
-        DataGridViewCellStyle1.Font = New System.Drawing.Font("Linux Libertine Display G", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText
-        DataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.GradientInactiveCaption
-        DataGridViewCellStyle1.SelectionForeColor = System.Drawing.Color.Navy
-        DataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.DgvFamilyGroup.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1
+        DataGridViewCellStyle20.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle20.BackColor = System.Drawing.SystemColors.Control
+        DataGridViewCellStyle20.Font = New System.Drawing.Font("Linux Libertine Display G", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle20.ForeColor = System.Drawing.SystemColors.ControlText
+        DataGridViewCellStyle20.SelectionBackColor = System.Drawing.SystemColors.GradientInactiveCaption
+        DataGridViewCellStyle20.SelectionForeColor = System.Drawing.Color.Navy
+        DataGridViewCellStyle20.WrapMode = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.DgvFamilyGroup.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle20
         Me.DgvFamilyGroup.ColumnHeadersHeight = 32
         Me.DgvFamilyGroup.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
-        Me.DgvFamilyGroup.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.nom_cli_gf, Me.nom_grp, Me.fdi_pgs_gf, Me.prc_pgs_gf, Me.dsc_pgs_gf, Me.total_pgs_gf, Me.dias_mes_gf, Me.a_pagar_gf, Me.empty})
-        DataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        DataGridViewCellStyle8.BackColor = System.Drawing.Color.MistyRose
-        DataGridViewCellStyle8.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle8.ForeColor = System.Drawing.Color.Navy
-        DataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.HotTrack
-        DataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        DataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.DgvFamilyGroup.DefaultCellStyle = DataGridViewCellStyle8
-        Me.DgvFamilyGroup.Location = New System.Drawing.Point(25, 284)
+        Me.DgvFamilyGroup.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.nom_cli_gf, Me.nom_grp, Me.fdi_pgs_gf, Me.PrcPgsGf, Me.DscPgsGf, Me.TtlPgsGf, Me.NumDiasGf, Me.APgrGf, Me.empty})
+        DataGridViewCellStyle27.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle27.BackColor = System.Drawing.Color.MistyRose
+        DataGridViewCellStyle27.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle27.ForeColor = System.Drawing.Color.Navy
+        DataGridViewCellStyle27.SelectionBackColor = System.Drawing.SystemColors.HotTrack
+        DataGridViewCellStyle27.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        DataGridViewCellStyle27.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.DgvFamilyGroup.DefaultCellStyle = DataGridViewCellStyle27
+        Me.DgvFamilyGroup.Location = New System.Drawing.Point(25, 436)
         Me.DgvFamilyGroup.Margin = New System.Windows.Forms.Padding(16, 0, 0, 16)
         Me.DgvFamilyGroup.MultiSelect = False
         Me.DgvFamilyGroup.Name = "DgvFamilyGroup"
         Me.DgvFamilyGroup.ReadOnly = True
-        DataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        DataGridViewCellStyle9.BackColor = System.Drawing.SystemColors.Control
-        DataGridViewCellStyle9.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
-        DataGridViewCellStyle9.ForeColor = System.Drawing.SystemColors.WindowText
-        DataGridViewCellStyle9.SelectionBackColor = System.Drawing.SystemColors.GradientInactiveCaption
-        DataGridViewCellStyle9.SelectionForeColor = System.Drawing.Color.Navy
-        DataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.DgvFamilyGroup.RowHeadersDefaultCellStyle = DataGridViewCellStyle9
+        DataGridViewCellStyle28.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle28.BackColor = System.Drawing.SystemColors.Control
+        DataGridViewCellStyle28.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
+        DataGridViewCellStyle28.ForeColor = System.Drawing.SystemColors.WindowText
+        DataGridViewCellStyle28.SelectionBackColor = System.Drawing.SystemColors.GradientInactiveCaption
+        DataGridViewCellStyle28.SelectionForeColor = System.Drawing.Color.Navy
+        DataGridViewCellStyle28.WrapMode = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.DgvFamilyGroup.RowHeadersDefaultCellStyle = DataGridViewCellStyle28
         Me.DgvFamilyGroup.RowHeadersWidth = 4
         Me.DgvFamilyGroup.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
         Me.DgvFamilyGroup.RowTemplate.Height = 24
         Me.DgvFamilyGroup.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
-        Me.DgvFamilyGroup.Size = New System.Drawing.Size(1054, 400)
+        Me.DgvFamilyGroup.Size = New System.Drawing.Size(1052, 250)
         Me.DgvFamilyGroup.TabIndex = 91
+        '
+        'nom_cli_gf
+        '
+        Me.nom_cli_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.nom_cli_gf.DataPropertyName = "Integrantes"
+        Me.nom_cli_gf.HeaderText = "INTEGRANTES"
+        Me.nom_cli_gf.Name = "nom_cli_gf"
+        Me.nom_cli_gf.ReadOnly = True
+        Me.nom_cli_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.nom_cli_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.nom_cli_gf.Width = 184
+        '
+        'nom_grp
+        '
+        Me.nom_grp.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.nom_grp.DataPropertyName = "NombreGrupo"
+        Me.nom_grp.HeaderText = "NOMBRE DEL GRUPO"
+        Me.nom_grp.Name = "nom_grp"
+        Me.nom_grp.ReadOnly = True
+        Me.nom_grp.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.nom_grp.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.nom_grp.Width = 272
+        '
+        'fdi_pgs_gf
+        '
+        Me.fdi_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.fdi_pgs_gf.DataPropertyName = "MesAnio"
+        DataGridViewCellStyle21.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        Me.fdi_pgs_gf.DefaultCellStyle = DataGridViewCellStyle21
+        Me.fdi_pgs_gf.HeaderText = "MES Y AÑO"
+        Me.fdi_pgs_gf.Name = "fdi_pgs_gf"
+        Me.fdi_pgs_gf.ReadOnly = True
+        Me.fdi_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.fdi_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.fdi_pgs_gf.Width = 128
+        '
+        'PrcPgsGf
+        '
+        Me.PrcPgsGf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.PrcPgsGf.DataPropertyName = "PrcPgs"
+        DataGridViewCellStyle22.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.PrcPgsGf.DefaultCellStyle = DataGridViewCellStyle22
+        Me.PrcPgsGf.HeaderText = "PRECIO"
+        Me.PrcPgsGf.Name = "PrcPgsGf"
+        Me.PrcPgsGf.ReadOnly = True
+        Me.PrcPgsGf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.PrcPgsGf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.PrcPgsGf.Width = 88
+        '
+        'DscPgsGf
+        '
+        Me.DscPgsGf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.DscPgsGf.DataPropertyName = "DscPgs"
+        DataGridViewCellStyle23.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.DscPgsGf.DefaultCellStyle = DataGridViewCellStyle23
+        Me.DscPgsGf.HeaderText = "DSCNTO"
+        Me.DscPgsGf.Name = "DscPgsGf"
+        Me.DscPgsGf.ReadOnly = True
+        Me.DscPgsGf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.DscPgsGf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.DscPgsGf.Width = 88
+        '
+        'TtlPgsGf
+        '
+        Me.TtlPgsGf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.TtlPgsGf.DataPropertyName = "Total"
+        DataGridViewCellStyle24.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.TtlPgsGf.DefaultCellStyle = DataGridViewCellStyle24
+        Me.TtlPgsGf.HeaderText = "TOTAL"
+        Me.TtlPgsGf.Name = "TtlPgsGf"
+        Me.TtlPgsGf.ReadOnly = True
+        Me.TtlPgsGf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.TtlPgsGf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.TtlPgsGf.Width = 88
+        '
+        'NumDiasGf
+        '
+        Me.NumDiasGf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.NumDiasGf.DataPropertyName = "DiasMes"
+        DataGridViewCellStyle25.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.NumDiasGf.DefaultCellStyle = DataGridViewCellStyle25
+        Me.NumDiasGf.HeaderText = "Nº DE DIAS"
+        Me.NumDiasGf.Name = "NumDiasGf"
+        Me.NumDiasGf.ReadOnly = True
+        Me.NumDiasGf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.NumDiasGf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.NumDiasGf.Width = 88
+        '
+        'APgrGf
+        '
+        Me.APgrGf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.APgrGf.DataPropertyName = "APagar"
+        DataGridViewCellStyle26.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.APgrGf.DefaultCellStyle = DataGridViewCellStyle26
+        Me.APgrGf.HeaderText = "A PAGAR"
+        Me.APgrGf.Name = "APgrGf"
+        Me.APgrGf.ReadOnly = True
+        Me.APgrGf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.APgrGf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.APgrGf.Width = 88
+        '
+        'empty
+        '
+        Me.empty.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.empty.HeaderText = ""
+        Me.empty.MinimumWidth = 4
+        Me.empty.Name = "empty"
+        Me.empty.ReadOnly = True
+        Me.empty.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.empty.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.empty.Width = 4
         '
         'DgvIndividual
         '
@@ -349,43 +458,43 @@ Partial Class FrmListDebtors
         Me.DgvIndividual.AllowUserToDeleteRows = False
         Me.DgvIndividual.AllowUserToResizeColumns = False
         Me.DgvIndividual.AllowUserToResizeRows = False
-        DataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Control
-        DataGridViewCellStyle10.Font = New System.Drawing.Font("Linux Libertine Display G", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle10.ForeColor = System.Drawing.SystemColors.ControlText
-        DataGridViewCellStyle10.SelectionBackColor = System.Drawing.SystemColors.GradientInactiveCaption
-        DataGridViewCellStyle10.SelectionForeColor = System.Drawing.Color.Navy
-        DataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.DgvIndividual.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle10
+        DataGridViewCellStyle29.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle29.BackColor = System.Drawing.SystemColors.Control
+        DataGridViewCellStyle29.Font = New System.Drawing.Font("Linux Libertine Display G", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle29.ForeColor = System.Drawing.SystemColors.ControlText
+        DataGridViewCellStyle29.SelectionBackColor = System.Drawing.SystemColors.GradientInactiveCaption
+        DataGridViewCellStyle29.SelectionForeColor = System.Drawing.Color.Navy
+        DataGridViewCellStyle29.WrapMode = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.DgvIndividual.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle29
         Me.DgvIndividual.ColumnHeadersHeight = 32
         Me.DgvIndividual.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
         Me.DgvIndividual.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.Nombre, Me.Apellido, Me.TextoEdad, Me.MesAnio, Me.PrcPgs, Me.DscPgs, Me.Total, Me.DiasMes, Me.APagar, Me.Column, Me.fdi_pgs, Me.id_pgs, Me.cliente})
-        DataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        DataGridViewCellStyle18.BackColor = System.Drawing.Color.MistyRose
-        DataGridViewCellStyle18.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle18.ForeColor = System.Drawing.Color.Navy
-        DataGridViewCellStyle18.SelectionBackColor = System.Drawing.SystemColors.HotTrack
-        DataGridViewCellStyle18.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        DataGridViewCellStyle18.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.DgvIndividual.DefaultCellStyle = DataGridViewCellStyle18
+        DataGridViewCellStyle37.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle37.BackColor = System.Drawing.Color.MistyRose
+        DataGridViewCellStyle37.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle37.ForeColor = System.Drawing.Color.Navy
+        DataGridViewCellStyle37.SelectionBackColor = System.Drawing.SystemColors.HotTrack
+        DataGridViewCellStyle37.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        DataGridViewCellStyle37.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.DgvIndividual.DefaultCellStyle = DataGridViewCellStyle37
         Me.DgvIndividual.Location = New System.Drawing.Point(27, 170)
         Me.DgvIndividual.Margin = New System.Windows.Forms.Padding(16, 0, 0, 16)
         Me.DgvIndividual.MultiSelect = False
         Me.DgvIndividual.Name = "DgvIndividual"
         Me.DgvIndividual.ReadOnly = True
-        DataGridViewCellStyle19.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        DataGridViewCellStyle19.BackColor = System.Drawing.SystemColors.Control
-        DataGridViewCellStyle19.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
-        DataGridViewCellStyle19.ForeColor = System.Drawing.SystemColors.WindowText
-        DataGridViewCellStyle19.SelectionBackColor = System.Drawing.SystemColors.GradientInactiveCaption
-        DataGridViewCellStyle19.SelectionForeColor = System.Drawing.Color.Navy
-        DataGridViewCellStyle19.WrapMode = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.DgvIndividual.RowHeadersDefaultCellStyle = DataGridViewCellStyle19
+        DataGridViewCellStyle38.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle38.BackColor = System.Drawing.SystemColors.Control
+        DataGridViewCellStyle38.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
+        DataGridViewCellStyle38.ForeColor = System.Drawing.SystemColors.WindowText
+        DataGridViewCellStyle38.SelectionBackColor = System.Drawing.SystemColors.GradientInactiveCaption
+        DataGridViewCellStyle38.SelectionForeColor = System.Drawing.Color.Navy
+        DataGridViewCellStyle38.WrapMode = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.DgvIndividual.RowHeadersDefaultCellStyle = DataGridViewCellStyle38
         Me.DgvIndividual.RowHeadersWidth = 4
         Me.DgvIndividual.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
         Me.DgvIndividual.RowTemplate.Height = 24
         Me.DgvIndividual.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
-        Me.DgvIndividual.Size = New System.Drawing.Size(1052, 98)
+        Me.DgvIndividual.Size = New System.Drawing.Size(1052, 250)
         Me.DgvIndividual.TabIndex = 2
         '
         'Nombre
@@ -414,8 +523,8 @@ Partial Class FrmListDebtors
         '
         Me.TextoEdad.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.TextoEdad.DataPropertyName = "Edad"
-        DataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.TextoEdad.DefaultCellStyle = DataGridViewCellStyle11
+        DataGridViewCellStyle30.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.TextoEdad.DefaultCellStyle = DataGridViewCellStyle30
         Me.TextoEdad.HeaderText = "EDAD"
         Me.TextoEdad.Name = "TextoEdad"
         Me.TextoEdad.ReadOnly = True
@@ -427,8 +536,8 @@ Partial Class FrmListDebtors
         '
         Me.MesAnio.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.MesAnio.DataPropertyName = "MesAnio"
-        DataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        Me.MesAnio.DefaultCellStyle = DataGridViewCellStyle12
+        DataGridViewCellStyle31.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        Me.MesAnio.DefaultCellStyle = DataGridViewCellStyle31
         Me.MesAnio.HeaderText = "MES Y AÑO"
         Me.MesAnio.Name = "MesAnio"
         Me.MesAnio.ReadOnly = True
@@ -440,8 +549,8 @@ Partial Class FrmListDebtors
         '
         Me.PrcPgs.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.PrcPgs.DataPropertyName = "PrcPgs"
-        DataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.PrcPgs.DefaultCellStyle = DataGridViewCellStyle13
+        DataGridViewCellStyle32.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.PrcPgs.DefaultCellStyle = DataGridViewCellStyle32
         Me.PrcPgs.HeaderText = "PRECIO"
         Me.PrcPgs.Name = "PrcPgs"
         Me.PrcPgs.ReadOnly = True
@@ -453,8 +562,8 @@ Partial Class FrmListDebtors
         '
         Me.DscPgs.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.DscPgs.DataPropertyName = "DscPgs"
-        DataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.DscPgs.DefaultCellStyle = DataGridViewCellStyle14
+        DataGridViewCellStyle33.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.DscPgs.DefaultCellStyle = DataGridViewCellStyle33
         Me.DscPgs.HeaderText = "DSCNTO"
         Me.DscPgs.Name = "DscPgs"
         Me.DscPgs.ReadOnly = True
@@ -466,8 +575,8 @@ Partial Class FrmListDebtors
         '
         Me.Total.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.Total.DataPropertyName = "Total"
-        DataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.Total.DefaultCellStyle = DataGridViewCellStyle15
+        DataGridViewCellStyle34.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.Total.DefaultCellStyle = DataGridViewCellStyle34
         Me.Total.HeaderText = "TOTAL"
         Me.Total.Name = "Total"
         Me.Total.ReadOnly = True
@@ -479,8 +588,8 @@ Partial Class FrmListDebtors
         '
         Me.DiasMes.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.DiasMes.DataPropertyName = "DiasMes"
-        DataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.DiasMes.DefaultCellStyle = DataGridViewCellStyle16
+        DataGridViewCellStyle35.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.DiasMes.DefaultCellStyle = DataGridViewCellStyle35
         Me.DiasMes.HeaderText = "Nº DE DIAS"
         Me.DiasMes.Name = "DiasMes"
         Me.DiasMes.ReadOnly = True
@@ -492,8 +601,8 @@ Partial Class FrmListDebtors
         '
         Me.APagar.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.APagar.DataPropertyName = "APagar"
-        DataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.APagar.DefaultCellStyle = DataGridViewCellStyle17
+        DataGridViewCellStyle36.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.APagar.DefaultCellStyle = DataGridViewCellStyle36
         Me.APagar.HeaderText = "A PAGAR"
         Me.APagar.Name = "APagar"
         Me.APagar.ReadOnly = True
@@ -567,22 +676,22 @@ Partial Class FrmListDebtors
         Me.BtnPayMonth.TextAlign = System.Drawing.ContentAlignment.BottomCenter
         Me.BtnPayMonth.UseVisualStyleBackColor = True
         '
-        'BtnNewMonthlyPayments
+        'BtnPaymentGenerator
         '
-        Me.BtnNewMonthlyPayments.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
-        Me.BtnNewMonthlyPayments.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.BtnNewMonthlyPayments.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnNewMonthlyPayments.ForeColor = System.Drawing.Color.DarkGreen
-        Me.BtnNewMonthlyPayments.Image = Global.GymPaymentControl.My.Resources.Resources.ic_pay_month_28x32
-        Me.BtnNewMonthlyPayments.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnNewMonthlyPayments.Location = New System.Drawing.Point(1250, 133)
-        Me.BtnNewMonthlyPayments.Margin = New System.Windows.Forms.Padding(24, 0, 24, 0)
-        Me.BtnNewMonthlyPayments.Name = "BtnNewMonthlyPayments"
-        Me.BtnNewMonthlyPayments.Size = New System.Drawing.Size(140, 64)
-        Me.BtnNewMonthlyPayments.TabIndex = 93
-        Me.BtnNewMonthlyPayments.Text = "&Nuevos pagos mensuales"
-        Me.BtnNewMonthlyPayments.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnNewMonthlyPayments.UseVisualStyleBackColor = True
+        Me.BtnPaymentGenerator.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
+        Me.BtnPaymentGenerator.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.BtnPaymentGenerator.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnPaymentGenerator.ForeColor = System.Drawing.Color.DarkGreen
+        Me.BtnPaymentGenerator.Image = Global.GymPaymentControl.My.Resources.Resources.ic_pay_month_28x32
+        Me.BtnPaymentGenerator.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnPaymentGenerator.Location = New System.Drawing.Point(1103, 204)
+        Me.BtnPaymentGenerator.Margin = New System.Windows.Forms.Padding(24, 0, 24, 0)
+        Me.BtnPaymentGenerator.Name = "BtnPaymentGenerator"
+        Me.BtnPaymentGenerator.Size = New System.Drawing.Size(140, 64)
+        Me.BtnPaymentGenerator.TabIndex = 93
+        Me.BtnPaymentGenerator.Text = "&Nuevos pagos mensuales"
+        Me.BtnPaymentGenerator.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnPaymentGenerator.UseVisualStyleBackColor = True
         '
         'LblSolitos
         '
@@ -602,133 +711,14 @@ Partial Class FrmListDebtors
         Me.LblToditos.TabIndex = 95
         Me.LblToditos.Text = "LblToditos"
         '
-        'DgvPrueba
-        '
-        Me.DgvPrueba.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.DgvPrueba.Location = New System.Drawing.Point(898, 12)
-        Me.DgvPrueba.Name = "DgvPrueba"
-        Me.DgvPrueba.Size = New System.Drawing.Size(181, 39)
-        Me.DgvPrueba.TabIndex = 97
-        '
-        'nom_cli_gf
-        '
-        Me.nom_cli_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.nom_cli_gf.DataPropertyName = "Integrantes"
-        Me.nom_cli_gf.HeaderText = "INTEGRANTES"
-        Me.nom_cli_gf.Name = "nom_cli_gf"
-        Me.nom_cli_gf.ReadOnly = True
-        Me.nom_cli_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.nom_cli_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.nom_cli_gf.Width = 184
-        '
-        'nom_grp
-        '
-        Me.nom_grp.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.nom_grp.DataPropertyName = "NomGrp"
-        Me.nom_grp.HeaderText = "NOMBRE DEL GRUPO"
-        Me.nom_grp.Name = "nom_grp"
-        Me.nom_grp.ReadOnly = True
-        Me.nom_grp.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.nom_grp.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.nom_grp.Width = 272
-        '
-        'fdi_pgs_gf
-        '
-        Me.fdi_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.fdi_pgs_gf.DataPropertyName = "FechaLarga"
-        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        Me.fdi_pgs_gf.DefaultCellStyle = DataGridViewCellStyle2
-        Me.fdi_pgs_gf.HeaderText = "MES Y AÑO"
-        Me.fdi_pgs_gf.Name = "fdi_pgs_gf"
-        Me.fdi_pgs_gf.ReadOnly = True
-        Me.fdi_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.fdi_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.fdi_pgs_gf.Width = 128
-        '
-        'prc_pgs_gf
-        '
-        Me.prc_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.prc_pgs_gf.DataPropertyName = "PrcPgs"
-        DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.prc_pgs_gf.DefaultCellStyle = DataGridViewCellStyle3
-        Me.prc_pgs_gf.HeaderText = "PRECIO"
-        Me.prc_pgs_gf.Name = "prc_pgs_gf"
-        Me.prc_pgs_gf.ReadOnly = True
-        Me.prc_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.prc_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.prc_pgs_gf.Width = 88
-        '
-        'dsc_pgs_gf
-        '
-        Me.dsc_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.dsc_pgs_gf.DataPropertyName = "DscPgs"
-        DataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.dsc_pgs_gf.DefaultCellStyle = DataGridViewCellStyle4
-        Me.dsc_pgs_gf.HeaderText = "DSCNTO"
-        Me.dsc_pgs_gf.Name = "dsc_pgs_gf"
-        Me.dsc_pgs_gf.ReadOnly = True
-        Me.dsc_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.dsc_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.dsc_pgs_gf.Width = 88
-        '
-        'total_pgs_gf
-        '
-        Me.total_pgs_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.total_pgs_gf.DataPropertyName = "TextoColTotal"
-        DataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.total_pgs_gf.DefaultCellStyle = DataGridViewCellStyle5
-        Me.total_pgs_gf.HeaderText = "TOTAL"
-        Me.total_pgs_gf.Name = "total_pgs_gf"
-        Me.total_pgs_gf.ReadOnly = True
-        Me.total_pgs_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.total_pgs_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.total_pgs_gf.Width = 88
-        '
-        'dias_mes_gf
-        '
-        Me.dias_mes_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.dias_mes_gf.DataPropertyName = "TextoColDias"
-        DataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.dias_mes_gf.DefaultCellStyle = DataGridViewCellStyle6
-        Me.dias_mes_gf.HeaderText = "Nº DE DIAS"
-        Me.dias_mes_gf.Name = "dias_mes_gf"
-        Me.dias_mes_gf.ReadOnly = True
-        Me.dias_mes_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.dias_mes_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.dias_mes_gf.Width = 88
-        '
-        'a_pagar_gf
-        '
-        Me.a_pagar_gf.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.a_pagar_gf.DataPropertyName = "APagarProrrateo"
-        DataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.a_pagar_gf.DefaultCellStyle = DataGridViewCellStyle7
-        Me.a_pagar_gf.HeaderText = "A PAGAR"
-        Me.a_pagar_gf.Name = "a_pagar_gf"
-        Me.a_pagar_gf.ReadOnly = True
-        Me.a_pagar_gf.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.a_pagar_gf.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.a_pagar_gf.Width = 88
-        '
-        'empty
-        '
-        Me.empty.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.empty.HeaderText = ""
-        Me.empty.MinimumWidth = 4
-        Me.empty.Name = "empty"
-        Me.empty.ReadOnly = True
-        Me.empty.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.empty.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.empty.Width = 4
-        '
         'FrmListDebtors
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1544, 759)
+        Me.ClientSize = New System.Drawing.Size(1252, 759)
         Me.Controls.Add(Me.LblToditos)
         Me.Controls.Add(Me.LblSolitos)
-        Me.Controls.Add(Me.BtnNewMonthlyPayments)
+        Me.Controls.Add(Me.BtnPaymentGenerator)
         Me.Controls.Add(Me.DgvFamilyGroup)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.Label)
@@ -739,7 +729,6 @@ Partial Class FrmListDebtors
         Me.Controls.Add(Me.PbLogo)
         Me.Controls.Add(Me.BtnPayMonth)
         Me.Controls.Add(Me.StsStatusBar)
-        Me.Controls.Add(Me.DgvPrueba)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Location = New System.Drawing.Point(20, 20)
         Me.MaximizeBox = False
@@ -755,7 +744,6 @@ Partial Class FrmListDebtors
         CType(Me.DgvFamilyGroup, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.DgvIndividual, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PbLogo, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.DgvPrueba, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -781,10 +769,9 @@ Partial Class FrmListDebtors
     Friend WithEvents RbPayGroup As RadioButton
     Friend WithEvents DgvFamilyGroup As DataGridView
     Friend WithEvents DgvIndividual As DataGridView
-    Friend WithEvents BtnNewMonthlyPayments As Button
+    Friend WithEvents BtnPaymentGenerator As Button
     Friend WithEvents LblToditos As Label
     Friend WithEvents LblSolitos As Label
-    Friend WithEvents DgvPrueba As DataGridView
     Friend WithEvents Nombre As DataGridViewTextBoxColumn
     Friend WithEvents Apellido As DataGridViewTextBoxColumn
     Friend WithEvents TextoEdad As DataGridViewTextBoxColumn
@@ -801,10 +788,10 @@ Partial Class FrmListDebtors
     Friend WithEvents nom_cli_gf As DataGridViewTextBoxColumn
     Friend WithEvents nom_grp As DataGridViewTextBoxColumn
     Friend WithEvents fdi_pgs_gf As DataGridViewTextBoxColumn
-    Friend WithEvents prc_pgs_gf As DataGridViewTextBoxColumn
-    Friend WithEvents dsc_pgs_gf As DataGridViewTextBoxColumn
-    Friend WithEvents total_pgs_gf As DataGridViewTextBoxColumn
-    Friend WithEvents dias_mes_gf As DataGridViewTextBoxColumn
-    Friend WithEvents a_pagar_gf As DataGridViewTextBoxColumn
+    Friend WithEvents PrcPgsGf As DataGridViewTextBoxColumn
+    Friend WithEvents DscPgsGf As DataGridViewTextBoxColumn
+    Friend WithEvents TtlPgsGf As DataGridViewTextBoxColumn
+    Friend WithEvents NumDiasGf As DataGridViewTextBoxColumn
+    Friend WithEvents APgrGf As DataGridViewTextBoxColumn
     Friend WithEvents empty As DataGridViewTextBoxColumn
 End Class

@@ -17,16 +17,6 @@
         Public Property SumaTotalDeuda As Decimal
         Public Property CantidadMeses As Integer
 
-
-        'Public Property IdGrp As Integer? ' Usamos ? porque puede ser NULL si es individual
-        'Public Property NombreGrupo As String
-        '' Para mostrar la lista de morosos
-        '' Para mostrar los clientes pertenecientes a un grupo
-        'Public Property Integrantes As String
-        'Public Property MontoResumen As Decimal ' Para el total "82.74€"
-
-
-
     End Class
 
 End Namespace

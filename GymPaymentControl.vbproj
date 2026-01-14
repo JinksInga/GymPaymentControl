@@ -178,6 +178,7 @@
     <Compile Include="Models\UserDTO.vb" />
     <Compile Include="Models\UserSession.vb" />
     <Compile Include="Services\AuthManager.vb" />
+    <Compile Include="Services\PaymentGenerator.vb" />
     <Compile Include="Services\PaymentManager.vb" />
     <Compile Include="Utils\Validations.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />

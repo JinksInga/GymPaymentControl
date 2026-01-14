@@ -6,370 +6,268 @@ Namespace Services
     Public Class PaymentManager
 
         Private ReadOnly _connectionString As String = ConfigurationManager.ConnectionStrings("MyConnectionMySQL").ConnectionString
+        ''
+        ''
 
-        'Public Sub GenerarMorososMensuales()
-
-        '    Using connectionString As New MySqlConnection(_connectionString)
-
-        '        connectionString.Open()
-        '        ' Iniciamos una transacción para asegurar que se graben ambos o ninguno
-        '        Using transaction = connectionString.BeginTransaction()
-
-        '            Try
-        '                ' 1. Generar deudas para clientes individuales
-        '                Dim sqlIndiv As String = "
-        '                INSERT INTO pagos (fdi_pgs, fdp_pgs, frm_pgs, mtd_pgs, prc_pgs, dsc_pgs, id_cli, id_grp, id_user)
-        '                SELECT CURDATE(), '0101-01-01', '', '', t.prcio_trfa, t.dscto_trfa, c.id_cli, NULL, @userId
-        '                FROM clientes c
-        '                INNER JOIN trfa_dscto t ON (TIMESTAMPDIFF(YEAR, c.fdn_cli, CURDATE()) BETWEEN t.emin_trfa AND t.emax_trfa)
-        '                WHERE c.std_cli = 'SI' AND c.id_grp IS NULL
-        '                AND NOT EXISTS (
-        '                    SELECT 1 FROM pagos p 
-        '                    WHERE p.id_cli = c.id_cli 
-        '                    AND MONTH(p.fdi_pgs) = MONTH(CURDATE()) 
-        '                    AND YEAR(p.fdi_pgs) = YEAR(CURDATE())
-        '                );"
-
-        '                ' 2. Generar deudas para grupos familiares (un solo pago por grupo)
-        '                Dim sqlGrupos As String = "
-        '                INSERT INTO pagos (fdi_pgs, fdp_pgs, frm_pgs, mtd_pgs, prc_pgs, dsc_pgs, id_cli, id_grp, id_user)
-        '                SELECT CURDATE(), '0101-01-01', '', '', t.prcio_trfa, t.dscto_trfa, NULL, g.id_grp, @userId
-        '                FROM grp_familiar g
-        '                INNER JOIN trfa_dscto t ON (g.num_intgrntes_grp = t.nperson_trfa)
-        '                WHERE NOT EXISTS (
-        '                    SELECT 1 FROM pagos p 
-        '                    WHERE p.id_grp = g.id_grp 
-        '                    AND MONTH(p.fdi_pgs) = MONTH(CURDATE()) 
-        '                    AND YEAR(p.fdi_pgs) = YEAR(CURDATE())
-        '                );"
-
-        '                Using sqlCommand As New MySqlCommand(sqlIndiv, connectionString, transaction)
-
-        '                    sqlCommand.Parameters.AddWithValue("@userId", UserSession.IdUser)
-        '                    sqlCommand.ExecuteNonQuery() ' Ejecuta individuales
-
-        '                    sqlCommand.CommandText = sqlGrupos
-        '                    sqlCommand.ExecuteNonQuery() ' Ejecuta grupos
-        '                End Using
-
-
-        '                transaction.Commit()
-
-        '            Catch ex As Exception
-
-        '                transaction.Rollback()
-        '                Throw New Exception("Error al generar morosos: " & ex.Message)
-
-        '            End Try
-
-        '        End Using
-
-        '    End Using
-
-        'End Sub
-
-        'Public Function ObtenerPagosPendientes(soloIndividuales As Boolean) As List(Of PaymentDTO)
-
-        '    Dim lista As New List(Of PaymentDTO)
-
-        '    ' Consulta SQL que une Pagos con Clientes y traduce fechas a nombres de meses
-        '    Dim sql As String = "
-        'SELECT 
-        '    c.nom_cli, c.ape_cli, 
-        '    CONCAT(TIMESTAMPDIFF(YEAR, c.fdn_cli, CURDATE()), ' años') as edad,
-        '    DATE_FORMAT(p.fdi_pgs, '%M %Y') as mes_anio,
-        '    p.prc_pgs, p.dsc_pgs,
-        '    (p.prc_pgs - p.dsc_pgs) as total,
-        '    p.id_pgs, p.id_cli
-        'FROM pagos p
-        'INNER JOIN clientes c ON p.id_cli = c.id_cli
-        'WHERE p.fdp_pgs = '0101-01-01' " ' Solo los no pagados
-
-        '    ' Filtramos según la pestaña
-        '    If soloIndividuales Then
-        '        sql &= " AND c.id_grp IS NULL"
-        '    Else
-        '        sql &= " AND c.id_grp IS NOT NULL"
-        '    End If
-
-        '    Using conn As New MySqlConnection(_connectionString)
-
-        '        Dim cmd As New MySqlCommand(sql, conn)
-        '        conn.Open()
-
-        '        Using dr = cmd.ExecuteReader()
-
-        '            While dr.Read()
-
-        '                lista.Add(New PaymentDTO With
-        '                          {
-        '                            .Nombre = dr("nom_cli").ToString(),
-        '                            .Apellido = dr("ape_cli").ToString(),
-        '                            .Edad = dr("edad").ToString(),
-        '                            .MesAnio = dr("mes_anio").ToString(),
-        '                            .PrcPgs = dr("prc_pgs"),
-        '                            .DscPgs = dr("dsc_pgs"),
-        '                            .Total = dr("total"),
-        '                            .IdPgs = dr("id_pgs")
-        '                        })
-        '            End While
-
-        '        End Using
-
-        '    End Using
-
-        '    Return lista
-
-        'End Function
-        '    Public Function ObtenerPagosPendientes(soloIndividuales As Boolean) As List(Of PaymentDTO)
-        '        Dim lista As New List(Of PaymentDTO)
-
-        '        ' Añadimos p.mtd_pgs y p.fdi_pgs a la consulta
-        '        Dim sql As String = "
-        'SELECT 
-        '    c.nom_cli, c.ape_cli, 
-        '    CONCAT(TIMESTAMPDIFF(YEAR, c.fdn_cli, CURDATE()), ' años') as edad,
-        '    DATE_FORMAT(p.fdi_pgs, '%M %Y') as mes_anio,
-        '    p.fdi_pgs, p.mtd_pgs,
-        '    p.prc_pgs, p.dsc_pgs,
-        '    (p.prc_pgs - p.dsc_pgs) as total,
-        '    p.id_pgs, p.id_cli
-        'FROM pagos p
-        'INNER JOIN clientes c ON p.id_cli = c.id_cli
-        'WHERE p.fdp_pgs = '0000-00-00' OR p.fdp_pgs IS NULL" 'WHERE p.fdp_pgs = '0101-01-01' "
-
-        '        If soloIndividuales Then
-        '            sql &= " AND c.id_grp IS NULL"
-        '        Else
-        '            sql &= " AND c.id_grp IS NOT NULL"
-        '        End If
-
-        '        Using conn As New MySqlConnection(_connectionString)
-        '            Dim cmd As New MySqlCommand(sql, conn)
-        '            conn.Open()
-        '            Using dr = cmd.ExecuteReader()
-        '                While dr.Read()
-        '                    ' El mapeo ahora es 1 a 1 con el SQL y el DTO
-        '                    lista.Add(New PaymentDTO With {
-        '                .Nombre = dr("nom_cli").ToString(),
-        '                .Apellido = dr("ape_cli").ToString(),
-        '                .Edad = dr("edad").ToString(),
-        '                .MesAnio = dr("mes_anio").ToString(),
-        '                .FdiPgs = dr.GetDateTime("fdi_pgs"), ' Para calcular días
-        '                .MtdPgs = dr("mtd_pgs").ToString(), ' Para la regla de "ASISTENCIA"
-        '                .PrcPgs = dr("prc_pgs"),
-        '                .DscPgs = dr("dsc_pgs"),
-        '                .Total = dr("total"),
-        '                .IdPgs = dr("id_pgs"),
-        '                .IdCli = dr("id_cli")
-        '            })
-        '                End While
-        '            End Using
-        '        End Using
-        '        Return lista
-        '    End Function
-
+        ' ========= MÉTODO PÚBLICO =========
         Public Function ObtenerListaMorososIndividuales() As List(Of IndividualPaymentDTO)
-            Dim listaFinal As New List(Of IndividualPaymentDTO)
-            Dim datosBase As New List(Of IndividualPaymentDTO)
 
-            ' 1. CONSULTA SQL (Tu lógica original de ACTIVO y frm_pgs vacía)
-            Dim sql As String = “SELECT
-                                    c.nom_cli,
-                                    c.ape_cli,
-                                    c.fdn_cli,
-                                    p.id_pgs,
-                                    p.fdi_pgs,
-                                    p.mtd_pgs,
-                                    p.prc_pgs,
-                                    p.dsc_pgs,
-                                    p.id_cli
-                                    FROM clientes c INNER JOIN pagos p ON c.id_cli = p.id_cli
-                                    WHERE c.std_cli = 'ACTIVO'
-                                    AND p.frm_pgs = ''
-                                    AND c.id_grp IS NULL
-                                    ORDER BY p.id_cli, p.fdi_pgs”
+            Dim datosBase = ObtenerDatosBase()
+            CalcularPagos(datosBase)
 
+            Return ConstruirListaFinal(datosBase)
 
-            ' 2. CONEXIÓN Y CARGA DE DATOS
+        End Function
+
+        ' ========= ACCESO A DATOS =========
+        Private Function ObtenerDatosBase() As List(Of IndividualPaymentDTO)
+
+            Dim lista As New List(Of IndividualPaymentDTO)
+
+            Dim sql As String =
+        "SELECT c.nom_cli, c.ape_cli, c.fdn_cli,
+                p.id_pgs, p.fdi_pgs, p.mtd_pgs, p.prc_pgs, p.dsc_pgs, p.id_cli
+         FROM clientes c
+         INNER JOIN pagos p ON c.id_cli = p.id_cli
+         WHERE c.std_cli = 'ACTIVO'
+           AND (p.frm_pgs IS NULL OR p.frm_pgs = '')
+           AND c.id_grp IS NULL
+         ORDER BY p.id_cli, p.fdi_pgs"
+
             Using conn As New MySqlConnection(_connectionString)
-                Dim cmd As New MySqlCommand(sql, conn)
-                conn.Open()
-                Using dr = cmd.ExecuteReader()
-                    While dr.Read()
-                        ' Variables temporales para calcular
-                        Dim fdn = dr.GetDateTime("fdn_cli")
-                        Dim fdi = dr.GetDateTime("fdi_pgs")
-                        Dim mtd = dr("mtd_pgs").ToString().ToUpper()
+                Using cmd As New MySqlCommand(sql, conn)
+                    conn.Open()
 
-                        ' Cálculo de EDAD EXACTA en VB
-                        Dim edad As Integer = Now.Year - fdn.Year
-                        If Now < fdn.AddYears(edad) Then edad -= 1
+                    Using dr = cmd.ExecuteReader()
+                        While dr.Read()
 
-                        ' Creamos el objeto y lo añadimos a la lista base
-                        Dim dto As New IndividualPaymentDTO()
-                        dto.IdPgs = dr("id_pgs")
-                        dto.IdCli = dr("id_cli")
-                        dto.Nombre = dr("nom_cli").ToString()
-                        dto.Apellido = dr("ape_cli").ToString()
-                        dto.Edad = edad & " años"
-                        dto.MtdPgs = dr("mtd_pgs").ToString()
-                        dto.PrcPgs = dr("prc_pgs")
-                        dto.DscPgs = dr("dsc_pgs")
-                        dto.Total = dto.PrcPgs - dto.DscPgs
-                        dto.FdiPgs = fdi
-                        dto.MesAnio = fdi.ToString("d MMMM yyyy").ToUpper() ' Mes en ESPAÑOL
-                        dto.Edad = edad & " años"
+                            Dim fdn = dr.GetDateTime("fdn_cli")
+                            Dim edad = CalcularEdad(fdn)
 
-                        datosBase.Add(dto)
-                    End While
+                            Dim dto As New IndividualPaymentDTO With {
+                        .IdPgs = dr("id_pgs"),
+                        .IdCli = dr("id_cli"),
+                        .Nombre = dr("nom_cli").ToString(),
+                        .Apellido = dr("ape_cli").ToString(),
+                        .Edad = edad,
+                        .MtdPgs = dr("mtd_pgs").ToString(),
+                        .PrcPgs = dr("prc_pgs"),
+                        .DscPgs = dr("dsc_pgs"),
+                        .FdiPgs = dr.GetDateTime("fdi_pgs")
+                    }
+
+                            dto.Total = dto.PrcPgs - dto.DscPgs
+                            dto.MesAnio = FormatearMesAnio(dto.FdiPgs)
+
+                            lista.Add(dto)
+                        End While
+                    End Using
                 End Using
             End Using
 
-            ' 3. AGRUPACIÓN PARA LAS FILAS NARANJAS
-            For Each grupo In datosBase.GroupBy(Function(p) p.IdCli)
+            Return lista
 
-                For Each item In grupo
-                    ' --- TU CÓDIGO ANTIGUO INTEGRADO AQUÍ ---
-                    Dim totalDiferencia As Decimal = item.PrcPgs - item.DscPgs
+        End Function
 
-                    If item.MtdPgs.ToUpper().Contains("MENSUAL") Then
-                        ' 1. Días totales del mes
-                        Dim diasTotalesMes As Integer = DateTime.DaysInMonth(item.FdiPgs.Year, item.FdiPgs.Month)
 
-                        ' 2. Lógica de proporcionalidad
-                        Dim prcDia As Decimal = totalDiferencia / diasTotalesMes
-                        Dim diaInicio As Integer = item.FdiPgs.Day ' El día que empezó
+        ' ========= REGLAS DE NEGOCIO =========
+        Private Sub CalcularPagos(items As List(Of IndividualPaymentDTO))
 
-                        item.DiasMes = diasTotalesMes - diaInicio + 1 ' Días restantes
-                        item.APagar = prcDia * item.DiasMes ' Precio proporcional
-                    Else
-                        ' 3. Caso DIARIO
-                        item.DiasMes = 1
-                        item.APagar = totalDiferencia
-                    End If
-                    ' ---------------------------------------
+            For Each item In items
+                CalcularPagoIndividual(item)
+            Next
 
-                    listaFinal.Add(item)
-                Next
+        End Sub
 
-                ' 4. Fila de resumen naranja
-                Dim totalDeudaGrupo As Decimal = grupo.Sum(Function(x) x.APagar) ' Sumamos los proporcionales ya calculados
+        Private Sub CalcularPagoIndividual(item As IndividualPaymentDTO)
 
-                Dim resumen As New IndividualPaymentDTO With {
-        .IdCli = grupo.Key,
-        .MtdPgs = grupo.First().MtdPgs,
-        .EsFilaResumen = True,
-        .CantidadMeses = grupo.Count(),
-        .SumaTotalDeuda = totalDeudaGrupo, ' Para control interno
-        .APagar = totalDeudaGrupo          ' ESTO es lo que hace que aparezca en la columna del Grid
-    }
-                listaFinal.Add(resumen)
+            Dim total = item.PrcPgs - item.DscPgs
+
+            If item.MtdPgs.Contains("MENSUAL") Then
+
+                Dim diasMes = DateTime.DaysInMonth(item.FdiPgs.Year, item.FdiPgs.Month)
+                Dim precioDia = total / diasMes
+
+                item.DiasMes = diasMes - item.FdiPgs.Day + 1
+                item.APagar = precioDia * item.DiasMes
+
+            Else
+                item.DiasMes = 1
+                item.APagar = total
+            End If
+
+        End Sub
+
+        ' ========= CONSTRUCCIÓN DE RESULTADOS =========
+        Private Function ConstruirListaFinal(datosBase As List(Of IndividualPaymentDTO)
+                                             ) As List(Of IndividualPaymentDTO)
+
+            Dim resultado As New List(Of IndividualPaymentDTO)
+
+            For Each grupo In datosBase.GroupBy(Function(x) x.IdCli)
+
+                ' Detalle
+                resultado.AddRange(grupo)
+
+                ' Resumen
+                resultado.Add(CrearFilaResumen(grupo))
 
             Next
 
-            Return listaFinal
+            Return resultado
+
         End Function
 
-        Public Function ObtenerListaGrupalesCompacta() As List(Of GroupPaymentDTO)
-            Dim listaFinal As New List(Of GroupPaymentDTO)
-            Dim connectionString As String = ConfigurationManager.ConnectionStrings("MyConnectionMySQL").ConnectionString
+        Private Function CrearFilaResumen(grupo As IGrouping(Of Integer, IndividualPaymentDTO)
+                                          ) As IndividualPaymentDTO
 
-            ' SQL con GROUP_CONCAT para evitar filas repetidas por integrante
-            ' Ordenamos por id_grp para que los pagos del mismo grupo salgan juntos
-            Dim sql As String = "SELECT g.id_grp, g.nom_grp, GROUP_CONCAT(c.nom_cli SEPARATOR ', ') as miembros, " &
-                        "p.id_pgs, p.fdi_pgs, p.prc_pgs, p.dsc_pgs " &
-                        "FROM pagos p " &
-                        "INNER JOIN grp_familiar g ON p.id_grp = g.id_grp " &
-                        "INNER JOIN clientes c ON g.id_grp = c.id_grp " &
-                        "WHERE p.fdp_pgs IS NULL " &
-                        "GROUP BY p.id_pgs " &
-                        "ORDER BY g.id_grp, p.fdi_pgs ASC"
+            Dim totalDeuda = grupo.Sum(Function(x) x.APagar)
 
-            Using conn As New MySqlConnection(connectionString)
-                conn.Open()
-                Dim cmd As New MySqlCommand(sql, conn)
-                Dim dr As MySqlDataReader = cmd.ExecuteReader()
+            Return New IndividualPaymentDTO With {
+                .IdCli = grupo.Key,
+                .MtdPgs = grupo.First().MtdPgs,
+                .EsFilaResumen = True,
+                .CantidadMeses = grupo.Count(),
+                .SumaTotalDeuda = totalDeuda,
+                .APagar = totalDeuda
+            }
+            '.IdCli = grupo.Key,
+            '.Nombre = primerItem.Nombre, ' <-- Añade esto para evitar nulos en el buscador
+            '.Apellido = primerItem.Apellido, ' <-- Añade esto también
+            '.MtdPgs = grupo.First().MtdPgs,
+        End Function
 
-                Dim ultimoIdGrp As Integer = -1
-                Dim acumuladoDinero As Decimal = 0
-                Dim contadorMeses As Integer = 0
-                While dr.Read()
-                    Dim idGrpActual As Integer = dr.GetInt32("id_grp")
+        ' ========= UTILIDADES =========
+        Private Function CalcularEdad(fechaNacimiento As DateTime) As Integer
 
-                    ' --- DETECCIÓN DE CAMBIO DE GRUPO ---
-                    If ultimoIdGrp <> -1 AndAlso ultimoIdGrp <> idGrpActual Then
-                        InsertarFilaResumen(listaFinal, acumuladoDinero, contadorMeses)
-                        acumuladoDinero = 0
-                        contadorMeses = 0
-                    End If
+            Dim edad = Date.Now.Year - fechaNacimiento.Year
+            If Date.Now < fechaNacimiento.AddYears(edad) Then edad -= 1
+            Return edad
 
-                    Dim dto As New GroupPaymentDTO()
-                    Dim fInicio As DateTime = dr.GetDateTime("fdi_pgs")
-                    Dim diasTotalesMes As Integer = DateTime.DaysInMonth(fInicio.Year, fInicio.Month)
+        End Function
 
-                    ' Datos básicos
-                    dto.IdPgs = dr.GetInt32("id_pgs")
-                    dto.IdGrp = idGrpActual
-                    dto.NomGrp = dr.GetString("nom_grp").ToUpper()
-                    dto.Integrantes = dr.GetString("miembros").ToUpper()
-                    dto.FechaLarga = fInicio.ToString("d 'DE' MMMM 'DE' yyyy").ToUpper()
-                    dto.PrcPgs = dr.GetDecimal("prc_pgs")
-                    dto.DscPgs = dr.GetDecimal("dsc_pgs")
-                    ' --- AQUÍ COLOCAS EL PRIMER BLOQUE ---
-                    ' Esto llena las columnas "TOTAL" y "Nº DE DIAS" para las filas blancas
-                    dto.TextoColTotal = (dto.PrcPgs - dto.DscPgs).ToString("N2")
-                    dto.TextoColDias = ((diasTotalesMes - fInicio.Day) + 1).ToString()
-                    '
-                    dto.DiasDelMes = (diasTotalesMes - fInicio.Day) + 1
-                    dto.TotalSinProrrateo = dto.PrcPgs - dto.DscPgs
-                    dto.APagarProrrateo = Math.Round((dto.TotalSinProrrateo / diasTotalesMes) * dto.DiasDelMes, 2)
+        Private Function FormatearMesAnio(fecha As DateTime) As String
 
-                    listaFinal.Add(dto)
+            Dim culturaEs = New Globalization.CultureInfo("es-ES")
+            Return fecha.ToString("d MMMM yyyy", culturaEs).ToUpper()
 
-                    ' Acumuladores
-                    acumuladoDinero += dto.APagarProrrateo
-                    contadorMeses += 1
-                    ultimoIdGrp = idGrpActual
-                End While
+        End Function
 
-                ' --- LA FILA QUE FALTABA PARA MOSTRAR EL RESUMEN ---
-                If ultimoIdGrp <> -1 Then
-                    InsertarFilaResumen(listaFinal, acumuladoDinero, contadorMeses)
-                End If
+        ' ========= MÉTODO PÚBLICO =========
+        ' ========= GRUPOS FAMILIARES =========
 
+        Public Function ObtenerListaMorososGrupales() As List(Of GroupPaymentDTO)
+
+            Dim datosBase = ObtenerDatosBaseGrupal()
+            ' En grupos, el pago suele ser directo (Prc - Dsc), 
+            ' pero mantenemos la estructura por si necesitas lógica adicional.
+            CalcularPagosGrupales(datosBase)
+
+            Return ConstruirListaFinalGrupal(datosBase)
+        End Function
+
+        ' ========= ACCESO A DATOS =========
+        Private Function ObtenerDatosBaseGrupal() As List(Of GroupPaymentDTO)
+            Dim lista As New List(Of GroupPaymentDTO)
+
+            ' Nueva consulta según tu requerimiento
+            Dim sql As String = "
+        SELECT GROUP_CONCAT(c.nom_cli SEPARATOR ', ') AS INTEGRANTES, 
+               g.id_grp, g.nom_grp, p.fdi_pgs, p.prc_pgs, p.dsc_pgs, p.id_pgs 
+        FROM clientes c 
+        INNER JOIN grp_familiar g ON c.id_grp = g.id_grp 
+        INNER JOIN pagos p ON g.id_grp = p.id_grp 
+        WHERE p.fdp_pgs IS NULL 
+        GROUP BY p.id_pgs 
+        ORDER BY g.id_grp, p.fdi_pgs ASC"
+
+            Using conn As New MySqlConnection(_connectionString)
+                Using cmd As New MySqlCommand(sql, conn)
+                    conn.Open()
+                    Using dr = cmd.ExecuteReader()
+                        While dr.Read()
+                            Dim dto As New GroupPaymentDTO With {
+                                .IdPgs = dr("id_pgs"),
+                                .IdGrp = dr("id_grp"),
+                                .NombreGrupo = dr("nom_grp").ToString(),
+                                .Integrantes = dr("INTEGRANTES").ToString(),
+                                .PrcPgs = Convert.ToDecimal(dr("prc_pgs")),
+                                .DscPgs = Convert.ToDecimal(dr("dsc_pgs")),
+                                .FdiPgs = dr.GetDateTime("fdi_pgs")
+                            }
+
+                            'dto.Total = dto.PrcPgs - dto.DscPgs
+                            'dto.APagar = dto.Total ' Simplificado: Pago grupal es el neto
+                            dto.MesAnio = FormatearMesAnio(dto.FdiPgs)
+
+                            lista.Add(dto)
+                        End While
+                    End Using
+                End Using
             End Using
-            Return listaFinal
+
+            Return lista
         End Function
 
-        ' Sub-función que ahora sí recibe los 3 argumentos correctamente
-        Private Sub InsertarFilaResumen(ByRef lista As List(Of GroupPaymentDTO), total As Decimal, meses As Integer)
-            'Dim resumen As New GroupPaymentDTO()
-            'resumen.EsFilaResumen = True
-
-            '' Obligamos a que estas propiedades no tengan valores que el DGV quiera formatear como moneda
-            'resumen.PrcPgs = 0
-            'resumen.DscPgs = 0
-            'resumen.TotalSinProrrateo = 0
-            'resumen.DiasDelMes = 0
-
-            '' El valor real va aquí
-            'resumen.APagarProrrateo = total
-
-            '' Guardamos el texto en la propiedad auxiliar
-            'resumen.TextoAuxiliar = meses & IIf(meses = 1, " MES", " MESES")
-
-            'lista.Add(resumen)
-            Dim resumen As New GroupPaymentDTO()
-            resumen.EsFilaResumen = True
-            resumen.APagarProrrateo = total
-
-            ' Inyectamos los textos aquí directamente
-            resumen.TextoColTotal = "DEBE :"
-            resumen.TextoColDias = meses & IIf(meses = 1, " MES", " MESES")
-
-            lista.Add(resumen)
+        ' ========= REGLAS DE NEGOCIO =========
+        ' Este es el que llamas desde ObtenerListaMorososGrupales
+        Private Sub CalcularPagosGrupales(items As List(Of GroupPaymentDTO))
+            For Each item In items
+                ' Solo calculamos si NO es fila de resumen
+                'If Not item.EsFilaResumen Then
+                CalcularPagoItemGrupal(item)
+                'End If
+            Next
         End Sub
 
+        ' Este hace el trabajo matemático (Rectángulo Verde y Azul de tu imagen)
+        Private Sub CalcularPagoItemGrupal(item As GroupPaymentDTO)
+            ' 1. TOTAL = PRECIO - DSCTO
+            item.Total = item.PrcPgs - item.DscPgs
+
+            ' 2. Nº DE DIAS = (Días del mes - día de inicio) + 1
+            Dim diasTotalesDelMes = DateTime.DaysInMonth(item.FdiPgs.Year, item.FdiPgs.Month)
+            item.DiasMes = (diasTotalesDelMes - item.FdiPgs.Day) + 1
+
+            ' 3. A PAGAR = TOTAL / DIAS_DEL_MES * DiasMes
+            'If diasTotalesDelMes > 0 Then
+            item.APagar = (item.Total / diasTotalesDelMes) * item.DiasMes
+            'Else
+            '    item.APagar = item.Total
+            'End If
+        End Sub
+
+        ' ========= CONSTRUCCIÓN DE RESULTADOS =========
+        Private Function ConstruirListaFinalGrupal(datosBase As List(Of GroupPaymentDTO)) As List(Of GroupPaymentDTO)
+            Dim resultado As New List(Of GroupPaymentDTO)
+
+            ' Agrupamos por Id de Grupo Familiar
+            For Each grupo In datosBase.GroupBy(Function(x) x.IdGrp)
+                ' 1. Añadimos los meses/pagos individuales del grupo
+                resultado.AddRange(grupo)
+
+                ' 2. Añadimos la fila de resumen de deuda del grupo
+                resultado.Add(CrearFilaResumenGrupal(grupo))
+            Next
+
+            Return resultado
+        End Function
+
+        Private Function CrearFilaResumenGrupal(grupo As IGrouping(Of Integer, GroupPaymentDTO)
+                                                ) As GroupPaymentDTO
+
+            Dim totalDeuda = grupo.Sum(Function(x) x.APagar)
+
+            Return New GroupPaymentDTO With
+                {
+                    .IdGrp = grupo.Key,'.NombreGrupo = "RESUMEN DEUDA",
+                    .EsFilaResumen = True,
+                    .CantidadMeses = grupo.Count(), ' <-- Esto es vital para el CellFormatting
+                    .APagar = grupo.Sum(Function(x) x.APagar)
+                }
+        End Function
+
+        ''
+        ''
     End Class
 End Namespace

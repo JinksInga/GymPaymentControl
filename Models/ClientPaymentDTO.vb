@@ -21,12 +21,6 @@
         Public Property IsGroup As Boolean
         Public Property IdGrupo As Integer?
         Public Property IntegrantesGrupo As Integer
-        Public Property TipoActualizacionGrupo As String
-
-        ' ======================
-        ' USUARIO / SISTEMA
-        ' ======================
-        Public Property IdUsuario As Integer
 
         ' ======================
         ' RESULTADO
