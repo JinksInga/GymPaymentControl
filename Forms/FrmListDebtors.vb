@@ -1,150 +1,193 @@
-﻿Imports GymPaymentControl.Models
+﻿Imports GymPaymentControl.Interfaces
+Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
+
 
 Public Class FrmListDebtors
     '
     Private ReadOnly _paymentManager As New PaymentManager()
-    Private ReadOnly _fontResumen As Font = New Font("Segoe UI", 9, FontStyle.Bold)
+    Private ReadOnly _fontSummary As Font = New Font("Arial", 10, FontStyle.Bold)
 
     ' Variables para guardar la carga completa original
-    Private listaIndividualCompleta As List(Of IndividualPaymentDTO)
-    Private listaGrupalCompleta As List(Of GroupPaymentDTO)
-    '
-    '
-    '
+    Private listIndividualPayment As List(Of IndividualPaymentDTO)
+    Private listGroupPayment As List(Of GroupPaymentDTO)
+    ''
+    ''
+    ''
     Private Sub FrmListDebtors_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        '
-        DgvIndividual.RowsDefaultCellStyle.Padding = New Padding(0, 2, 0, 2)
-        CargarIndividuales()
 
-        '
-        DgvIndividual.RowsDefaultCellStyle.Padding = New Padding(0, 2, 0, 2)
-        CargarGrupales()
+        '|
+        '|
+        '|
+
+        LblErrorProvider.Text = String.Empty
+        UploadIndividualDebts()
+        UploadGroupDebts()
 
     End Sub
-    '
-    '
-    '
+    ''
+    ''
+    ''
     Private Sub CmbFilter_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CmbFilter.SelectedIndexChanged
         '1
     End Sub
-    '
-    '
-    '
+    ''
+    ''
+    ''
     Private Sub TxtSearch_TextChanged(sender As Object, e As EventArgs) Handles TxtSearch.TextChanged
 
-        Dim criterio As String = TxtSearch.Text.Trim() '.ToUpper()
+        '|
+        '|
+        '|
+
+        Dim searchCriteria As String = TxtSearch.Text.Trim()
 
         ' --- BÚSQUEDA INDIVIDUAL ---
-        If RbPayIndividual.Checked AndAlso listaIndividualCompleta IsNot Nothing Then
-            Dim filtrados = listaIndividualCompleta.Where(Function(x)
-                                                              ' Lógica de coincidencia según ComboBox
-                                                              Dim coincide As Boolean = False
-                                                              If CmbFilter.SelectedIndex = 0 Then ' NOMBRE
-                                                                  coincide = (x.Nombre IsNot Nothing AndAlso x.Nombre.Contains(criterio))
-                                                              Else ' APELLIDO
-                                                                  coincide = (x.Apellido IsNot Nothing AndAlso x.Apellido.Contains(criterio))
-                                                              End If
+        If RbPayIndividual.Checked AndAlso listIndividualPayment IsNot Nothing Then
+            Dim filtrados =
+                listIndividualPayment.Where(Function(x)
+                                                ' Lógica de coincidencia según ComboBox
+                                                Dim coincide As Boolean = False
 
-                                                              ' Mantener visible la fila de resumen si el cliente coincide
-                                                              Dim esResumenVisible = x.EsFilaResumen AndAlso listaIndividualCompleta.Any(Function(cli)
-                                                                                                                                             Return cli.IdCli = x.IdCli AndAlso Not cli.EsFilaResumen AndAlso
-                                                                                                                                                    ((CmbFilter.SelectedIndex = 0 AndAlso cli.Nombre IsNot Nothing AndAlso cli.Nombre.Contains(criterio)) OrElse
-                                                                                                                                                     (CmbFilter.SelectedIndex = 1 AndAlso cli.Apellido IsNot Nothing AndAlso cli.Apellido.Contains(criterio)))
-                                                                                                                                         End Function)
+                                                If CmbFilter.SelectedIndex = 0 Then
+                                                    coincide = (x.Name IsNot Nothing AndAlso x.Name.Contains(searchCriteria))
+                                                Else
+                                                    coincide = (x.LastName IsNot Nothing AndAlso x.LastName.Contains(searchCriteria))
+                                                End If
 
-                                                              Return coincide OrElse esResumenVisible
-                                                          End Function).ToList()
+                                                ' Mantener visible la fila de resumen si el cliente coincide
+                                                Dim esResumenVisible =
+                                                  x.IsSummaryRow AndAlso listIndividualPayment.Any(Function(cli)
+
+                                                                                                       Return cli.IdCli = x.IdCli AndAlso Not cli.IsSummaryRow AndAlso
+                                                                                                        ((CmbFilter.SelectedIndex = 0 AndAlso cli.Name IsNot Nothing AndAlso cli.Name.Contains(searchCriteria)) OrElse
+                                                                                                        (CmbFilter.SelectedIndex = 1 AndAlso cli.LastName IsNot Nothing AndAlso cli.LastName.Contains(searchCriteria)))
+                                                                                                   End Function)
+
+                                                Return coincide OrElse esResumenVisible
+                                            End Function).ToList()
 
             DgvIndividual.DataSource = Nothing
             DgvIndividual.DataSource = filtrados
-            AplicarFormatoDgvIndividual() ' Re-aplicar rojos
         End If
 
         ' --- BÚSQUEDA GRUPAL ---
-        If RbPayGroup.Checked AndAlso listaGrupalCompleta IsNot Nothing Then
-            Dim filtradosGrp = listaGrupalCompleta.Where(Function(x)
-                                                             Dim coincideGrp = (x.NombreGrupo IsNot Nothing AndAlso x.NombreGrupo.Contains(criterio))
+        If RbPayGroup.Checked AndAlso listGroupPayment IsNot Nothing Then
+            Dim filtradosGrp =
+                listGroupPayment.Where(Function(x)
 
-                                                             Dim esResumenVisible = x.EsFilaResumen AndAlso listaGrupalCompleta.Any(Function(g)
-                                                                                                                                        Return g.IdGrp = x.IdGrp AndAlso Not g.EsFilaResumen AndAlso
-                                                                                                                                               g.NombreGrupo IsNot Nothing AndAlso g.NombreGrupo.Contains(criterio)
-                                                                                                                                    End Function)
+                                           Dim coincideGrp = False
 
-                                                             Return coincideGrp OrElse esResumenVisible
-                                                         End Function).ToList()
+                                           If CmbFilter.SelectedIndex = 0 Then
+                                               coincideGrp = (x.Members IsNot Nothing AndAlso x.Members.Contains(searchCriteria))
+                                           Else
+                                               coincideGrp = (x.GroupName IsNot Nothing AndAlso x.GroupName.Contains(searchCriteria))
+                                           End If
+
+                                           Dim esResumenVisible =
+                                              x.IsSummaryRow AndAlso listGroupPayment.Any(Function(g)
+                                                                                              Return g.IdGrp = x.IdGrp AndAlso Not g.IsSummaryRow AndAlso
+                                                                                                ((CmbFilter.SelectedIndex = 0 AndAlso g.Members IsNot Nothing AndAlso g.Members.Contains(searchCriteria)) OrElse
+                                                                                                (CmbFilter.SelectedIndex = 1 AndAlso g.GroupName IsNot Nothing AndAlso g.GroupName.Contains(searchCriteria)))
+                                                                                          End Function)
+
+                                           Return coincideGrp OrElse esResumenVisible
+                                       End Function).ToList()
 
             DgvFamilyGroup.DataSource = Nothing
             DgvFamilyGroup.DataSource = filtradosGrp
-            AplicarFormatoDgvGrupal() ' Re-aplicar verdes
         End If
 
-        ActualizarStatusBar(criterio) ' Actualizar conteo
+        ActualizarStatusBar(searchCriteria) ' Actualizar conteo
         '
     End Sub
-    '
-    '
-    '
+    ''
+    ''
+    ''
     Private Sub BtnClean_Click(sender As Object, e As EventArgs) Handles BtnClean.Click
-        '3
+
+        '|
+        '|
+        '|
+
     End Sub
-    '
-    '
-    '
+    ''
+    ''
+    ''
     Private Sub RbPayIndividual_CheckedChanged(sender As Object, e As EventArgs) Handles RbPayIndividual.CheckedChanged
-        '
+
+        '|
+        '|
+        '|
+
         If RbPayIndividual.Checked Then
+
             ' 1. Visualización
+            RbPayIndividual.BringToFront()
             DgvIndividual.Visible = True
             DgvFamilyGroup.Visible = False
 
             ' 2. Configurar ComboBox
             CmbFilter.Items.Clear()
-            CmbFilter.Items.AddRange({"NOMBRE", "APELLIDO"})
-            CmbFilter.SelectedIndex = 0 ' Por defecto NOMBRE
+            CmbFilter.Items.AddRange({"   NOMBRE", "   APELLIDO"})
+            CmbFilter.SelectedIndex = 0
 
             ' 3. Limpiar búsqueda anterior
             TxtSearch.Clear()
+            TxtSearch.Focus()
+
         End If
         '
     End Sub
-    '
-    '
-    '
+    ''
+    ''
+    ''
     Private Sub RbPayGroup_CheckedChanged(sender As Object, e As EventArgs) Handles RbPayGroup.CheckedChanged
-        '
+
+        '|
+        '|
+        '|
+
         If RbPayGroup.Checked Then
+
             ' 1. Visualización
+            RbPayGroup.BringToFront()
             DgvIndividual.Visible = False
             DgvFamilyGroup.Visible = True
 
             ' 2. Configurar ComboBox
             CmbFilter.Items.Clear()
-            CmbFilter.Items.Add("NOMBRE GRUPO")
+            CmbFilter.Items.AddRange({"   INTEGRANTES", "   NOMBRE GRUPO"})
             CmbFilter.SelectedIndex = 0
 
             ' 3. Limpiar búsqueda anterior
             TxtSearch.Clear()
+            TxtSearch.Focus()
         End If
-        '
+
     End Sub
-    '
-    '
-    '
+    ''
+    ''
+    ''
     Private Sub DgvIndividual_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvIndividual.CellContentClick
     End Sub
     Private Sub DgvIndividual_CellFormatting(sender As Object, e As DataGridViewCellFormattingEventArgs) Handles DgvIndividual.CellFormatting
+
+        '|
+        '|
+        '|
 
         If e.RowIndex < 0 Then Exit Sub
 
         Dim dgv = DirectCast(sender, DataGridView)
         Dim fila = TryCast(dgv.Rows(e.RowIndex).DataBoundItem, IndividualPaymentDTO)
-        If fila Is Nothing OrElse Not fila.EsFilaResumen Then Exit Sub
+        If fila Is Nothing OrElse Not fila.IsSummaryRow Then Exit Sub
 
         ' Estilo base para fila resumen
-        e.CellStyle.BackColor = Color.Orange
-        e.CellStyle.SelectionBackColor = Color.Orange
-        e.CellStyle.Font = _fontResumen
+        e.CellStyle.ForeColor = Color.OrangeRed
+        e.CellStyle.BackColor = Color.LightSalmon
+        e.CellStyle.SelectionBackColor = Color.LightSalmon
+        e.CellStyle.Font = _fontSummary
 
         Select Case dgv.Columns(e.ColumnIndex).Name
 
@@ -156,8 +199,8 @@ Public Class FrmListDebtors
                 e.Value = "DEBE"
                 e.FormattingApplied = True
 
-            Case "DiasMes"
-                Dim cantidad = fila.CantidadMeses
+            Case "daysOfMonthInv"
+                Dim cantidad = fila.NumberMonths
 
                 If fila.MtdPgs.Contains("MENSUAL") Then
                     e.Value = If(cantidad = 1, "1 MES", $"{cantidad} MESES")
@@ -171,28 +214,40 @@ Public Class FrmListDebtors
     End Sub
     Private Sub DgvIndividual_DataBindingComplete(sender As Object, e As DataGridViewBindingCompleteEventArgs) Handles DgvIndividual.DataBindingComplete
 
-        Dim dgv = DirectCast(sender, DataGridView)
-
+        '|
+        '|
+        '|
         ' Recorremos las filas una vez que los datos están cargados
-        For Each row As DataGridViewRow In dgv.Rows
-            Dim fila = TryCast(row.DataBoundItem, IndividualPaymentDTO)
+        ' Limpiar selección después de cargar los datos
 
-            ' Si la fila es de resumen, le damos el protagonismo visual
-            If fila IsNot Nothing AndAlso fila.EsFilaResumen Then
-                ' Aquí aplicamos el tamaño más grande que usabas antes
-                row.Height = 28
-            Else
-                ' Altura normal para las filas blancas
-                row.Height = 26
-            End If
+        Dim dataGridView = DirectCast(sender, DataGridView)
+        For Each row As DataGridViewRow In dataGridView.Rows
+            Dim rowSumary = TryCast(row.DataBoundItem, IndividualPaymentDTO)
+            row.Height = 25
         Next
+
+        If DgvIndividual.Rows.Count > 0 Then DgvIndividual.CurrentCell = Nothing
+
     End Sub
-    '
-    '
-    '
+    Private Sub DgvIndividual_SelectionChanged(sender As Object, e As EventArgs) Handles DgvIndividual.SelectionChanged
+
+        '|
+        '|
+        '|
+
+        CheckRowDataGridView(DgvIndividual, LblErrorProvider, BtnPayMonth, ErrorProvider, "Selecciona una fila que contenga un PAGO.")
+
+    End Sub
+    ''
+    ''
+    ''
     Private Sub DgvFamilyGroup_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvFamilyGroup.CellContentClick
     End Sub
     Private Sub DgvFamilyGroup_CellFormatting(sender As Object, e As DataGridViewCellFormattingEventArgs) Handles DgvFamilyGroup.CellFormatting
+
+        '|
+        '|
+        '|
 
         If e.RowIndex < 0 Then Exit Sub
 
@@ -200,11 +255,13 @@ Public Class FrmListDebtors
         Dim fila = TryCast(dgv.Rows(e.RowIndex).DataBoundItem, GroupPaymentDTO)
 
         ' Si la fila es nula o NO es una fila de resumen (naranja), no aplicamos cambios especiales
-        If fila Is Nothing OrElse Not fila.EsFilaResumen Then Exit Sub
+        If fila Is Nothing OrElse Not fila.IsSummaryRow Then Exit Sub
 
         ' 2. Estilo visual para la fila de resumen
-        e.CellStyle.BackColor = Color.Orange
-        e.CellStyle.Font = _fontResumen ' Asegúrate de tener esta variable definida
+        e.CellStyle.ForeColor = Color.OrangeRed
+        e.CellStyle.BackColor = Color.LightSalmon
+        e.CellStyle.SelectionBackColor = Color.LightSalmon
+        e.CellStyle.Font = _fontSummary ' Asegúrate de tener esta variable definida
 
         ' 3. Personalización de celdas según tus marcas de colores
         Select Case dgv.Columns(e.ColumnIndex).Name
@@ -220,8 +277,8 @@ Public Class FrmListDebtors
                 e.FormattingApplied = True
 
         ' --- MARCA VERDE (Nº DE DIAS): Mostrar sumatoria de registros ---
-            Case "NumDiasGf"
-                Dim cantidad = fila.CantidadMeses
+            Case "daysOfMonthGrp"
+                Dim cantidad = fila.NumberMonths
                 ' Lógica: "1 MES" si es uno, "X MESES" si son varios
                 e.Value = If(cantidad = 1, "1 MES", $"{cantidad} MESES")
                 e.FormattingApplied = True
@@ -229,20 +286,51 @@ Public Class FrmListDebtors
         End Select
 
     End Sub
+    Private Sub DgvFamilyGroup_DataBindingComplete(sender As Object, e As DataGridViewBindingCompleteEventArgs) Handles DgvFamilyGroup.DataBindingComplete
+
+        '|
+        '|
+        '|
+        ' Activa el salto de línea en la columna de INTEGRANTES (ajusta el índice si no es la 0)
+        ' Permite que las filas crezcan a lo alto para mostrar todo el texto
+        With DgvFamilyGroup
+
+            .Columns("members").DefaultCellStyle.WrapMode = DataGridViewTriState.True
+            .AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCellsExceptHeaders
+            .RowsDefaultCellStyle.Padding = New Padding(0, 3, 0, 3)
+
+            If .Rows.Count > 0 Then .CurrentCell = Nothing
+
+        End With
+
+    End Sub
+    Private Sub DgvFamilyGroup_SelectionChanged(sender As Object, e As EventArgs) Handles DgvFamilyGroup.SelectionChanged
+        '
+        CheckRowDataGridView(DgvFamilyGroup, LblErrorProvider, BtnPayMonth, ErrorProvider, "Selecciona una fila que contenga un PAGO.")
+
+    End Sub
     ''
     ''
     ''
     Private Sub BtnPayMonth_Click(sender As Object, e As EventArgs) Handles BtnPayMonth.Click
-        '111
+
+        '|
+        '|
+        '|
+
     End Sub
     ''
     ''
     ''
     Private Sub BtnPaymentGenerator_Click(sender As Object, e As EventArgs) Handles BtnPaymentGenerator.Click
 
-        Dim msg As String = "Se generarán los pagos mensuales para clientes individuales y grupos familiares. ¿Desea continuar?"
+        '|
+        '|
+        '|
 
-        If MessageBox.Show(msg, "Generación Masiva", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+        Dim strMsgBox As String = "Se generarán los pagos mensuales para clientes individuales y grupos familiares. ¿Desea continuar?"
+
+        If MessageBox.Show(strMsgBox, "Generación Masiva", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
             Try
                 Dim generator As New Services.PaymentGenerator()
                 ' Pasamos el ID del usuario actual (id_user) que tienes en tu sesión
@@ -269,94 +357,121 @@ Public Class FrmListDebtors
         Me.Close()
 
     End Sub
-    '
-    '
-    '
-    Private Sub CargarIndividuales()
-        Try
-            listaIndividualCompleta = _paymentManager.ObtenerListaMorososIndividuales()
+    ''
+    ''
+    ''
+    Private Sub UploadIndividualDebts()
 
-            ConfigurarGrid()
-            CargarGrid(listaIndividualCompleta)
-            ActualizarResumen(listaIndividualCompleta)
-            AplicarFormatoDgvIndividual()
+        '|
+        '|
+        '|
+
+        Try
+            listIndividualPayment = _paymentManager.ObtenerListaMorososIndividuales()
+            ConfigureDataGridView(DgvIndividual, "PrcPgs", "DscPgs", "Total", "APagar")
+            LoadDataGridView(DgvIndividual, listIndividualPayment)
+            UpdateSummary(listIndividualPayment, LblSolitos)
 
         Catch ex As Exception
-            MessageBox.Show(
-                $"Error al cargar individuales:{Environment.NewLine}{ex.Message}",
-                "Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error
-            )
+            MessageBox.Show($"Pagos individuales: {Environment.NewLine}{ex.Message}", "Error al cargar", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
-    End Sub
-    Private Sub ConfigurarGrid()
-        DgvIndividual.AutoGenerateColumns = False
-
-        DgvIndividual.Columns("PrcPgs").DefaultCellStyle.Format = "C2"
-        DgvIndividual.Columns("DscPgs").DefaultCellStyle.Format = "C2"
-        DgvIndividual.Columns("Total").DefaultCellStyle.Format = "C2"
-        DgvIndividual.Columns("APagar").DefaultCellStyle.Format = "C2"
-    End Sub
-    Private Sub CargarGrid(lista As List(Of IndividualPaymentDTO))
-        DgvIndividual.DataSource = lista
-    End Sub
-    Private Sub ActualizarResumen(lista As List(Of IndividualPaymentDTO))
-
-        Dim numMorosos = lista.Where(Function(x) Not x.EsFilaResumen).Count()
-        LblSolitos.Text = $"{numMorosos} - Registros pendientes de pago."
 
     End Sub
+    ''
+    ''
+    ''
+    Private Sub UploadGroupDebts()
 
-    Private Sub CargarGrupales()
+        '|
+        '|
+        '|
+
         Try
             ' Llamamos al nuevo método que creamos en el Manager/Servicio
-            listaGrupalCompleta = _paymentManager.ObtenerListaMorososGrupales()
-
-            ConfigurarGridGrupal()
-            CargarGridGrupal(listaGrupalCompleta)
-            ActualizarResumenGrupal(listaGrupalCompleta)
-            AplicarFormatoDgvGrupal()
+            listGroupPayment = _paymentManager.ObtenerListaMorososGrupales()
+            ConfigureDataGridView(DgvFamilyGroup, "PrcPgsGf", "DscPgsGf", "TtlPgsGf", "ApgrGf")
+            LoadDataGridView(DgvFamilyGroup, listGroupPayment)
+            UpdateSummary(listGroupPayment, LblToditos)
 
         Catch ex As Exception
-            MessageBox.Show(
-            $"Error al cargar pagos grupales:{Environment.NewLine}{ex.Message}",
-            "Error",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Error
-        )
+            MessageBox.Show($"Pagos grupales:{Environment.NewLine}{ex.Message}", "Error al cargar", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
-    End Sub
-
-    Private Sub ConfigurarGridGrupal()
-        DgvFamilyGroup.AutoGenerateColumns = False
-
-        DgvFamilyGroup.Columns("PrcPgsGf").DefaultCellStyle.Format = "C2"
-        DgvFamilyGroup.Columns("DscPgsGf").DefaultCellStyle.Format = "C2"
-        DgvFamilyGroup.Columns("TtlPgsGf").DefaultCellStyle.Format = "C2"
-        DgvFamilyGroup.Columns("ApgrGf").DefaultCellStyle.Format = "C2"
 
     End Sub
+    ''
+    ''
+    ''
+    Private Sub CheckRowDataGridView(dataGridView As DataGridView, label As Label, button As Button, errorProvider As ErrorProvider, errorMessage As String)
 
-    Private Sub CargarGridGrupal(lista As List(Of GroupPaymentDTO))
-        ' Es importante limpiar el DataSource antes de asignar el nuevo
-        DgvFamilyGroup.DataSource = Nothing
-        DgvFamilyGroup.DataSource = lista
+        '|
+        '|
+        '|
+
+        Dim dto = TryCast(dataGridView.CurrentRow?.DataBoundItem, ISelectableRow)
+
+        Dim isValid = dto IsNot Nothing AndAlso Not dto.IsSummaryRow AndAlso dto.IdPayment > 0
+
+        button.Enabled = isValid
+
+        errorProvider.Clear()
+
+        If Not isValid Then
+            errorProvider.SetError(label, errorMessage)
+        End If
+
     End Sub
 
-    Private Sub ActualizarResumenGrupal(lista As List(Of GroupPaymentDTO))
-        ' Contamos cuántas cuotas/meses hay pendientes (excluyendo las filas de resumen)
-        Dim numPendientes = lista.Where(Function(x) Not x.EsFilaResumen).Count()
+    Private Sub ConfigureDataGridView(dataGridView As DataGridView, ParamArray currencyFormatColumn As String())
 
+        '|
+        '|
+        '|
+
+        dataGridView.AutoGenerateColumns = False
+
+        For Each nameColumn In currencyFormatColumn
+            If dataGridView.Columns.Contains(nameColumn) Then
+                dataGridView.Columns(nameColumn).DefaultCellStyle.Format = "C2"
+            End If
+        Next
+    End Sub
+
+    Private Sub LoadDataGridView(Of T)(dataGridView As DataGridView, list As List(Of T))
+
+        '|
+        '|
+        '|
+
+        dataGridView.DataSource = Nothing
+        dataGridView.DataSource = list
+
+    End Sub
+
+    Private Sub UpdateSummary(Of T As IPaymentSummary)(list As List(Of T), label As Label)
+
+        '|
+        '|
+        '|
+
+        Dim outstandingPayments = list.Where(Function(x) Not x.IsSummaryRow).Count
+        label.Text = $"{outstandingPayments} - Registros pendientes de pago."
+
+        'Dim numMorosos As Integer = 0
+        'For Each item In list
+        '    If Not item.IsSummaryRow Then
+        '        numMorosos += 1
+        '    End If
+        'Next
         ' Contamos cuántos grupos distintos tienen deuda
-        Dim numGrupos = lista.Where(Function(x) Not x.EsFilaResumen) _
-                         .Select(Function(x) x.IdGrp) _
-                         .Distinct().Count()
-
-        LblToditos.Text = $"{numPendientes} cuotas pendientes de {numGrupos} grupos familiares."
+        '    'Dim numGrupos = lista.Where(Function(x) Not x.IsSummaryRow).Select(Function(x) x.IdGrp).Distinct().Count()
     End Sub
 
     Private Sub ActualizarStatusBar(criterio As String)
+
+        '|
+        '|
+        '|
+
         Dim totalReg As Integer = DgvIndividual.RowCount + DgvFamilyGroup.RowCount
 
         If criterio = "" Then
@@ -367,31 +482,7 @@ Public Class FrmListDebtors
             SlblMessage.Text = $" {totalReg} - Registro(s) que coincide(n) con su búsqueda."
         End If
     End Sub
-
-    Private Sub AplicarFormatoDgvIndividual()
-        For Each row As DataGridViewRow In DgvIndividual.Rows
-            ' Obtenemos el objeto DTO vinculado a la fila
-            Dim dto = TryCast(row.DataBoundItem, IndividualPaymentDTO)
-
-            If dto IsNot Nothing AndAlso dto.EsFilaResumen Then
-                ' Formato para la fila de "DEBE : X MESES"
-                row.DefaultCellStyle.BackColor = Color.FromArgb(255, 192, 192) ' Rojo suave
-                row.DefaultCellStyle.ForeColor = Color.DarkRed
-                row.DefaultCellStyle.Font = New Font(DgvIndividual.Font, FontStyle.Bold)
-            End If
-        Next
-    End Sub
-
-    Private Sub AplicarFormatoDgvGrupal()
-        For Each row As DataGridViewRow In DgvFamilyGroup.Rows
-            Dim dto = TryCast(row.DataBoundItem, GroupPaymentDTO)
-
-            If dto IsNot Nothing AndAlso dto.EsFilaResumen Then
-                row.DefaultCellStyle.BackColor = Color.FromArgb(192, 255, 192) ' Verde suave
-                row.DefaultCellStyle.ForeColor = Color.DarkGreen
-                row.DefaultCellStyle.Font = New Font(DgvFamilyGroup.Font, FontStyle.Bold)
-            End If
-        Next
-    End Sub
-
+    ''
+    ''
+    ''
 End Class

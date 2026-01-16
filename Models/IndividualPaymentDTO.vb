@@ -1,21 +1,37 @@
-﻿Namespace Models
+﻿Imports GymPaymentControl.Interfaces
+
+Namespace Models
     Public Class IndividualPaymentDTO
+
+        Implements ISelectableRow
+        Implements IPaymentSummary
+
         Public Property IdPgs As Integer
-        Public Property IdCli As Integer '?
-        Public Property Nombre As String
-        Public Property Apellido As String
-        Public Property Edad As String ' Ejemplo: "25 años"
+        Public Property IdCli As Integer
+        Public Property Name As String
+        Public Property LastName As String
+        Public Property Age As String
         Public Property MtdPgs As String
-        Public Property FdiPgs As Date 'DateTime'
-        Public Property MesAnio As String ' Ejemplo: "Enero 2026"
+        Public Property FdiPgs As Date
+        Public Property LongDate As String
         Public Property PrcPgs As Decimal
         Public Property DscPgs As Decimal
         Public Property Total As Decimal
-        Public Property DiasMes As Integer
-        Public Property APagar As Decimal
-        Public Property EsFilaResumen As Boolean '= False
-        Public Property SumaTotalDeuda As Decimal
-        Public Property CantidadMeses As Integer
+        Public Property DaysOfMonth As Integer
+        Public Property TotalToPay As Decimal
+        Public Property IsSummaryRow As Boolean Implements IPaymentSummary.IsSummaryRow
+        Public Property TotalAmountDebt As Decimal
+        Public Property NumberMonths As Integer
+
+        Public ReadOnly Property IdPayment As Integer _
+        Implements ISelectableRow.IdPayment
+            Get
+                Return IdPgs
+            End Get
+        End Property
+
+        Public Property EsFilaResumen As Boolean _
+        Implements ISelectableRow.IsSummaryRow
 
     End Class
 

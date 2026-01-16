@@ -172,6 +172,8 @@
     <Compile Include="Forms\FrmUserPassword.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Interfaces\ISelectableRow.vb" />
+    <Compile Include="Interfaces\IPaymentSummary.vb" />
     <Compile Include="Models\ClientPaymentDTO.vb" />
     <Compile Include="Models\GroupPaymentDTO.vb" />
     <Compile Include="Models\IndividualPaymentDTO.vb" />

@@ -47,9 +47,9 @@ Namespace Services
                             Dim dto As New IndividualPaymentDTO With {
                         .IdPgs = dr("id_pgs"),
                         .IdCli = dr("id_cli"),
-                        .Nombre = dr("nom_cli").ToString(),
-                        .Apellido = dr("ape_cli").ToString(),
-                        .Edad = edad,
+                        .Name = dr("nom_cli").ToString(),
+                        .LastName = dr("ape_cli").ToString(),
+                        .Age = edad,
                         .MtdPgs = dr("mtd_pgs").ToString(),
                         .PrcPgs = dr("prc_pgs"),
                         .DscPgs = dr("dsc_pgs"),
@@ -57,7 +57,7 @@ Namespace Services
                     }
 
                             dto.Total = dto.PrcPgs - dto.DscPgs
-                            dto.MesAnio = FormatearMesAnio(dto.FdiPgs)
+                            dto.LongDate = FormatearMesAnio(dto.FdiPgs)
 
                             lista.Add(dto)
                         End While
@@ -88,12 +88,12 @@ Namespace Services
                 Dim diasMes = DateTime.DaysInMonth(item.FdiPgs.Year, item.FdiPgs.Month)
                 Dim precioDia = total / diasMes
 
-                item.DiasMes = diasMes - item.FdiPgs.Day + 1
-                item.APagar = precioDia * item.DiasMes
+                item.DaysOfMonth = diasMes - item.FdiPgs.Day + 1
+                item.TotalToPay = precioDia * item.DaysOfMonth
 
             Else
-                item.DiasMes = 1
-                item.APagar = total
+                item.DaysOfMonth = 1
+                item.TotalToPay = total
             End If
 
         End Sub
@@ -121,15 +121,15 @@ Namespace Services
         Private Function CrearFilaResumen(grupo As IGrouping(Of Integer, IndividualPaymentDTO)
                                           ) As IndividualPaymentDTO
 
-            Dim totalDeuda = grupo.Sum(Function(x) x.APagar)
+            Dim totalDeuda = grupo.Sum(Function(x) x.TotalToPay)
 
             Return New IndividualPaymentDTO With {
                 .IdCli = grupo.Key,
                 .MtdPgs = grupo.First().MtdPgs,
-                .EsFilaResumen = True,
-                .CantidadMeses = grupo.Count(),
-                .SumaTotalDeuda = totalDeuda,
-                .APagar = totalDeuda
+                .IsSummaryRow = True,
+                .NumberMonths = grupo.Count(),
+                .TotalAmountDebt = totalDeuda,
+                .TotalToPay = totalDeuda
             }
             '.IdCli = grupo.Key,
             '.Nombre = primerItem.Nombre, ' <-- Añade esto para evitar nulos en el buscador
@@ -189,8 +189,8 @@ Namespace Services
                             Dim dto As New GroupPaymentDTO With {
                                 .IdPgs = dr("id_pgs"),
                                 .IdGrp = dr("id_grp"),
-                                .NombreGrupo = dr("nom_grp").ToString(),
-                                .Integrantes = dr("INTEGRANTES").ToString(),
+                                .GroupName = dr("nom_grp").ToString(),
+                                .Members = dr("INTEGRANTES").ToString(),
                                 .PrcPgs = Convert.ToDecimal(dr("prc_pgs")),
                                 .DscPgs = Convert.ToDecimal(dr("dsc_pgs")),
                                 .FdiPgs = dr.GetDateTime("fdi_pgs")
@@ -198,7 +198,7 @@ Namespace Services
 
                             'dto.Total = dto.PrcPgs - dto.DscPgs
                             'dto.APagar = dto.Total ' Simplificado: Pago grupal es el neto
-                            dto.MesAnio = FormatearMesAnio(dto.FdiPgs)
+                            dto.LongDate = FormatearMesAnio(dto.FdiPgs)
 
                             lista.Add(dto)
                         End While
@@ -227,11 +227,11 @@ Namespace Services
 
             ' 2. Nº DE DIAS = (Días del mes - día de inicio) + 1
             Dim diasTotalesDelMes = DateTime.DaysInMonth(item.FdiPgs.Year, item.FdiPgs.Month)
-            item.DiasMes = (diasTotalesDelMes - item.FdiPgs.Day) + 1
+            item.DaysOfMonth = (diasTotalesDelMes - item.FdiPgs.Day) + 1
 
             ' 3. A PAGAR = TOTAL / DIAS_DEL_MES * DiasMes
             'If diasTotalesDelMes > 0 Then
-            item.APagar = (item.Total / diasTotalesDelMes) * item.DiasMes
+            item.TotalToPay = (item.Total / diasTotalesDelMes) * item.DaysOfMonth
             'Else
             '    item.APagar = item.Total
             'End If
@@ -256,14 +256,14 @@ Namespace Services
         Private Function CrearFilaResumenGrupal(grupo As IGrouping(Of Integer, GroupPaymentDTO)
                                                 ) As GroupPaymentDTO
 
-            Dim totalDeuda = grupo.Sum(Function(x) x.APagar)
+            Dim totalDeuda = grupo.Sum(Function(x) x.TotalToPay)
 
             Return New GroupPaymentDTO With
                 {
                     .IdGrp = grupo.Key,'.NombreGrupo = "RESUMEN DEUDA",
-                    .EsFilaResumen = True,
-                    .CantidadMeses = grupo.Count(), ' <-- Esto es vital para el CellFormatting
-                    .APagar = grupo.Sum(Function(x) x.APagar)
+                    .IsSummaryRow = True,
+                    .NumberMonths = grupo.Count(), ' <-- Esto es vital para el CellFormatting
+                    .TotalToPay = grupo.Sum(Function(x) x.TotalToPay)
                 }
         End Function
 
