@@ -174,6 +174,7 @@
     </Compile>
     <Compile Include="Interfaces\ISelectableRow.vb" />
     <Compile Include="Interfaces\IPaymentSummary.vb" />
+    <Compile Include="Interfaces\IPaymentCalculable.vb" />
     <Compile Include="Models\ClientPaymentDTO.vb" />
     <Compile Include="Models\GroupPaymentDTO.vb" />
     <Compile Include="Models\IndividualPaymentDTO.vb" />
@@ -182,6 +183,8 @@
     <Compile Include="Services\AuthManager.vb" />
     <Compile Include="Services\PaymentGenerator.vb" />
     <Compile Include="Services\PaymentManager.vb" />
+    <Compile Include="Utils\DateUtils.vb" />
+    <Compile Include="Utils\PaymentCalculator.vb" />
     <Compile Include="Utils\Validations.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">

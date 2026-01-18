@@ -1,5 +1,6 @@
-﻿Imports MySql.Data.MySqlClient
-Imports System.Configuration
+﻿Imports System.Configuration
+Imports GymPaymentControl.Utils
+Imports MySql.Data.MySqlClient
 
 Namespace Services
     Public Class PaymentGenerator
@@ -176,11 +177,11 @@ Namespace Services
         End Function
 
         ' Tu función de edad (Cópiala aquí dentro también)
-        Public Function CalculateClientAge(ByVal dtDateOfBirth As Date) As Integer
-            Dim dtToday As Date = Date.Today
-            Dim intAge As Integer = dtToday.Year - dtDateOfBirth.Year
-            If dtDateOfBirth.Date > dtToday.AddYears(-intAge).Date Then intAge -= 1
-            Return intAge
-        End Function
+        'Public Function CalculateClientAge(ByVal dtDateOfBirth As Date) As Integer
+        '    Dim dtToday As Date = Date.Today
+        '    Dim intAge As Integer = dtToday.Year - dtDateOfBirth.Year
+        '    If dtDateOfBirth.Date > dtToday.AddYears(-intAge).Date Then intAge -= 1
+        '    Return intAge
+        'End Function
     End Class
 End Namespace

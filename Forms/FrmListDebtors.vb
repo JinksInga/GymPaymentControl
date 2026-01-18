@@ -29,7 +29,22 @@ Public Class FrmListDebtors
     ''
     ''
     Private Sub CmbFilter_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CmbFilter.SelectedIndexChanged
-        '1
+        '
+
+        TxtSearch.Focus() 'ENVIAR ENFOQUE AL TEXBOX
+
+        If DgvIndividual.RowCount = 0 Then Exit Sub 'COMPROBAR SI HAY REGISTROS EN LA GRILLA
+
+        'SELECCIONAMOS LA COLUMNA QUE VAMMOS A BUSCAR
+        Select Case CmbFilter.SelectedIndex
+            Case 0 'NOMBRE
+                DgvIndividual.CurrentCell = DgvIndividual.Item(0, 0)
+
+            Case 1 'APELLIDO
+                DgvIndividual.CurrentCell = DgvIndividual.Item(1, 0)
+
+        End Select
+
     End Sub
     ''
     ''
@@ -44,62 +59,83 @@ Public Class FrmListDebtors
 
         ' --- BÚSQUEDA INDIVIDUAL ---
         If RbPayIndividual.Checked AndAlso listIndividualPayment IsNot Nothing Then
-            Dim filtrados =
+
+            Dim filteredRecords =
                 listIndividualPayment.Where(Function(x)
                                                 ' Lógica de coincidencia según ComboBox
-                                                Dim coincide As Boolean = False
+                                                Dim coincideWith As Boolean = False
 
                                                 If CmbFilter.SelectedIndex = 0 Then
-                                                    coincide = (x.Name IsNot Nothing AndAlso x.Name.Contains(searchCriteria))
+                                                    coincideWith = (x.Name IsNot Nothing AndAlso x.Name.Contains(searchCriteria))
                                                 Else
-                                                    coincide = (x.LastName IsNot Nothing AndAlso x.LastName.Contains(searchCriteria))
+                                                    coincideWith = (x.LastName IsNot Nothing AndAlso x.LastName.Contains(searchCriteria))
                                                 End If
 
                                                 ' Mantener visible la fila de resumen si el cliente coincide
-                                                Dim esResumenVisible =
-                                                  x.IsSummaryRow AndAlso listIndividualPayment.Any(Function(cli)
+                                                Dim isVisibleSummary =
+                                                  x.IsSummaryRow AndAlso
+                                                  listIndividualPayment.Any(Function(client)
 
-                                                                                                       Return cli.IdCli = x.IdCli AndAlso Not cli.IsSummaryRow AndAlso
-                                                                                                        ((CmbFilter.SelectedIndex = 0 AndAlso cli.Name IsNot Nothing AndAlso cli.Name.Contains(searchCriteria)) OrElse
-                                                                                                        (CmbFilter.SelectedIndex = 1 AndAlso cli.LastName IsNot Nothing AndAlso cli.LastName.Contains(searchCriteria)))
-                                                                                                   End Function)
+                                                                                Return client.IdCli =
+                                                                                x.IdCli AndAlso Not client.IsSummaryRow AndAlso
+                                                                                ((CmbFilter.SelectedIndex = 0 AndAlso client.Name IsNot Nothing AndAlso client.Name.Contains(searchCriteria)) OrElse
+                                                                                (CmbFilter.SelectedIndex = 1 AndAlso client.LastName IsNot Nothing AndAlso client.LastName.Contains(searchCriteria)))
+                                                                            End Function)
 
-                                                Return coincide OrElse esResumenVisible
+                                                Return coincideWith OrElse isVisibleSummary
                                             End Function).ToList()
 
             DgvIndividual.DataSource = Nothing
-            DgvIndividual.DataSource = filtrados
+            DgvIndividual.DataSource = filteredRecords
         End If
 
         ' --- BÚSQUEDA GRUPAL ---
         If RbPayGroup.Checked AndAlso listGroupPayment IsNot Nothing Then
-            Dim filtradosGrp =
+            Dim filteredRecords =
                 listGroupPayment.Where(Function(x)
 
-                                           Dim coincideGrp = False
+                                           Dim coincideWith As Boolean = False
 
                                            If CmbFilter.SelectedIndex = 0 Then
-                                               coincideGrp = (x.Members IsNot Nothing AndAlso x.Members.Contains(searchCriteria))
+                                               coincideWith = (x.Members IsNot Nothing AndAlso x.Members.Contains(searchCriteria))
                                            Else
-                                               coincideGrp = (x.GroupName IsNot Nothing AndAlso x.GroupName.Contains(searchCriteria))
+                                               coincideWith = (x.GroupName IsNot Nothing AndAlso x.GroupName.Contains(searchCriteria))
                                            End If
 
-                                           Dim esResumenVisible =
-                                              x.IsSummaryRow AndAlso listGroupPayment.Any(Function(g)
-                                                                                              Return g.IdGrp = x.IdGrp AndAlso Not g.IsSummaryRow AndAlso
-                                                                                                ((CmbFilter.SelectedIndex = 0 AndAlso g.Members IsNot Nothing AndAlso g.Members.Contains(searchCriteria)) OrElse
-                                                                                                (CmbFilter.SelectedIndex = 1 AndAlso g.GroupName IsNot Nothing AndAlso g.GroupName.Contains(searchCriteria)))
-                                                                                          End Function)
+                                           Dim isVisibleSummary =
+                                              x.IsSummaryRow AndAlso
+                                              listGroupPayment.Any(Function(group)
+                                                                       Return group.IdGrp =
+                                                                       x.IdGrp AndAlso Not group.IsSummaryRow AndAlso
+                                                                       ((CmbFilter.SelectedIndex = 0 AndAlso group.Members IsNot Nothing AndAlso group.Members.Contains(searchCriteria)) OrElse
+                                                                       (CmbFilter.SelectedIndex = 1 AndAlso group.GroupName IsNot Nothing AndAlso group.GroupName.Contains(searchCriteria)))
+                                                                   End Function)
 
-                                           Return coincideGrp OrElse esResumenVisible
+                                           Return coincideWith OrElse isVisibleSummary
                                        End Function).ToList()
 
             DgvFamilyGroup.DataSource = Nothing
-            DgvFamilyGroup.DataSource = filtradosGrp
+            DgvFamilyGroup.DataSource = filteredRecords
         End If
 
         ActualizarStatusBar(searchCriteria) ' Actualizar conteo
         '
+    End Sub
+    Private Sub ActualizarStatusBar(criterio As String)
+
+        '|
+        '|
+        '|
+
+        Dim totalReg As Integer = DgvIndividual.RowCount ' + DgvFamilyGroup.RowCount
+
+        If criterio = "" Then
+            SlblTitle.Text = If(totalReg = 0, "Lista vacía", "Nº de Registros")
+            SlblMessage.Text = $" {totalReg} - Registros pendientes de pago."
+        Else
+            SlblTitle.Text = "Buscando..."
+            SlblMessage.Text = $" {totalReg} - Registro(s) que coincide(n) con su búsqueda."
+        End If
     End Sub
     ''
     ''
@@ -109,6 +145,9 @@ Public Class FrmListDebtors
         '|
         '|
         '|
+        '
+        TxtSearch.Clear()
+        TxtSearch.Focus()
 
     End Sub
     ''
@@ -179,9 +218,9 @@ Public Class FrmListDebtors
 
         If e.RowIndex < 0 Then Exit Sub
 
-        Dim dgv = DirectCast(sender, DataGridView)
-        Dim fila = TryCast(dgv.Rows(e.RowIndex).DataBoundItem, IndividualPaymentDTO)
-        If fila Is Nothing OrElse Not fila.IsSummaryRow Then Exit Sub
+        Dim dataGridView = DirectCast(sender, DataGridView)
+        Dim row = TryCast(dataGridView.Rows(e.RowIndex).DataBoundItem, IndividualPaymentDTO)
+        If row Is Nothing OrElse Not row.IsSummaryRow Then Exit Sub
 
         ' Estilo base para fila resumen
         e.CellStyle.ForeColor = Color.OrangeRed
@@ -189,9 +228,9 @@ Public Class FrmListDebtors
         e.CellStyle.SelectionBackColor = Color.LightSalmon
         e.CellStyle.Font = _fontSummary
 
-        Select Case dgv.Columns(e.ColumnIndex).Name
+        Select Case dataGridView.Columns(e.ColumnIndex).Name
 
-            Case "PrcPgs", "DscPgs"
+            Case "AgeText", "PrcPgs", "DscPgs"
                 e.Value = ""
                 e.FormattingApplied = True
 
@@ -200,12 +239,12 @@ Public Class FrmListDebtors
                 e.FormattingApplied = True
 
             Case "daysOfMonthInv"
-                Dim cantidad = fila.NumberMonths
+                Dim amount = row.NumberMonths
 
-                If fila.MtdPgs.Contains("MENSUAL") Then
-                    e.Value = If(cantidad = 1, "1 MES", $"{cantidad} MESES")
+                If row.MtdPgs.Contains("MENSUAL") Then
+                    e.Value = If(amount = 1, "1 MES", $"{amount} MESES")
                 Else
-                    e.Value = If(cantidad = 1, "1 DIA", $"{cantidad} DIAS")
+                    e.Value = If(amount = 1, "1 DIA", $"{amount} DIAS")
                 End If
 
                 e.FormattingApplied = True
@@ -251,11 +290,11 @@ Public Class FrmListDebtors
 
         If e.RowIndex < 0 Then Exit Sub
 
-        Dim dgv = DirectCast(sender, DataGridView)
-        Dim fila = TryCast(dgv.Rows(e.RowIndex).DataBoundItem, GroupPaymentDTO)
+        Dim dataGridView = DirectCast(sender, DataGridView)
+        Dim row = TryCast(dataGridView.Rows(e.RowIndex).DataBoundItem, GroupPaymentDTO)
 
         ' Si la fila es nula o NO es una fila de resumen (naranja), no aplicamos cambios especiales
-        If fila Is Nothing OrElse Not fila.IsSummaryRow Then Exit Sub
+        If row Is Nothing OrElse Not row.IsSummaryRow Then Exit Sub
 
         ' 2. Estilo visual para la fila de resumen
         e.CellStyle.ForeColor = Color.OrangeRed
@@ -264,7 +303,7 @@ Public Class FrmListDebtors
         e.CellStyle.Font = _fontSummary ' Asegúrate de tener esta variable definida
 
         ' 3. Personalización de celdas según tus marcas de colores
-        Select Case dgv.Columns(e.ColumnIndex).Name
+        Select Case dataGridView.Columns(e.ColumnIndex).Name
 
         ' --- MARCAS EN ROJO: Deben quedar vacías ---
             Case "PrcPgsGf", "DscPgsGf"
@@ -278,9 +317,9 @@ Public Class FrmListDebtors
 
         ' --- MARCA VERDE (Nº DE DIAS): Mostrar sumatoria de registros ---
             Case "daysOfMonthGrp"
-                Dim cantidad = fila.NumberMonths
+                Dim amount = row.NumberMonths
                 ' Lógica: "1 MES" si es uno, "X MESES" si son varios
-                e.Value = If(cantidad = 1, "1 MES", $"{cantidad} MESES")
+                e.Value = If(amount = 1, "1 MES", $"{amount} MESES")
                 e.FormattingApplied = True
 
         End Select
@@ -367,7 +406,7 @@ Public Class FrmListDebtors
         '|
 
         Try
-            listIndividualPayment = _paymentManager.ObtenerListaMorososIndividuales()
+            listIndividualPayment = _paymentManager.GetListIndividualDebtors()
             ConfigureDataGridView(DgvIndividual, "PrcPgs", "DscPgs", "Total", "APagar")
             LoadDataGridView(DgvIndividual, listIndividualPayment)
             UpdateSummary(listIndividualPayment, LblSolitos)
@@ -388,7 +427,7 @@ Public Class FrmListDebtors
 
         Try
             ' Llamamos al nuevo método que creamos en el Manager/Servicio
-            listGroupPayment = _paymentManager.ObtenerListaMorososGrupales()
+            listGroupPayment = _paymentManager.GetListGroupDebtors()
             ConfigureDataGridView(DgvFamilyGroup, "PrcPgsGf", "DscPgsGf", "TtlPgsGf", "ApgrGf")
             LoadDataGridView(DgvFamilyGroup, listGroupPayment)
             UpdateSummary(listGroupPayment, LblToditos)
@@ -466,22 +505,10 @@ Public Class FrmListDebtors
         '    'Dim numGrupos = lista.Where(Function(x) Not x.IsSummaryRow).Select(Function(x) x.IdGrp).Distinct().Count()
     End Sub
 
-    Private Sub ActualizarStatusBar(criterio As String)
 
-        '|
-        '|
-        '|
 
-        Dim totalReg As Integer = DgvIndividual.RowCount + DgvFamilyGroup.RowCount
 
-        If criterio = "" Then
-            SlblTitle.Text = If(totalReg = 0, "Lista vacía", "Nº de Registros")
-            SlblMessage.Text = $" {totalReg} - Registros pendientes de pago."
-        Else
-            SlblTitle.Text = "Buscando..."
-            SlblMessage.Text = $" {totalReg} - Registro(s) que coincide(n) con su búsqueda."
-        End If
-    End Sub
+
     ''
     ''
     ''
