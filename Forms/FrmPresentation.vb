@@ -31,7 +31,7 @@ Public Class FrmPresentation
         '| * Ocultamos el formulario 'FrmPresentation'
 
         SetProgress(33, "Iniciando conexión con la Base de Datos.", Color.Red)
-        Await Task.Delay(500)
+        Await Task.Delay(1) '500
 
         If Not Await Task.Run(AddressOf CheckConnection) Then
             ShowCriticalError()
@@ -39,10 +39,10 @@ Public Class FrmPresentation
         End If
 
         SetProgress(66, "Conexión exitosa.", Color.Green)
-        Await Task.Delay(600)
+        Await Task.Delay(1) '600
 
         SetProgress(100, "Iniciando el programa.", Color.Black)
-        Await Task.Delay(600)
+        Await Task.Delay(1) '600
 
         Dim login As New FrmUserPassword()
         login.Show()

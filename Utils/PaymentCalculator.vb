@@ -13,8 +13,6 @@ Namespace Utils
             item.TotalToPay = (item.Total / daysInMonth) * item.DaysOfMonth
 
         End Sub
-        ''
-        ''
-        ''
+
     End Module
 End Namespace

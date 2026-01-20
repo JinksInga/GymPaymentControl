@@ -1,4 +1,5 @@
-﻿Imports GymPaymentControl.Interfaces
+﻿Imports GymPaymentControl.FrmCollectMembership
+Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 
@@ -7,6 +8,7 @@ Public Class FrmListDebtors
     '
     Private ReadOnly _paymentManager As New PaymentManager()
     Private ReadOnly _fontSummary As Font = New Font("Arial", 10, FontStyle.Bold)
+    Private _isFiltering As Boolean = False
 
     ' Variables para guardar la carga completa original
     Private listIndividualPayment As List(Of IndividualPaymentDTO)
@@ -33,18 +35,6 @@ Public Class FrmListDebtors
 
         TxtSearch.Focus() 'ENVIAR ENFOQUE AL TEXBOX
 
-        If DgvIndividual.RowCount = 0 Then Exit Sub 'COMPROBAR SI HAY REGISTROS EN LA GRILLA
-
-        'SELECCIONAMOS LA COLUMNA QUE VAMMOS A BUSCAR
-        Select Case CmbFilter.SelectedIndex
-            Case 0 'NOMBRE
-                DgvIndividual.CurrentCell = DgvIndividual.Item(0, 0)
-
-            Case 1 'APELLIDO
-                DgvIndividual.CurrentCell = DgvIndividual.Item(1, 0)
-
-        End Select
-
     End Sub
     ''
     ''
@@ -59,6 +49,9 @@ Public Class FrmListDebtors
 
         ' --- BÚSQUEDA INDIVIDUAL ---
         If RbPayIndividual.Checked AndAlso listIndividualPayment IsNot Nothing Then
+
+            ' Iniciamos el modo "silencio"
+            _isFiltering = True
 
             Dim filteredRecords =
                 listIndividualPayment.Where(Function(x)
@@ -87,10 +80,34 @@ Public Class FrmListDebtors
 
             DgvIndividual.DataSource = Nothing
             DgvIndividual.DataSource = filteredRecords
+
+            'COMPROBAR SI HAY REGISTROS EN LA GRILLA
+            If DgvIndividual.RowCount > 0 Then
+                ' Limpiamos cualquier error previo antes de mover la celda
+                ErrorProvider.Clear()
+
+                Select Case CmbFilter.SelectedIndex
+                    Case 0 : DgvIndividual.CurrentCell = DgvIndividual.Item(0, 0)'NOMBRE
+                    Case 1 : DgvIndividual.CurrentCell = DgvIndividual.Item(1, 0) 'APELLIDO
+                End Select
+
+                BtnPayMonth.Enabled = True
+
+            Else
+                BtnPayMonth.Enabled = False
+
+            End If
+
+            _isFiltering = False ' Fin del modo silencio
+
         End If
 
         ' --- BÚSQUEDA GRUPAL ---
         If RbPayGroup.Checked AndAlso listGroupPayment IsNot Nothing Then
+
+            ' Iniciamos el modo "silencio"
+            _isFiltering = True
+
             Dim filteredRecords =
                 listGroupPayment.Where(Function(x)
 
@@ -116,6 +133,26 @@ Public Class FrmListDebtors
 
             DgvFamilyGroup.DataSource = Nothing
             DgvFamilyGroup.DataSource = filteredRecords
+
+            'COMPROBAR SI HAY REGISTROS EN LA GRILLA
+            If DgvFamilyGroup.RowCount > 0 Then
+                ' Limpiamos cualquier error previo antes de mover la celda
+                ErrorProvider.Clear()
+
+                Select Case CmbFilter.SelectedIndex
+                    Case 0 : DgvFamilyGroup.CurrentCell = DgvFamilyGroup.Item(0, 0)'INTEGRANTES
+                    Case 1 : DgvFamilyGroup.CurrentCell = DgvFamilyGroup.Item(1, 0) 'NOMBRE DEL GRUPO
+                End Select
+
+                BtnPayMonth.Enabled = True
+
+            Else
+                BtnPayMonth.Enabled = False
+
+            End If
+
+            _isFiltering = False ' Fin del modo silencio
+
         End If
 
         ActualizarStatusBar(searchCriteria) ' Actualizar conteo
@@ -175,6 +212,10 @@ Public Class FrmListDebtors
             TxtSearch.Clear()
             TxtSearch.Focus()
 
+            ' 4. 
+            'DgvIndividual.CurrentCell = Nothing
+            DgvFamilyGroup.CurrentCell = Nothing
+            BtnPayMonth.Enabled = False
         End If
         '
     End Sub
@@ -202,6 +243,11 @@ Public Class FrmListDebtors
             ' 3. Limpiar búsqueda anterior
             TxtSearch.Clear()
             TxtSearch.Focus()
+
+            ' 4. 
+            DgvIndividual.CurrentCell = Nothing
+            'DgvFamilyGroup.CurrentCell = Nothing
+            BtnPayMonth.Enabled = False
         End If
 
     End Sub
@@ -273,7 +319,8 @@ Public Class FrmListDebtors
         '|
         '|
         '|
-
+        ' Si estamos buscando, no queremos que aparezcan iconos de error
+        If _isFiltering Then Exit Sub
         CheckRowDataGridView(DgvIndividual, LblErrorProvider, BtnPayMonth, ErrorProvider, "Selecciona una fila que contenga un PAGO.")
 
     End Sub
@@ -345,6 +392,8 @@ Public Class FrmListDebtors
     End Sub
     Private Sub DgvFamilyGroup_SelectionChanged(sender As Object, e As EventArgs) Handles DgvFamilyGroup.SelectionChanged
         '
+        ' Si estamos buscando, no queremos que aparezcan iconos de error
+        If _isFiltering Then Exit Sub
         CheckRowDataGridView(DgvFamilyGroup, LblErrorProvider, BtnPayMonth, ErrorProvider, "Selecciona una fila que contenga un PAGO.")
 
     End Sub
@@ -356,7 +405,41 @@ Public Class FrmListDebtors
         '|
         '|
         '|
+        If RbPayIndividual.Checked Then
+            ' --- LÓGICA INDIVIDUAL ---
+            Dim dto = TryCast(DgvIndividual.CurrentRow?.DataBoundItem, IndividualPaymentDTO)
 
+            If dto IsNot Nothing AndAlso Not dto.IsSummaryRow Then
+                AbrirFormularioCobro(dto)
+            Else
+                MostrarAdvertencia()
+            End If
+
+        End If
+
+        If RbPayGroup.Checked Then
+            ' --- LÓGICA GRUPAL ---
+            Dim dtoGrp = TryCast(DgvFamilyGroup.CurrentRow?.DataBoundItem, GroupPaymentDTO)
+
+            If dtoGrp IsNot Nothing AndAlso Not dtoGrp.IsSummaryRow Then
+                AbrirFormularioCobro(dtoGrp)
+            Else
+                MostrarAdvertencia()
+            End If
+        End If
+
+    End Sub
+
+    Private Sub AbrirFormularioCobro(dto As IPaymentCalculable)
+        ' 3. ENVIAR DATOS AL FORMULARIO DE COBRO
+        Dim frm As New FrmCollectMembership() ' Creamos una instancia nueva
+        frm.MdiParent = Me.MdiParent
+        frm.PreparePayment(dto, TransactionMode.UpdatePayment) ' Le pasamos el objeto completo
+        frm.Show()
+    End Sub
+    Private Sub MostrarAdvertencia()
+        MessageBox.Show("Debe seleccionar un registro de pago válido (no las filas de resumen).",
+                            "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning)
     End Sub
     ''
     ''
@@ -373,7 +456,7 @@ Public Class FrmListDebtors
             Try
                 Dim generator As New Services.PaymentGenerator()
                 ' Pasamos el ID del usuario actual (id_user) que tienes en tu sesión
-                generator.GenerarPagosDelMes(UserSession.IdUser)
+                generator.GenerateNewMonthPayments(UserSession.IdUser)
 
                 MessageBox.Show("Pagos generados correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 ' Aquí podrías llamar a tu función CargarGrupales() para refrescar el DGV
@@ -504,11 +587,6 @@ Public Class FrmListDebtors
         ' Contamos cuántos grupos distintos tienen deuda
         '    'Dim numGrupos = lista.Where(Function(x) Not x.IsSummaryRow).Select(Function(x) x.IdGrp).Distinct().Count()
     End Sub
-
-
-
-
-
     ''
     ''
     ''

@@ -1,9 +1,10 @@
 ﻿Imports System.Text.RegularExpressions
 
-Namespace Validations
+Namespace Utils
+
     Public Module Validations
 
-        Sub ValidateOnlyLetters(strAllowKey As String, strLockKey As String, e As KeyPressEventArgs)
+        Public Sub ValidateOnlyLetters(strAllowKey As String, strLockKey As String, e As KeyPressEventArgs)
 
             '| IF : Comprobamos si una de las condiciones se cumplem.
             '|      * Not Char.IsLetter(e.KeyChar) - Permite letras mayúsculas y minúsculas.
@@ -22,7 +23,7 @@ Namespace Validations
 
         End Sub
 
-        Sub ValidateIntegerNumbers(strAllowKey As String, e As KeyPressEventArgs)
+        Public Sub ValidateIntegerNumbers(strAllowKey As String, e As KeyPressEventArgs)
 
             '| * Almacenamos en la variable Allow_Key los caracteres PERMITIDOS.
             '| IF : Comprobamos si una de las condiciones se cumplem.
@@ -42,7 +43,7 @@ Namespace Validations
 
         End Sub
 
-        Sub ValidateNumbersAndLetters(strAllowKey As String, e As KeyPressEventArgs)
+        Public Sub ValidateNumbersAndLetters(strAllowKey As String, e As KeyPressEventArgs)
 
             '| IF : Comprobamos si una de las condiciones se cumplem.
             '|      * Not Char.IsLetterOrDigit(e.KeyChar) - Si el carácter es una letra o un dígito, incluye los _
@@ -59,7 +60,7 @@ Namespace Validations
 
         End Sub
 
-        Sub ValidateDecimalNumbers(textBox As TextBox, e As KeyPressEventArgs)
+        Public Sub ValidateDecimalNumbers(textBox As TextBox, e As KeyPressEventArgs)
 
             '| IF : Comprobamos si una de las condiciones se cumplem.
             '|      * Not Char.IsDigit(e.KeyChar) - Permite dígitos.
@@ -83,7 +84,7 @@ Namespace Validations
 
         End Sub
 
-        Function IsValidEmail(eMail As String) As Boolean
+        Public Function IsValidEmail(eMail As String) As Boolean
 
             '| * Almacenamos en la variable strRegex un patrón de Regex estándar para validar _
             '|   _ correos electrónicos, cubre letras, números, guiones, puntos, guiones _
@@ -98,27 +99,33 @@ Namespace Validations
         ''
         ''
         ''
-        Sub ValidateDecimalInput(sender As Object, e As KeyPressEventArgs)
-            Dim txt = TryCast(sender, TextBox)
-            If txt Is Nothing Then Return
+        Public Sub ValidateDecimalInput(sender As Object, e As KeyPressEventArgs)
+
+            Dim textBox = TryCast(sender, TextBox)
+            If textBox Is Nothing Then Return
 
             ' Obtenemos el separador del sistema actual (, o .)
-            Dim sep As String = Application.CurrentCulture.NumberFormat.NumberDecimalSeparator
+            Dim separator As String = Application.CurrentCulture.NumberFormat.NumberDecimalSeparator
 
             If Not Char.IsDigit(e.KeyChar) AndAlso Not Char.IsControl(e.KeyChar) Then
                 ' Permitir el punto o coma, pero solo una vez
                 If (e.KeyChar = "."c OrElse e.KeyChar = ","c) Then
-                    If txt.Text.Contains(sep) Then
+                    If textBox.Text.Contains(separator) Then
                         e.Handled = True ' Ya existe un separador
                     Else
                         ' Normalizamos la tecla a lo que el sistema espera
-                        e.KeyChar = CChar(sep)
+                        e.KeyChar = CChar(separator)
                         e.Handled = False
                     End If
                 Else
                     e.Handled = True
+
                 End If
             End If
+
         End Sub
+        ''
+        ''
+        ''
     End Module
 End Namespace

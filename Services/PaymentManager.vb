@@ -4,22 +4,35 @@ Imports GymPaymentControl.Utils
 Imports MySql.Data.MySqlClient
 
 Namespace Services
+
+    ' Servicio encargado de:
+    ' - Obtener pagos pendientes (individuales y grupales)
+    ' - Aplicar reglas de negocio (cálculos, prorrateos)
+    ' - Construir filas de resumen para presentación
     Public Class PaymentManager
 
+        ' Cadena de conexión a MySQL tomada desde App.config
         Private ReadOnly _connectionString As String = ConfigurationManager.ConnectionStrings("MyConnectionMySQL").ConnectionString
-        ''
-        ''
-        ''
+
+        ' =====================================================
+        ' ========== PAGOS INDIVIDUALES =======================
+        ' =====================================================
+
+        ' Método público:
+        ' Devuelve la lista final de morosos individuales,
+        ' incluyendo filas de resumen por cliente.
         Public Function GetListIndividualDebtors() As List(Of IndividualPaymentDTO)
-
+            ' 1. Obtener datos base desde la BBDD
             Dim baseData = GetBaseDataIndividual()
-            CalculatePayments(baseData)
-
-            Return BuildFinalList(baseData)
+            ' 2. Aplicar reglas de negocio y cálculos
+            CalculateIndividualPayments(baseData)
+            ' 3. Construir lista final con filas de resumen
+            Return BuildFinalIndividualList(baseData)
 
         End Function
 
-        ' ========= ACCESO A DATOS =========
+        ' Obtiene los pagos individuales pendientes desde la base de datos
+        ' (clientes activos, sin grupo, sin pago finalizado)
         Private Function GetBaseDataIndividual() As List(Of IndividualPaymentDTO)
 
             Dim listIndividualPayment As New List(Of IndividualPaymentDTO)
@@ -41,20 +54,20 @@ Namespace Services
                     Using dataReader = command.ExecuteReader()
 
                         While dataReader.Read()
-
+                            ' Mapeo de datos a DTO
                             Dim dto As New IndividualPaymentDTO With
                                 {
                                     .IdPgs = dataReader("id_pgs"),
                                     .IdCli = dataReader("id_cli"),
                                     .Name = dataReader("nom_cli").ToString(),
                                     .LastName = dataReader("ape_cli").ToString(),
-                                    .Age = CalculateClientAge(dataReader.GetDateTime("fdn_cli")),'.Age = age,
+                                    .Age = CalculateClientAge(dataReader.GetDateTime("fdn_cli")),
                                     .MtdPgs = dataReader("mtd_pgs").ToString(),
                                     .PrcPgs = dataReader("prc_pgs"),
                                     .DscPgs = dataReader("dsc_pgs"),
                                     .FdiPgs = dataReader.GetDateTime("fdi_pgs")
                                 }
-
+                            ' Formato de fecha largo para presentación
                             dto.LongDate = ConvertLongDate(dto.FdiPgs)
 
                             listIndividualPayment.Add(dto)
@@ -69,7 +82,8 @@ Namespace Services
 
         End Function
 
-        Private Sub CalculatePayments(items As List(Of IndividualPaymentDTO))
+        ' Aplica cálculos a todos los pagos individuales
+        Private Sub CalculateIndividualPayments(items As List(Of IndividualPaymentDTO))
 
             For Each item In items
                 CalculateIndividualPayment(item)
@@ -77,33 +91,32 @@ Namespace Services
 
         End Sub
 
+        ' Aplica la lógica de cálculo según el método de pago
         Private Sub CalculateIndividualPayment(item As IndividualPaymentDTO)
-
+            ' Pagos mensuales → cálculo prorrateado
             If item.MtdPgs.Contains("MENSUAL") Then
-
                 CalculateProratedPayment(item)
 
             Else
+                ' Pagos diarios u otros → pago completo
                 item.DaysOfMonth = 1
                 item.Total = item.PrcPgs
                 item.TotalToPay = item.PrcPgs
-
             End If
 
         End Sub
 
-        Private Function BuildFinalList(baseData As List(Of IndividualPaymentDTO)
+        ' Construye la lista final agrupando por cliente
+        ' y añadiendo una fila resumen por cada uno
+        Private Function BuildFinalIndividualList(baseData As List(Of IndividualPaymentDTO)
                                              ) As List(Of IndividualPaymentDTO)
 
             Dim result As New List(Of IndividualPaymentDTO)
 
             For Each group In baseData.GroupBy(Function(x) x.IdCli)
 
-                ' Detalle
                 result.AddRange(group)
-
-                ' Resumen
-                result.Add(CreateSummaryRow(group))
+                result.Add(CreateIndividualSummaryRow(group))
 
             Next
 
@@ -111,10 +124,9 @@ Namespace Services
 
         End Function
 
-        Private Function CreateSummaryRow(group As IGrouping(Of Integer, IndividualPaymentDTO)
-                                          ) As IndividualPaymentDTO
-
-            Dim totalDebt = group.Sum(Function(x) x.TotalToPay)
+        ' Crea la fila resumen (fila naranja) de un cliente
+        Private Function CreateIndividualSummaryRow(group As IGrouping(Of Integer, IndividualPaymentDTO)
+                                         ) As IndividualPaymentDTO
 
             Return New IndividualPaymentDTO With
                 {
@@ -122,27 +134,28 @@ Namespace Services
                     .MtdPgs = group.First().MtdPgs,
                     .IsSummaryRow = True,
                     .NumberMonths = group.Count(),
-                    .TotalAmountDebt = totalDebt,
-                    .TotalToPay = totalDebt
+                    .TotalToPay = group.Sum(Function(x) x.TotalToPay)
                 }
 
         End Function
-        ''
-        ''
-        ''
-        ' ========= GRUPOS FAMILIARES ========= 
 
+        ' =====================================================
+        ' ========== PAGOS GRUPALES ===========================
+        ' =====================================================
+
+        ' Método público:
+        ' Devuelve la lista final de morosos grupales,
+        ' incluyendo filas de resumen por grupo familiar.
         Public Function GetListGroupDebtors() As List(Of GroupPaymentDTO)
 
             Dim baseData = GetBaseDataGroup()
-            ' En grupos, el pago suele ser directo (Prc - Dsc), 
-            ' pero mantenemos la estructura por si necesitas lógica adicional.
             CalculateGroupPayments(baseData)
 
             Return BuildFinalGroupList(baseData)
+
         End Function
 
-        ' ========= ACCESO A DATOS =========
+        ' Obtiene los pagos grupales pendientes desde la BBDD
         Private Function GetBaseDataGroup() As List(Of GroupPaymentDTO)
 
             Dim listGroupPayment As New List(Of GroupPaymentDTO)
@@ -190,7 +203,7 @@ Namespace Services
 
         End Function
 
-        ' ========= REGLAS DE NEGOCIO =========
+        ' Aplica cálculos a todos los pagos grupales
         Private Sub CalculateGroupPayments(items As List(Of GroupPaymentDTO))
 
             For Each item In items
@@ -199,15 +212,14 @@ Namespace Services
 
         End Sub
 
+        ' Todos los pagos grupales son prorrateados
         Private Sub CalculateGroupPayment(item As GroupPaymentDTO)
 
             CalculateProratedPayment(item)
 
         End Sub
-        ' ========= CONSTRUCCIÓN DE RESULTADOS =========
-        ' Agrupamos por Id de Grupo Familiar
-        ' 1. Añadimos los meses/pagos individuales del grupo
-        ' 2. Añadimos la fila de resumen de deuda del grupo
+
+        ' Construye la lista final agrupando por grupo familiar
         Private Function BuildFinalGroupList(baseData As List(Of GroupPaymentDTO)
                                              ) As List(Of GroupPaymentDTO)
 
@@ -224,10 +236,9 @@ Namespace Services
 
         End Function
 
+        ' Crea la fila resumen (fila naranja) de un grupo familiar
         Private Function CreateGroupSummaryRow(group As IGrouping(Of Integer, GroupPaymentDTO)
                                                 ) As GroupPaymentDTO
-
-            Dim totalDebt = group.Sum(Function(x) x.TotalToPay)
 
             Return New GroupPaymentDTO With
                 {

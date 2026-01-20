@@ -123,6 +123,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\SqlRepository.vb" />
+    <Compile Include="Forms\FrmCollectMembership.Designer.vb">
+      <DependentUpon>FrmCollectMembership.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FrmCollectMembership.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\FrmClientsPayments.Designer.vb">
       <DependentUpon>FrmClientsPayments.vb</DependentUpon>
     </Compile>
@@ -205,6 +211,9 @@
     <Compile Include="Services\ClientService.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Forms\FrmCollectMembership.resx">
+      <DependentUpon>FrmCollectMembership.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\FrmListDebtors.resx">
       <DependentUpon>FrmListDebtors.vb</DependentUpon>
     </EmbeddedResource>
