@@ -16,10 +16,17 @@ Namespace Models
         Implements IPaymentCalculable
 
         ' ======================
+        ' Creamos una copia superficial del objeto actual
+        ' ======================
+        Public Function Clone() As IPaymentCalculable Implements IPaymentCalculable.Clone
+            Return DirectCast(Me.MemberwiseClone(), IndividualPaymentDTO)
+        End Function
+
+        ' ======================
         ' Identificadores
         ' ======================
         Public Property IdPgs As Integer Implements IPaymentCalculable.IdPgs ' Id del pago
-        Public Property IdCli As Integer          ' Id del cliente
+        Public Property IdCli As Integer            ' Id del cliente
 
         ' ======================
         ' Datos del cliente
@@ -34,8 +41,9 @@ Namespace Models
         ' ======================
         ' Datos del pago
         ' ======================
-        Public Property MtdPgs As String          ' Método de pago (MENSUAL / DIARIO)
-        Public Property FdiPgs As Date Implements IPaymentCalculable.FdiPgs
+        Public Property MtdPgs As String Implements IPaymentCalculable.MtdPgs ' Método de pago (DIARIO o MENSUAL)
+        Public Property FdiPgs As Date Implements IPaymentCalculable.FdiPgs ' Fecha de inicio
+        Public Property FdpPgs As Date Implements IPaymentCalculable.FdpPgs ' Fecha de pago
         Public Property LongDate As String        ' Fecha formateada para UI
 
         ' ======================
@@ -51,7 +59,7 @@ Namespace Models
         ' Control de resumen
         ' ======================
         Public Property IsSummaryRow As Boolean Implements IPaymentSummary.IsSummaryRow
-        Public Property NumberMonths As Integer   ' Nº de meses agrupados en la fila resumen
+        Public Property NumberMonths As Integer            ' Nº de meses agrupados en la fila resumen
 
         ' ======================
         ' Propiedades calculadas
@@ -78,6 +86,8 @@ Namespace Models
                 Return $"{Me.Name} {Me.LastName} - {Me.AgeText}"
             End Get
         End Property
-    End Class
 
+        ''
+        ''
+    End Class
 End Namespace

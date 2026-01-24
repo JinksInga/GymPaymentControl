@@ -14,22 +14,30 @@ Namespace Models
         Implements IPaymentCalculable
 
         ' ======================
+        ' Creamos una copia superficial del objeto actual
+        ' ======================
+        Public Function Clone() As IPaymentCalculable Implements IPaymentCalculable.Clone
+            Return DirectCast(Me.MemberwiseClone(), GroupPaymentDTO)
+        End Function
+
+        ' ======================
         ' Identificadores
         ' ======================
         Public Property IdPgs As Integer Implements IPaymentCalculable.IdPgs ' Id del pago
-        Public Property IdGrp As Integer          ' Id del grupo familiar
+        Public Property IdGrp As Integer            ' Id del grupo familiar
 
         ' ======================
         ' Datos del grupo
         ' ======================
         Public Property GroupName As String
-        Public Property Members As String         ' Lista concatenada de integrantes
+        Public Property Members As String           ' Lista concatenada de integrantes
 
         ' ======================
         ' Datos del pago
         ' ======================
-        Public Property MtdPgs As String          ' Método de pago (GRUPAL)
-        Public Property FdiPgs As Date Implements IPaymentCalculable.FdiPgs
+        Public Property MtdPgs As String Implements IPaymentCalculable.MtdPgs ' Método de pago (GRUPAL)
+        Public Property FdiPgs As Date Implements IPaymentCalculable.FdiPgs ' Fecha de inicio
+        Public Property FdpPgs As Date Implements IPaymentCalculable.FdpPgs ' Fecha de pago
         Public Property LongDate As String        ' Fecha formateada para UI
 
         ' ======================
@@ -45,27 +53,27 @@ Namespace Models
         ' Control de resumen
         ' ======================
         Public Property IsSummaryRow As Boolean Implements IPaymentSummary.IsSummaryRow
-        Public Property NumberMonths As Integer   ' Nº de meses agrupados en la fila resumen
+        Public Property NumberMonths As Integer            ' Nº de meses agrupados en la fila resumen
 
         ' ======================
         ' Propiedades calculadas
         ' ======================
-
         ' Devuelve el identificador de pago de forma genérica
         ' para selección de filas en DataGridView
-        Public ReadOnly Property IdPayment As Integer _
-            Implements ISelectableRow.IdPayment
+        Public ReadOnly Property IdPayment As Integer Implements ISelectableRow.IdPayment
             Get
                 Return IdPgs
             End Get
         End Property
 
-        '
+        ' Devuelve el nombre del grupo
         Public ReadOnly Property DisplayName As String Implements IPaymentCalculable.DisplayName
             Get
                 Return $"GRUPO: {Me.GroupName}"
             End Get
         End Property
-    End Class
 
+        ''
+        ''
+    End Class
 End Namespace

@@ -1,22 +1,29 @@
 ﻿Imports GymPaymentControl.Interfaces
+Imports GymPaymentControl.Models
+Imports GymPaymentControl.Services
 Imports GymPaymentControl.Utils.PaymentCalculator
 Imports GymPaymentControl.Utils.Validations
+Imports MySql.Data.MySqlClient
 
 Public Class FrmCollectMembership
     '
-    'Public strIdCli, strIdPgs As String
+    Private ReadOnly _paymentManager As New PaymentManager()
+
     ' Propiedad privada del objeto completo
     Private _selectedPayment As IPaymentCalculable
 
-    Private _isUpdatedText As Boolean = False
-
     ' Variable para guardar el modo actual
     Private _currentMode As TransactionMode
+
     ' Definimos los dos estados posibles
     Public Enum TransactionMode
         NewPayment
         UpdatePayment
     End Enum
+
+    Private _isUpdatedText As Boolean = False
+    Private _isLoading As Boolean = False
+
     ''
     ''
     Private Sub FrmCollectMembership_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -30,7 +37,7 @@ Public Class FrmCollectMembership
         '| ------------------------------------------------
         '| * Si se desactiva el Form o se hace clic fuera del Form cerramos el FrmCollectMembership para
         '|   evitar hacer otras acciones con el form ejecutado (no visible).
-        Close()
+        Me.Close()
 
     End Sub
     ''
@@ -96,35 +103,80 @@ Public Class FrmCollectMembership
         '|
         '|
 
-        Dim strDetail As String
+        'Dim strDetail As String
 
-        Select Case CmbMtdPgs.SelectedIndex
-            Case 0 'BONO
-                strDetail = "Cuota mensual +" & vbCrLf & "guantes +" & vbCrLf & "vendas"
+        'Select Case CmbMtdPgs.SelectedIndex
+        '    Case 0 'BONO
+        '        strDetail = "Cuota mensual +" & vbCrLf & "guantes +" & vbCrLf & "vendas"
 
-            Case 1 'DIARIO
-                strDetail = "Pago diario, " & TxtPrcPgs.Text & " por cada clase suelta."
+        '    Case 1 'DIARIO
+        '        strDetail = "Pago diario, " & TxtPrcPgs.Text & " por cada clase suelta."
 
-            Case 2 'MENSAL
-                strDetail = "Con descuento de " & TxtDscPgs.Text & " por edad."
+        '    Case 2 'MENSAL
+        '        strDetail = "Con descuento de " & TxtDscPgs.Text & " por edad."
 
-            Case Else 'GRUPO FAMILIAR
-                strDetail = "Jinkis" & vbCrLf & "Sarita" & vbCrLf & "Marjorie"
+        '    Case Else 'GRUPO FAMILIAR
+        '        strDetail = "Jinkis" & vbCrLf & "Sarita" & vbCrLf & "Marjorie"
 
-        End Select
+        'End Select
 
-        TxtDtlleMtdo.Text = strDetail
+        'TxtDetailMethod.Text = strDetail
 
     End Sub
     ''
     ''
     Private Sub BtnPayMonth_Click(sender As Object, e As EventArgs) Handles BtnPayMonth.Click
         '
+        ' 1. Sincronización final: Aseguramos que el clon tenga los valores de la UI
+        _selectedPayment.PrcPgs = ParseMoney(TxtPrcPgs.Text)
+        _selectedPayment.DscPgs = ParseMoney(TxtDscPgs.Text)
+        _selectedPayment.FdiPgs = DtpFdiPgs.Value
+        _selectedPayment.FdpPgs = DtpFdpPgs.Value ' <--- Respetamos tu DTP manual
+
+        ' 2. Validación de existencia (Solo para nuevos pagos)
+        If _currentMode = TransactionMode.NewPayment Then
+
+            Dim idClient As Integer? = If(TypeOf _selectedPayment Is IndividualPaymentDTO,
+                DirectCast(_selectedPayment, IndividualPaymentDTO).IdCli, CType(Nothing, Integer?))
+
+            Dim idGroup As Integer? = If(TypeOf _selectedPayment Is GroupPaymentDTO,
+                DirectCast(_selectedPayment, GroupPaymentDTO).IdGrp, CType(Nothing, Integer?))
+
+            Using connection As New MySqlConnection(_paymentManager.ConnectionString)
+
+                connection.Open()
+
+                Dim generator As New PaymentGenerator()
+                If generator.PaymentExists(connection, Nothing, DtpFdiPgs.Value, idClient, idGroup) Then
+                    MessageBox.Show("Ya existe un pago registrado para este periodo (Mes/Año).", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                    Exit Sub
+                End If
+
+            End Using
+        End If
+
+        ' 3. Recalcular totales finales antes de guardar para asegurar coherencia
+        'PaymentCalculator.CalculateProratedPayment(_selectedPayment)
+
+        ' 4. Guardar usando tu PaymentManager
+        Dim monthPaid = _paymentManager.SaveTransaction(_selectedPayment, _currentMode,
+                                                        UserSession.IdUser, CmbFrmPgs.Text)
+
+        If monthPaid Then
+            MessageBox.Show("Transacción realizada con éxito", "Pago realizado", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            ' Al cerrar con OK, el formulario padre refrescará la lista desde la BD
+            Me.DialogResult = DialogResult.OK
+            Me.Close()
+        End If
+
     End Sub
     ''
     ''
     Private Sub BtnCancelPayment_Click(sender As Object, e As EventArgs) Handles BtnCancelPayment.Click
-        Close() 'CERRAR FORM
+        ' Forzamos el resultado a Cancel y cerramos
+        Me.DialogResult = DialogResult.Cancel
+        Me.Close() 'CERRAR FORM
+
     End Sub
     ''
     ''
@@ -132,9 +184,13 @@ Public Class FrmCollectMembership
     ' Cambiamos el parámetro a la Interfaz
     Public Sub PreparePayment(payment As IPaymentCalculable, mode As TransactionMode)
 
+        _isLoading = True ' <-- BLOQUEO
+
         _selectedPayment = payment ' _selectedPayment debe ser de tipo IPaymentCalculable
         _currentMode = mode
-
+        ''''''
+        Console.WriteLine("Descuento recibido: " & _selectedPayment.DscPgs)
+        ''''''
         ' Configuramos la UI según el modo
         If _currentMode = TransactionMode.NewPayment Then
             Me.Text = "Nuevo pago mensual"
@@ -144,18 +200,62 @@ Public Class FrmCollectMembership
             BtnPayMonth.Text = "Confirmar Cobro"
         End If
 
-        With _selectedPayment
-            ' Usamos la propiedad DisplayName que definiremos en los DTOs
-            LblCliente.Text = .DisplayName
-            DtpFdiPgs.Value = .FdiPgs
+        'With _selectedPayment
+        ' Usamos la propiedad DisplayName que definiremos en los DTOs
+        LblDisplayName.Text = _selectedPayment.DisplayName
+        DtpFdiPgs.Value = _selectedPayment.FdiPgs
 
-            ' Usamos los valores numéricos; el TextChanged se encargará del " €"
-            TxtPrcPgs.Text = $"{ .PrcPgs} €" '.PrcPgs.ToString()
-            TxtDscPgs.Text = $"{ .DscPgs} €" '.DscPgs.ToString()
-        End With
+        ' Usamos los valores numéricos; el TextChanged se encargará del " €"
+        TxtPrcPgs.Text = $"{ _selectedPayment.PrcPgs} €"
+        TxtDscPgs.Text = $"{ _selectedPayment.DscPgs} €"
+
+        Dim strMtdPgs As String = _selectedPayment.MtdPgs 'Método de pago (DIARIO / MENSUAL / GRUPAL)
+
+        Select Case True
+            Case strMtdPgs.Contains("DIARIO")
+                CmbMtdPgs.Text = "DIARIO"
+                TxtDetailMethod.Text = "CLASES SUELTAS : Pago por jornada individual."
+                TxtDetailMethod.BackColor = Color.FromArgb(255, 250, 240) ' FloralWhite
+                TxtDetailMethod.ForeColor = Color.DarkOrange
+                BtnPayMonth.BackColor = Color.FromArgb(255, 248, 220) ' Toque naranja suave al botón
+
+            Case strMtdPgs.Contains("MENSUAL")
+                CmbMtdPgs.Text = "MENSUAL"
+
+                If payment.DscPgs = 0 Then
+                    TxtDetailMethod.Text = "TARIFA INDIVIDUAL : Sin Descuento."
+                Else
+                    TxtDetailMethod.Text = $"TARIFA INDIVIDUAL : Con descuento aplicado por edad {payment.DscPgs:C2}"
+                End If
+                TxtDetailMethod.BackColor = Color.FromArgb(240, 248, 255) ' AliceBlue
+                TxtDetailMethod.ForeColor = Color.RoyalBlue
+                BtnPayMonth.BackColor = Color.FromArgb(230, 240, 255) ' Toque azul suave
+
+            Case strMtdPgs.Contains("GRUPAL")
+                CmbMtdPgs.Text = "GRUPO FAMILIAR"
+
+                If TypeOf payment Is GroupPaymentDTO Then
+                    TxtDetailMethod.Text = "INTEGRANTES : " & DirectCast(payment, GroupPaymentDTO).Members
+                End If
+                TxtDetailMethod.BackColor = Color.FromArgb(245, 240, 255) ' Lavender
+                TxtDetailMethod.ForeColor = Color.Indigo
+                BtnPayMonth.BackColor = Color.FromArgb(240, 230, 255) ' Toque púrpura suave
+
+                'Case strMtdPgs.Contains("BONO")
+                '    CmbMtdPgs.Text = "BONO"
+
+            Case Else
+                CmbMtdPgs.SelectedIndex = -1
+
+        End Select
+
+        _isLoading = False ' <-- LIBERACIÓN
 
         ' Llamamos a tu lógica de prorrateo
-        CalculateProratedPayment(_selectedPayment)
+        ''CalculateProratedPayment(_selectedPayment)
+        ' Ahora que todo está cargado, forzamos un único cálculo real
+        CalculatePrice()
+
     End Sub
 
     Private Sub ChangeFontError()
@@ -183,9 +283,10 @@ Public Class FrmCollectMembership
 
     Private Sub CalculatePrice()
 
-        If _selectedPayment Is Nothing Then Exit Sub
+        'If _selectedPayment Is Nothing Then Exit Sub
+        ' Si estamos cargando datos o no hay objeto, NO calcular nada
+        If _isLoading OrElse _selectedPayment Is Nothing Then Exit Sub
 
-        'Try
         ' 1. Sincronizamos los cambios manuales de la UI al objeto
         ' (Quitamos el " €" y convertimos a decimal)
         With _selectedPayment
@@ -263,6 +364,42 @@ Public Class FrmCollectMembership
         ElseIf sender Is TxtDscPgs Then
             FormatMoneyTextChanged(TxtDscPgs, 0D, 25D, Color.DarkOrange)
 
+        End If
+
+    End Sub
+
+    Private Sub ChkFdiPgs_CheckedChanged(sender As Object, e As EventArgs) Handles ChkFdiPgs.CheckedChanged
+
+        '
+        OnOffCheckBox(DtpFdiPgs, ChkFdiPgs, "Desactiva la fecha de inicio del mes.", "Activa la fecha de inicio del mes.")
+
+    End Sub
+
+    Private Sub ChkFdpPgs_CheckedChanged(sender As Object, e As EventArgs) Handles ChkFdpPgs.CheckedChanged
+
+        '
+        OnOffCheckBox(DtpFdpPgs, ChkFdpPgs, "Desactiva la fecha de pago.", "Activa la fecha de pago.")
+
+    End Sub
+
+    Private Sub ChkMtdPgs_CheckedChanged(sender As Object, e As EventArgs) Handles ChkMtdPgs.CheckedChanged
+
+        '
+        OnOffCheckBox(CmbMtdPgs, ChkMtdPgs, "Desactiva el método de pago", "Activa el método de pago")
+
+    End Sub
+
+    Private Sub OnOffCheckBox(control As Control, checkBox As CheckBox,
+                              strDeactivate As String, strActivate As String)
+
+        control.Enabled = checkBox.Checked
+
+        If checkBox.Checked Then
+
+            control.Focus()
+            ToolTip.SetToolTip(checkBox, strDeactivate)
+        Else
+            ToolTip.SetToolTip(checkBox, strActivate)
         End If
 
     End Sub

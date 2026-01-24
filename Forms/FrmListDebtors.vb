@@ -406,40 +406,32 @@ Public Class FrmListDebtors
         '|
         '|
         If RbPayIndividual.Checked Then
-            ' --- LÓGICA INDIVIDUAL ---
+
             Dim dto = TryCast(DgvIndividual.CurrentRow?.DataBoundItem, IndividualPaymentDTO)
 
             If dto IsNot Nothing AndAlso Not dto.IsSummaryRow Then
-                AbrirFormularioCobro(dto)
+                ' Creamos la copia antes de enviarla al formulario, blindaje total
+                Dim dtoClone = DirectCast(dto.Clone(), IndividualPaymentDTO)
+                OpenFrmCollectMembership(dto)
             Else
-                MostrarAdvertencia()
+                ShowMessageBox()
             End If
 
         End If
 
         If RbPayGroup.Checked Then
-            ' --- LÓGICA GRUPAL ---
-            Dim dtoGrp = TryCast(DgvFamilyGroup.CurrentRow?.DataBoundItem, GroupPaymentDTO)
 
-            If dtoGrp IsNot Nothing AndAlso Not dtoGrp.IsSummaryRow Then
-                AbrirFormularioCobro(dtoGrp)
+            Dim dto = TryCast(DgvFamilyGroup.CurrentRow?.DataBoundItem, GroupPaymentDTO)
+
+            If dto IsNot Nothing AndAlso Not dto.IsSummaryRow Then
+                ' Creamos la copia antes de enviarla al formulario, blindaje total
+                Dim dtoClone = DirectCast(dto.Clone(), GroupPaymentDTO)
+                OpenFrmCollectMembership(dto)
             Else
-                MostrarAdvertencia()
+                ShowMessageBox()
             End If
         End If
 
-    End Sub
-
-    Private Sub AbrirFormularioCobro(dto As IPaymentCalculable)
-        ' 3. ENVIAR DATOS AL FORMULARIO DE COBRO
-        Dim frm As New FrmCollectMembership() ' Creamos una instancia nueva
-        frm.MdiParent = Me.MdiParent
-        frm.PreparePayment(dto, TransactionMode.UpdatePayment) ' Le pasamos el objeto completo
-        frm.Show()
-    End Sub
-    Private Sub MostrarAdvertencia()
-        MessageBox.Show("Debe seleccionar un registro de pago válido (no las filas de resumen).",
-                            "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning)
     End Sub
     ''
     ''
@@ -450,20 +442,30 @@ Public Class FrmListDebtors
         '|
         '|
 
-        Dim strMsgBox As String = "Se generarán los pagos mensuales para clientes individuales y grupos familiares. ¿Desea continuar?"
+        Dim newMonth = Date.Now.ToString("MMMM").ToUpper
+        Dim strMsgBox As String = "                                ¡¡¡ ATENCIÓN !!!" & Environment.NewLine &
+                                  Environment.NewLine &
+                                  "   Se van a crear nuevos pagos mensuales para todos los" & Environment.NewLine &
+                                  $"   clientes y grupos familiares del mes de {newMonth}." & Environment.NewLine &
+                                  "   ________________________________________________________" & Environment.NewLine &
+                                  Environment.NewLine &
+                                  "                        ¿Estás seguro de crear registros masivos?"
 
-        If MessageBox.Show(strMsgBox, "Generación Masiva", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+        If MessageBox.Show(strMsgBox, "Registrar pagos nuevos", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) = DialogResult.Yes Then
+
             Try
-                Dim generator As New Services.PaymentGenerator()
-                ' Pasamos el ID del usuario actual (id_user) que tienes en tu sesión
-                generator.GenerateNewMonthPayments(UserSession.IdUser)
+                    Dim generator As New PaymentGenerator()
 
-                MessageBox.Show("Pagos generados correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                ' Aquí podrías llamar a tu función CargarGrupales() para refrescar el DGV
-            Catch ex As Exception
-                MessageBox.Show("Error al generar pagos: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-            End Try
-        End If
+                    generator.GenerateNewMonthPayments(UserSession.IdUser)
+
+                    MessageBox.Show("Se han generado los nuevos pagos correctamente.", "Pagos registrados", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+                Catch ex As Exception
+                    MessageBox.Show("Error al generar deudas: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+
+                End Try
+
+            End If
 
     End Sub
     ''
@@ -509,7 +511,6 @@ Public Class FrmListDebtors
         '|
 
         Try
-            ' Llamamos al nuevo método que creamos en el Manager/Servicio
             listGroupPayment = _paymentManager.GetListGroupDebtors()
             ConfigureDataGridView(DgvFamilyGroup, "PrcPgsGf", "DscPgsGf", "TtlPgsGf", "ApgrGf")
             LoadDataGridView(DgvFamilyGroup, listGroupPayment)
@@ -578,14 +579,64 @@ Public Class FrmListDebtors
         Dim outstandingPayments = list.Where(Function(x) Not x.IsSummaryRow).Count
         label.Text = $"{outstandingPayments} - Registros pendientes de pago."
 
-        'Dim numMorosos As Integer = 0
-        'For Each item In list
-        '    If Not item.IsSummaryRow Then
-        '        numMorosos += 1
-        '    End If
-        'Next
-        ' Contamos cuántos grupos distintos tienen deuda
-        '    'Dim numGrupos = lista.Where(Function(x) Not x.IsSummaryRow).Select(Function(x) x.IdGrp).Distinct().Count()
+    End Sub
+
+
+    Private Sub OpenFrmCollectMembership(dto As IPaymentCalculable)
+
+        '|
+        '|
+        '|
+        ' 1. CREAMOS EL CLON (La "fotocopia" de seguridad)
+        Dim dtoClone = dto.Clone()
+
+        Using form As New FrmCollectMembership()
+            ' 2. PASAMOS EL CLON AL FORMULARIO
+            ' Ahora, si el formulario pone el descuento a 0, solo afectará al CLON.
+            form.PreparePayment(dtoClone, TransactionMode.UpdatePayment)
+
+            If form.ShowDialog() = DialogResult.OK Then
+                ' 3. REFRESCAMOS SOLO SI SE CONFIRMA EL PAGO
+                ' El objeto original en el DGV no se verá "ensuciado" si el usuario cancela.
+                If TypeOf dto Is IndividualPaymentDTO Then RefreshDgvIndividual()
+                If TypeOf dto Is GroupPaymentDTO Then RefreshDgvFamilyGroup()
+            End If
+        End Using
+    End Sub
+
+    Private Sub RefreshDgvIndividual()
+
+        TxtSearch.Clear()
+        listIndividualPayment = _paymentManager.GetListIndividualDebtors()
+        DgvIndividual.DataSource = Nothing
+        DgvIndividual.DataSource = listIndividualPayment
+
+    End Sub
+
+    Private Sub RefreshDgvFamilyGroup()
+
+        TxtSearch.Clear()
+        listGroupPayment = _paymentManager.GetListGroupDebtors()
+        DgvFamilyGroup.DataSource = Nothing
+        DgvFamilyGroup.DataSource = listGroupPayment
+
+    End Sub
+
+    Private Sub ShowMessageBox()
+
+        '|
+        '|
+        '|
+
+        Dim strMsgBox As String = "   Para cobrar la cuota mensual a un cliente" & Environment.NewLine &
+                                  Environment.NewLine &
+                                  "   Selecciona un registro válido de la lista de morosos" & Environment.NewLine &
+                                  "   _____________________________________________________" & Environment.NewLine &
+                                  Environment.NewLine &
+                                  "                     La fila RESUMEN no es un registro válido"
+
+        MessageBox.Show(strMsgBox, "Seleccionar registro", MessageBoxButtons.OK, MessageBoxIcon.Error)
+
     End Sub
     ''
     ''

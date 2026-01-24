@@ -120,20 +120,22 @@ Namespace Services
         ' ==========================================================
 
         ''' <summary>
-        ''' Verifica si ya existe un pago para un cliente o grupo
-        ''' en una fecha determinada (normalmente el primer día del mes).
+        ''' Verifica si ya existe un pago para un cliente o grupo en una fecha determinada.
+        ''' (Normalmente el primer día del mes).
         ''' </summary>
-        Private Function PaymentExists(connection As MySqlConnection, transaction As MySqlTransaction, dateTime As DateTime,
+        Public Function PaymentExists(connection As MySqlConnection, transaction As MySqlTransaction, dateTime As DateTime,
                                        Optional idCli As Integer? = Nothing,
                                        Optional idGrp As Integer? = Nothing) As Boolean
 
-            Dim sqlQuery As String = "SELECT COUNT(*) FROM pagos WHERE fdi_pgs = @fdi AND "
+            Dim sqlQuery As String = "SELECT COUNT(*) FROM pagos WHERE MONTH(fdi_pgs) = @month AND YEAR(fdi_pgs) = @year AND "
             If idCli.HasValue Then sqlQuery &= "id_cli = @id" Else sqlQuery &= "id_grp = @id"
 
             Using command As New MySqlCommand(sqlQuery, connection, transaction)
 
-                command.Parameters.AddWithValue("@fdi", dateTime.ToString("yyyy-MM-dd"))
+                command.Parameters.AddWithValue("@month", dateTime.Month)
+                command.Parameters.AddWithValue("@year", dateTime.Year)
                 command.Parameters.AddWithValue("@id", If(idCli, idGrp))
+
                 Return Convert.ToInt32(command.ExecuteScalar()) > 0
 
             End Using

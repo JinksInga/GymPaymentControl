@@ -12,6 +12,11 @@ Public Class FrmUserPassword
     ''
     ''
     ''
+    Private Sub FrmUserPassword_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+    End Sub
+    ''
+    ''
+    ''
     Private Sub BtnStart_Click(sender As Object, e As EventArgs) Handles BtnStart.Click
 
         '|-----------------------------------------------------------------------------

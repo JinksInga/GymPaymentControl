@@ -1,4 +1,6 @@
 ﻿Imports System.Configuration
+Imports GymPaymentControl.FrmCollectMembership
+Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Utils
 Imports MySql.Data.MySqlClient
@@ -13,6 +15,13 @@ Namespace Services
 
         ' Cadena de conexión a MySQL tomada desde App.config
         Private ReadOnly _connectionString As String = ConfigurationManager.ConnectionStrings("MyConnectionMySQL").ConnectionString
+
+        ' Propiedad de solo lectura que permite leer la cadena de conexión desde fuera de la clase, sin permitir su modificación.
+        Public ReadOnly Property ConnectionString As String
+            Get
+                Return _connectionString
+            End Get
+        End Property
 
         ' =====================================================
         ' ========== PAGOS INDIVIDUALES =======================
@@ -63,8 +72,8 @@ Namespace Services
                                     .LastName = dataReader("ape_cli").ToString(),
                                     .Age = CalculateClientAge(dataReader.GetDateTime("fdn_cli")),
                                     .MtdPgs = dataReader("mtd_pgs").ToString(),
-                                    .PrcPgs = dataReader("prc_pgs"),
-                                    .DscPgs = dataReader("dsc_pgs"),
+                                    .PrcPgs = Convert.ToDecimal(dataReader("prc_pgs")),
+                                    .DscPgs = Convert.ToDecimal(dataReader("dsc_pgs")),
                                     .FdiPgs = dataReader.GetDateTime("fdi_pgs")
                                 }
                             ' Formato de fecha largo para presentación
@@ -247,6 +256,58 @@ Namespace Services
                     .NumberMonths = group.Count(),
                     .TotalToPay = group.Sum(Function(x) x.TotalToPay)
                 }
+        End Function
+        ''
+        ''
+        Public Function SaveTransaction(payment As IPaymentCalculable, mode As TransactionMode,
+                                        idUser As Integer, paymentMethod As String) As Boolean
+            Dim sqlQuery As String
+
+            If mode = TransactionMode.NewPayment Then
+                ' SQL de Inserción: Usamos los campos comunes
+                ' Nota: He añadido @idOwner para que sirva tanto para id_cli como para id_grp
+                sqlQuery = "INSERT INTO pagos (fdi_pgs, fdp_pgs, frm_pgs, prc_pgs, dsc_pgs, id_cli, id_grp, id_user)
+                            VALUES (@fdi, @fdp, @frm, @prc, @dsc, @idCli, @idGrp, @idUser)"
+            Else
+                ' SQL de Actualización para registros que ya existen
+                sqlQuery = "UPDATE pagos
+                            SET fdi_pgs=@fdi,
+                                fdp_pgs=@fdp,
+                                frm_pgs=@frm,
+                                prc_pgs=@prc,
+                                dsc_pgs=@dsc,
+                                id_user=@idUser
+                            WHERE id_pgs=@idPgs"
+            End If
+
+            Using connection As New MySqlConnection(_connectionString)
+
+                Dim command As New MySqlCommand(sqlQuery, connection)
+
+                ' Parámetros comunes de la Interfaz
+                command.Parameters.AddWithValue("@fdi", payment.FdiPgs)
+                command.Parameters.AddWithValue("@fdp", payment.FdpPgs)
+                command.Parameters.AddWithValue("@frm", paymentMethod)
+                command.Parameters.AddWithValue("@prc", payment.PrcPgs)
+                command.Parameters.AddWithValue("@dsc", payment.DscPgs)
+                command.Parameters.AddWithValue("@idUser", idUser)
+
+                If mode = TransactionMode.UpdatePayment Then
+                    command.Parameters.AddWithValue("@idPgs", payment.IdPgs)
+                Else
+                    ' --- LÓGICA PARA NUEVOS PAGOS (Detección de tipo) ---
+                    If TypeOf payment Is IndividualPaymentDTO Then
+                        command.Parameters.AddWithValue("@idCli", DirectCast(payment, IndividualPaymentDTO).IdCli)
+                        command.Parameters.AddWithValue("@idGrp", DBNull.Value) ' No es un grupo
+                    ElseIf TypeOf payment Is GroupPaymentDTO Then
+                        command.Parameters.AddWithValue("@idCli", DBNull.Value) ' No es un cliente individual
+                        command.Parameters.AddWithValue("@idGrp", DirectCast(payment, GroupPaymentDTO).IdGrp)
+                    End If
+                End If
+
+                connection.Open()
+                Return command.ExecuteNonQuery() > 0
+            End Using
         End Function
         ''
         ''

@@ -317,6 +317,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <None Include="image\ic_cancel_pay_34x28.png" />
     <None Include="image\ic_pay_month_28x32.png" />
     <None Include="image\ic_cancel_c_28x28.png" />
     <None Include="image\ic_cash_register_60x60.png" />
