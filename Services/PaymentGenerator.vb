@@ -26,7 +26,9 @@ Namespace Services
         ''' Todo el proceso se ejecuta dentro de una transacción.
         ''' </summary>
         ''' <param name="idUser">Usuario que ejecuta el proceso (auditoría)</param>
-        Public Sub GenerateNewMonthPayments(idUser As Integer)
+        Public Function GenerateNewMonthPayments(idUser As Integer) As Integer
+
+            Dim filasInsertadas As Integer '= 0
 
             ' Primer día del mes actual (clave para evitar duplicados)
             Dim firstDayOfMonth As New DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)
@@ -37,6 +39,7 @@ Namespace Services
 
                 ' Iniciamos transacción para asegurar consistencia
                 Using transaction As MySqlTransaction = connection.BeginTransaction()
+
                     Try
                         ' ==========================================================
                         ' PAGOS INDIVIDUALES
@@ -68,6 +71,10 @@ Namespace Services
                                                          Convert.ToDecimal(individualRate("prcio_trfa")),
                                                          Convert.ToDecimal(individualRate("dscto_trfa")),
                                                          idUser, idCli:=idCli, mtdPgs:="MENSUAL")
+
+                                    ' SUMAMOS SOLO SI SE INSERTÓ EL REGISTRO
+                                    filasInsertadas += 1
+
                                 End If
                             End If
                         Next
@@ -97,12 +104,18 @@ Namespace Services
                                                         Convert.ToDecimal(groupRate("prcio_trfa")) * numberMembers,
                                                         Convert.ToDecimal(groupRate("dscto_trfa")),
                                                         idUser, idGrp:=idGrp, mtdPgs:="GRUPAL")
+
+                                    ' SUMAMOS AL MISMO CONTADOR PARA TENER EL TOTAL GLOBAL
+                                    filasInsertadas += 1
+
                                 End If
                             End If
                         Next
 
                         ' Si todo salió bien, confirmamos la transacción
                         transaction.Commit()
+
+                        Return filasInsertadas ' Devolvemos la suma de ambos bucles
 
                     Catch ex As Exception
                         ' Ante cualquier error, deshacemos todos los cambios
@@ -113,7 +126,7 @@ Namespace Services
                 End Using
             End Using
 
-        End Sub
+        End Function
 
         ' ==========================================================
         ' FUNCIONES DE APOYO
@@ -256,5 +269,43 @@ Namespace Services
 
         End Function
 
+        '
+        '
+        '
+        Public Function HasPendingMassivePayments() As Boolean
+
+            Dim firstDayOfMonth As New DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)
+
+            Using connection As New MySqlConnection(_connectionString)
+
+                connection.Open()
+
+                ' 1. Buscamos si hay al menos UN cliente individual que falte por registrar
+                Dim sqlInd As String = "SELECT COUNT(*) FROM clientes c WHERE std_cli = 'ACTIVO' AND mpg_cli = 'MENSUAL'
+                                        AND (id_grp Is NULL Or id_grp = 0) AND
+                                        NOT EXISTS (SELECT 1 FROM pagos p WHERE p.id_cli = c.id_cli AND p.fdi_pgs = @fdi)"
+
+                Using cmd As New MySqlCommand(sqlInd, connection)
+                    cmd.Parameters.AddWithValue("@fdi", firstDayOfMonth)
+                    If Convert.ToInt32(cmd.ExecuteScalar()) > 0 Then Return True
+                End Using
+
+                ' 2. Buscamos si hay al menos UN grupo familiar que falte por registrar
+                Dim sqlGrp As String = "SELECT COUNT(*) FROM grp_familiar grp WHERE
+                                        NOT EXISTS (SELECT 1 FROM pagos p WHERE p.id_grp = grp.id_grp AND p.fdi_pgs = @fdi)"
+
+                Using cmd As New MySqlCommand(sqlGrp, connection)
+                    cmd.Parameters.AddWithValue("@fdi", firstDayOfMonth)
+                    If Convert.ToInt32(cmd.ExecuteScalar()) > 0 Then Return True
+                End Using
+
+            End Using
+
+            Return False ' Si llegamos aquí, es que todo está ya creado
+
+        End Function
+        ''
+        ''
+        ''
     End Class
 End Namespace

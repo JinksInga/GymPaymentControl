@@ -211,6 +211,9 @@
     <Compile Include="Services\ClientService.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Forms\FrmClientsPayments.resx">
+      <DependentUpon>FrmClientsPayments.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\FrmCollectMembership.resx">
       <DependentUpon>FrmCollectMembership.vb</DependentUpon>
     </EmbeddedResource>
@@ -317,6 +320,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <None Include="image\ic_new_payment_28x32.png" />
+    <None Include="image\ic_inactive_50x50.png" />
+    <None Include="image\ic_in_activity_50x50.png" />
+    <None Include="image\ic_search_28x32.png" />
+    <None Include="image\ic_okay_round_28x28.png" />
     <None Include="image\ic_cancel_pay_34x28.png" />
     <None Include="image\ic_pay_month_28x32.png" />
     <None Include="image\ic_cancel_c_28x28.png" />

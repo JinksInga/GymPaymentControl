@@ -125,7 +125,7 @@ Public Class FrmCollectMembership
     End Sub
     ''
     ''
-    Private Sub BtnPayMonth_Click(sender As Object, e As EventArgs) Handles BtnPayMonth.Click
+    Private Sub BtnPayMonth_Click(sender As Object, e As EventArgs) Handles BtnConfirmPayment.Click
         '
         ' 1. Sincronización final: Aseguramos que el clon tenga los valores de la UI
         _selectedPayment.PrcPgs = ParseMoney(TxtPrcPgs.Text)
@@ -188,17 +188,15 @@ Public Class FrmCollectMembership
 
         _selectedPayment = payment ' _selectedPayment debe ser de tipo IPaymentCalculable
         _currentMode = mode
-        ''''''
-        Console.WriteLine("Descuento recibido: " & _selectedPayment.DscPgs)
-        ''''''
+
         ' Configuramos la UI según el modo
-        If _currentMode = TransactionMode.NewPayment Then
-            Me.Text = "Nuevo pago mensual"
-            BtnPayMonth.Text = "Registrar Pago"
-        Else
-            Me.Text = "Cobrar mes pendiente"
-            BtnPayMonth.Text = "Confirmar Cobro"
-        End If
+        'If _currentMode = TransactionMode.NewPayment Then
+        '    Me.Text = "NUEVO PAGO MENSUAL"
+        '    BtnConfirmPayment.Text = "Registrar Pago"
+        'Else
+        '    Me.Text = "COBRAR MES PENDIENTE"
+        '    BtnConfirmPayment.Text = "Confirmar Cobro"
+        'End If
 
         'With _selectedPayment
         ' Usamos la propiedad DisplayName que definiremos en los DTOs
@@ -215,9 +213,7 @@ Public Class FrmCollectMembership
             Case strMtdPgs.Contains("DIARIO")
                 CmbMtdPgs.Text = "DIARIO"
                 TxtDetailMethod.Text = "CLASES SUELTAS : Pago por jornada individual."
-                TxtDetailMethod.BackColor = Color.FromArgb(255, 250, 240) ' FloralWhite
                 TxtDetailMethod.ForeColor = Color.DarkOrange
-                BtnPayMonth.BackColor = Color.FromArgb(255, 248, 220) ' Toque naranja suave al botón
 
             Case strMtdPgs.Contains("MENSUAL")
                 CmbMtdPgs.Text = "MENSUAL"
@@ -227,9 +223,7 @@ Public Class FrmCollectMembership
                 Else
                     TxtDetailMethod.Text = $"TARIFA INDIVIDUAL : Con descuento aplicado por edad {payment.DscPgs:C2}"
                 End If
-                TxtDetailMethod.BackColor = Color.FromArgb(240, 248, 255) ' AliceBlue
                 TxtDetailMethod.ForeColor = Color.RoyalBlue
-                BtnPayMonth.BackColor = Color.FromArgb(230, 240, 255) ' Toque azul suave
 
             Case strMtdPgs.Contains("GRUPAL")
                 CmbMtdPgs.Text = "GRUPO FAMILIAR"
@@ -237,9 +231,7 @@ Public Class FrmCollectMembership
                 If TypeOf payment Is GroupPaymentDTO Then
                     TxtDetailMethod.Text = "INTEGRANTES : " & DirectCast(payment, GroupPaymentDTO).Members
                 End If
-                TxtDetailMethod.BackColor = Color.FromArgb(245, 240, 255) ' Lavender
                 TxtDetailMethod.ForeColor = Color.Indigo
-                BtnPayMonth.BackColor = Color.FromArgb(240, 230, 255) ' Toque púrpura suave
 
                 'Case strMtdPgs.Contains("BONO")
                 '    CmbMtdPgs.Text = "BONO"
@@ -266,9 +258,7 @@ Public Class FrmCollectMembership
         LblPriceDay.ForeColor = Color.Red
         LblTotalToPay.Text = "ERROR"
         LblTotalToPay.ForeColor = Color.Red
-        'LblTtlPgs.Font = New System.Drawing.Font(LblTtlPgs.Font, FontStyle.Bold)
-        'LblPrcDisPgs.Font = New System.Drawing.Font(LblPrcDisPgs.Font, FontStyle.Bold)
-        'LblPagarPgs.Font = New System.Drawing.Font(LblPagarPgs.Font, FontStyle.Bold)
+
     End Sub
 
     Private Sub ChangeFontOk()
@@ -276,9 +266,7 @@ Public Class FrmCollectMembership
         LblTotal.ForeColor = Color.Green
         LblPriceDay.ForeColor = Color.Green
         LblTotalToPay.ForeColor = Color.Black
-        'LblTtlPgs.Font = New System.Drawing.Font(LblPrcPgs.Font, LblTtlPgs.Font.Style And Not FontStyle.Bold)
-        'LblPrcDisPgs.Font = New System.Drawing.Font(LblPrcDisPgs.Font, LblPrcPgs.Font.Style And Not FontStyle.Bold)
-        'LblPagarPgs.Font = New System.Drawing.Font(LblPagarPgs.Font, LblPrcPgs.Font.Style And Not FontStyle.Bold)
+
     End Sub
 
     Private Sub CalculatePrice()

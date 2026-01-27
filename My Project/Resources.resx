@@ -118,76 +118,91 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ic_monthly_30x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_monthly_30x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_go_out_34x31" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_go_out_34x31.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_cancel_c_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_cancel_c_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="img_user_password" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\img_user_password.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ic_add_group_37x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_add_group_37x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ic_remove_30x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_remove_30x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_inactive_50x50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_inactive_50x50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ic_new_24x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_new_24x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_okay_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_okay_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="juanhc" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\juanhc.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ic_close_22x22" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_close_22x22.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ic_cash_register_60x60" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_cash_register_60x60.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ic_cancel_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_cancel_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ic_delete_28x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_delete_28x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ic_client_37x35" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_client_37x35.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_update_28x27" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_update_28x27.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ic_pay_month_28x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_pay_month_28x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_rate_discount_45x33" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_rate_discount_45x33.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_cash_register_60x60" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_cash_register_60x60.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_save_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_save_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_delete_28x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_delete_28x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_error_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_error_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_remove_30x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_remove_30x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_family_group_53x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_family_group_53x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_okay_round_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_okay_round_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_update_28x27" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_update_28x27.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_cancel_c_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_cancel_c_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_go_out_34x31" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_go_out_34x31.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_cancel_pay_34x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_cancel_pay_34x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ic_defaulters_35x35" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_defaulters_35x35.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_modify_28x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_modify_28x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_add_group_37x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_add_group_37x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_monthly_30x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_monthly_30x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ic_daily_27x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_daily_27x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_cancel_pay_34x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_cancel_pay_34x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_rate_discount_45x33" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_rate_discount_45x33.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_search_28x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_search_28x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_save_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_save_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_okay_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_okay_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_family_group_53x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_family_group_53x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_close_22x22" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_close_22x22.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="juanhc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\juanhc.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_cancel_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_cancel_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="img_user_password" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\img_user_password.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_in_activity_50x50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_in_activity_50x50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_error_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_error_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_client_37x35" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_client_37x35.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_modify_28x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_modify_28x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_new_payment_28x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_new_payment_28x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

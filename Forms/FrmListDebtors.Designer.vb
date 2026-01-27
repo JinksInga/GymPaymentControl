@@ -46,7 +46,6 @@ Partial Class FrmListDebtors
         Me.StsStatusBar = New System.Windows.Forms.StatusStrip()
         Me.SlblTitle = New System.Windows.Forms.ToolStripStatusLabel()
         Me.SlblMessage = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.BtnClose = New System.Windows.Forms.Button()
         Me.PnlSearch = New System.Windows.Forms.Panel()
         Me.CmbFilter = New System.Windows.Forms.ComboBox()
         Me.BtnClean = New System.Windows.Forms.Button()
@@ -69,11 +68,6 @@ Partial Class FrmListDebtors
         Me.APgrGf = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.empty = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.DgvIndividual = New System.Windows.Forms.DataGridView()
-        Me.PbLogo = New System.Windows.Forms.PictureBox()
-        Me.BtnPayMonth = New System.Windows.Forms.Button()
-        Me.BtnPaymentGenerator = New System.Windows.Forms.Button()
-        Me.LblSolitos = New System.Windows.Forms.Label()
-        Me.LblToditos = New System.Windows.Forms.Label()
         Me.Nombre = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Apellido = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.AgeText = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -84,6 +78,10 @@ Partial Class FrmListDebtors
         Me.daysOfMonthInv = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.APagar = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Column = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.BtnCollectMonth = New System.Windows.Forms.Button()
+        Me.BtnPaymentGenerator = New System.Windows.Forms.Button()
+        Me.BtnClose = New System.Windows.Forms.Button()
+        Me.PbLogo = New System.Windows.Forms.PictureBox()
         Me.StsStatusBar.SuspendLayout()
         Me.PnlSearch.SuspendLayout()
         CType(Me.ErrorProvider, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -145,27 +143,6 @@ Partial Class FrmListDebtors
         Me.SlblMessage.Size = New System.Drawing.Size(904, 42)
         Me.SlblMessage.Text = " n Registros pendientes de pago."
         Me.SlblMessage.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        '
-        'BtnClose
-        '
-        Me.BtnClose.BackColor = System.Drawing.SystemColors.Control
-        Me.BtnClose.FlatAppearance.BorderColor = System.Drawing.Color.Red
-        Me.BtnClose.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(128, Byte), Integer), CType(CType(128, Byte), Integer))
-        Me.BtnClose.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(192, Byte), Integer))
-        Me.BtnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.BtnClose.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnClose.ForeColor = System.Drawing.Color.Brown
-        Me.BtnClose.Image = Global.GymPaymentControl.My.Resources.Resources.ic_close_22x22
-        Me.BtnClose.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnClose.Location = New System.Drawing.Point(1137, 607)
-        Me.BtnClose.Margin = New System.Windows.Forms.Padding(0, 56, 0, 0)
-        Me.BtnClose.Name = "BtnClose"
-        Me.BtnClose.Padding = New System.Windows.Forms.Padding(0, 4, 0, 2)
-        Me.BtnClose.Size = New System.Drawing.Size(140, 64)
-        Me.BtnClose.TabIndex = 6
-        Me.BtnClose.Text = "  &Cerrar ventana"
-        Me.BtnClose.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnClose.UseVisualStyleBackColor = False
         '
         'PnlSearch
         '
@@ -494,70 +471,6 @@ Partial Class FrmListDebtors
         Me.DgvIndividual.Size = New System.Drawing.Size(1078, 536)
         Me.DgvIndividual.TabIndex = 2
         '
-        'PbLogo
-        '
-        Me.PbLogo.Image = Global.GymPaymentControl.My.Resources.Resources.ic_cash_register_60x60
-        Me.PbLogo.Location = New System.Drawing.Point(25, 25)
-        Me.PbLogo.Margin = New System.Windows.Forms.Padding(16, 16, 0, 0)
-        Me.PbLogo.Name = "PbLogo"
-        Me.PbLogo.Size = New System.Drawing.Size(77, 77)
-        Me.PbLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PbLogo.TabIndex = 68
-        Me.PbLogo.TabStop = False
-        '
-        'BtnPayMonth
-        '
-        Me.BtnPayMonth.Enabled = False
-        Me.BtnPayMonth.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
-        Me.BtnPayMonth.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.BtnPayMonth.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnPayMonth.ForeColor = System.Drawing.Color.DarkGreen
-        Me.BtnPayMonth.Image = Global.GymPaymentControl.My.Resources.Resources.ic_pay_month_28x32
-        Me.BtnPayMonth.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnPayMonth.Location = New System.Drawing.Point(1127, 189)
-        Me.BtnPayMonth.Margin = New System.Windows.Forms.Padding(24, 0, 24, 0)
-        Me.BtnPayMonth.Name = "BtnPayMonth"
-        Me.BtnPayMonth.Size = New System.Drawing.Size(140, 64)
-        Me.BtnPayMonth.TabIndex = 4
-        Me.BtnPayMonth.Text = "&Pagar mes"
-        Me.BtnPayMonth.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnPayMonth.UseVisualStyleBackColor = True
-        '
-        'BtnPaymentGenerator
-        '
-        Me.BtnPaymentGenerator.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
-        Me.BtnPaymentGenerator.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.BtnPaymentGenerator.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnPaymentGenerator.ForeColor = System.Drawing.Color.DarkGreen
-        Me.BtnPaymentGenerator.Image = Global.GymPaymentControl.My.Resources.Resources.ic_pay_month_28x32
-        Me.BtnPaymentGenerator.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnPaymentGenerator.Location = New System.Drawing.Point(1127, 60)
-        Me.BtnPaymentGenerator.Margin = New System.Windows.Forms.Padding(24, 0, 24, 0)
-        Me.BtnPaymentGenerator.Name = "BtnPaymentGenerator"
-        Me.BtnPaymentGenerator.Size = New System.Drawing.Size(140, 92)
-        Me.BtnPaymentGenerator.TabIndex = 5
-        Me.BtnPaymentGenerator.Text = "&Nuevos pagos mensuales"
-        Me.BtnPaymentGenerator.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnPaymentGenerator.UseVisualStyleBackColor = True
-        '
-        'LblSolitos
-        '
-        Me.LblSolitos.AutoSize = True
-        Me.LblSolitos.Location = New System.Drawing.Point(24, 708)
-        Me.LblSolitos.Name = "LblSolitos"
-        Me.LblSolitos.Size = New System.Drawing.Size(52, 13)
-        Me.LblSolitos.TabIndex = 94
-        Me.LblSolitos.Text = "LblSolitos"
-        '
-        'LblToditos
-        '
-        Me.LblToditos.AutoSize = True
-        Me.LblToditos.Location = New System.Drawing.Point(24, 730)
-        Me.LblToditos.Name = "LblToditos"
-        Me.LblToditos.Size = New System.Drawing.Size(56, 13)
-        Me.LblToditos.TabIndex = 95
-        Me.LblToditos.Text = "LblToditos"
-        '
         'Nombre
         '
         Me.Nombre.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
@@ -682,14 +595,79 @@ Partial Class FrmListDebtors
         Me.Column.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
         Me.Column.Width = 4
         '
+        'BtnCollectMonth
+        '
+        Me.BtnCollectMonth.Enabled = False
+        Me.BtnCollectMonth.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
+        Me.BtnCollectMonth.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.BtnCollectMonth.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnCollectMonth.ForeColor = System.Drawing.Color.DarkGreen
+        Me.BtnCollectMonth.Image = Global.GymPaymentControl.My.Resources.Resources.ic_pay_month_28x32
+        Me.BtnCollectMonth.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnCollectMonth.Location = New System.Drawing.Point(1127, 189)
+        Me.BtnCollectMonth.Margin = New System.Windows.Forms.Padding(24, 0, 24, 0)
+        Me.BtnCollectMonth.Name = "BtnCollectMonth"
+        Me.BtnCollectMonth.Size = New System.Drawing.Size(140, 64)
+        Me.BtnCollectMonth.TabIndex = 4
+        Me.BtnCollectMonth.Text = "&Cobrar mes"
+        Me.BtnCollectMonth.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnCollectMonth.UseVisualStyleBackColor = True
+        '
+        'BtnPaymentGenerator
+        '
+        Me.BtnPaymentGenerator.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
+        Me.BtnPaymentGenerator.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.BtnPaymentGenerator.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnPaymentGenerator.ForeColor = System.Drawing.Color.DarkGreen
+        Me.BtnPaymentGenerator.Image = Global.GymPaymentControl.My.Resources.Resources.ic_pay_month_28x32
+        Me.BtnPaymentGenerator.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnPaymentGenerator.Location = New System.Drawing.Point(1125, 60)
+        Me.BtnPaymentGenerator.Margin = New System.Windows.Forms.Padding(24, 0, 24, 0)
+        Me.BtnPaymentGenerator.Name = "BtnPaymentGenerator"
+        Me.BtnPaymentGenerator.Size = New System.Drawing.Size(140, 92)
+        Me.BtnPaymentGenerator.TabIndex = 5
+        Me.BtnPaymentGenerator.Text = "&Nuevos pagos mensuales"
+        Me.BtnPaymentGenerator.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnPaymentGenerator.UseVisualStyleBackColor = True
+        '
+        'BtnClose
+        '
+        Me.BtnClose.BackColor = System.Drawing.SystemColors.Control
+        Me.BtnClose.FlatAppearance.BorderColor = System.Drawing.Color.Red
+        Me.BtnClose.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(128, Byte), Integer), CType(CType(128, Byte), Integer))
+        Me.BtnClose.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(192, Byte), Integer))
+        Me.BtnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.BtnClose.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnClose.ForeColor = System.Drawing.Color.Brown
+        Me.BtnClose.Image = Global.GymPaymentControl.My.Resources.Resources.ic_close_22x22
+        Me.BtnClose.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnClose.Location = New System.Drawing.Point(1137, 607)
+        Me.BtnClose.Margin = New System.Windows.Forms.Padding(0, 56, 0, 0)
+        Me.BtnClose.Name = "BtnClose"
+        Me.BtnClose.Padding = New System.Windows.Forms.Padding(0, 4, 0, 2)
+        Me.BtnClose.Size = New System.Drawing.Size(140, 64)
+        Me.BtnClose.TabIndex = 6
+        Me.BtnClose.Text = "  &Cerrar ventana"
+        Me.BtnClose.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnClose.UseVisualStyleBackColor = False
+        '
+        'PbLogo
+        '
+        Me.PbLogo.Image = Global.GymPaymentControl.My.Resources.Resources.ic_cash_register_60x60
+        Me.PbLogo.Location = New System.Drawing.Point(25, 25)
+        Me.PbLogo.Margin = New System.Windows.Forms.Padding(16, 16, 0, 0)
+        Me.PbLogo.Name = "PbLogo"
+        Me.PbLogo.Size = New System.Drawing.Size(77, 77)
+        Me.PbLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PbLogo.TabIndex = 68
+        Me.PbLogo.TabStop = False
+        '
         'FrmListDebtors
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1310, 855)
-        Me.Controls.Add(Me.BtnPayMonth)
-        Me.Controls.Add(Me.LblToditos)
-        Me.Controls.Add(Me.LblSolitos)
+        Me.Controls.Add(Me.BtnCollectMonth)
         Me.Controls.Add(Me.BtnPaymentGenerator)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.LblErrorProvider)
@@ -723,7 +701,7 @@ Partial Class FrmListDebtors
     Friend WithEvents BtnClose As Button
     Friend WithEvents PbLogo As PictureBox
     Friend WithEvents LblInformacion As Label
-    Friend WithEvents BtnPayMonth As Button
+    Friend WithEvents BtnCollectMonth As Button
     Friend WithEvents StsStatusBar As StatusStrip
     Friend WithEvents SlblTitle As ToolStripStatusLabel
     Friend WithEvents SlblMessage As ToolStripStatusLabel
@@ -741,8 +719,6 @@ Partial Class FrmListDebtors
     Friend WithEvents DgvFamilyGroup As DataGridView
     Friend WithEvents DgvIndividual As DataGridView
     Friend WithEvents BtnPaymentGenerator As Button
-    Friend WithEvents LblToditos As Label
-    Friend WithEvents LblSolitos As Label
     Friend WithEvents members As DataGridViewTextBoxColumn
     Friend WithEvents nom_grp As DataGridViewTextBoxColumn
     Friend WithEvents fdi_pgs_gf As DataGridViewTextBoxColumn

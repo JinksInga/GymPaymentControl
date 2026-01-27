@@ -312,5 +312,31 @@ Namespace Services
         ''
         ''
         ''
+        Public Function HasClients() As Boolean
+
+            Try
+                Using connection As New MySqlConnection(_connectionString)
+
+                    connection.Open()
+
+                    ' Un simple COUNT(1) es lo más rápido que existe en SQL
+                    Dim sqlQuery As String = "SELECT COUNT(1) FROM clientes"
+
+                    Using command As New MySqlCommand(sqlQuery, connection)
+                        Dim count = Convert.ToInt32(command.ExecuteScalar())
+                        Return count > 0
+                    End Using
+
+                End Using
+
+            Catch ex As Exception
+                ' Manejo de errores profesional
+                Throw New Exception("Error al verificar tabla clientes: " & ex.Message)
+            End Try
+
+        End Function
+        ''
+        ''
+        ''
     End Class
 End Namespace

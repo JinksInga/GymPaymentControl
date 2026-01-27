@@ -52,7 +52,7 @@ Partial Class FrmCollectMembership
         Me.TxtPrcPgs = New System.Windows.Forms.TextBox()
         Me.LblDisplayName = New System.Windows.Forms.Label()
         Me.BtnCancelPayment = New System.Windows.Forms.Button()
-        Me.BtnPayMonth = New System.Windows.Forms.Button()
+        Me.BtnConfirmPayment = New System.Windows.Forms.Button()
         Me.ToolTip = New System.Windows.Forms.ToolTip(Me.components)
         Me.GroupBox1.SuspendLayout()
         Me.Panel.SuspendLayout()
@@ -105,7 +105,7 @@ Partial Class FrmCollectMembership
         'TxtDetailMethod
         '
         Me.TxtDetailMethod.BackColor = System.Drawing.SystemColors.Window
-        Me.TxtDetailMethod.Font = New System.Drawing.Font("Arial", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TxtDetailMethod.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.TxtDetailMethod.Location = New System.Drawing.Point(21, 205)
         Me.TxtDetailMethod.Margin = New System.Windows.Forms.Padding(0, 0, 0, 16)
         Me.TxtDetailMethod.Multiline = True
@@ -442,25 +442,25 @@ Partial Class FrmCollectMembership
         Me.BtnCancelPayment.TextAlign = System.Drawing.ContentAlignment.BottomCenter
         Me.BtnCancelPayment.UseVisualStyleBackColor = False
         '
-        'BtnPayMonth
+        'BtnConfirmPayment
         '
-        Me.BtnPayMonth.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer))
-        Me.BtnPayMonth.FlatAppearance.MouseDownBackColor = System.Drawing.Color.AliceBlue
-        Me.BtnPayMonth.FlatAppearance.MouseOverBackColor = System.Drawing.Color.LightSteelBlue
-        Me.BtnPayMonth.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.BtnPayMonth.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnPayMonth.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer))
-        Me.BtnPayMonth.Image = Global.GymPaymentControl.My.Resources.Resources.ic_pay_month_28x32
-        Me.BtnPayMonth.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnPayMonth.Location = New System.Drawing.Point(705, 99)
-        Me.BtnPayMonth.Margin = New System.Windows.Forms.Padding(8, 0, 20, 0)
-        Me.BtnPayMonth.Name = "BtnPayMonth"
-        Me.BtnPayMonth.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
-        Me.BtnPayMonth.Size = New System.Drawing.Size(136, 64)
-        Me.BtnPayMonth.TabIndex = 2
-        Me.BtnPayMonth.Text = "&Pagar mes"
-        Me.BtnPayMonth.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnPayMonth.UseVisualStyleBackColor = True
+        Me.BtnConfirmPayment.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer))
+        Me.BtnConfirmPayment.FlatAppearance.MouseDownBackColor = System.Drawing.Color.AliceBlue
+        Me.BtnConfirmPayment.FlatAppearance.MouseOverBackColor = System.Drawing.Color.LightSteelBlue
+        Me.BtnConfirmPayment.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.BtnConfirmPayment.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnConfirmPayment.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer))
+        Me.BtnConfirmPayment.Image = Global.GymPaymentControl.My.Resources.Resources.ic_pay_month_28x32
+        Me.BtnConfirmPayment.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnConfirmPayment.Location = New System.Drawing.Point(705, 99)
+        Me.BtnConfirmPayment.Margin = New System.Windows.Forms.Padding(8, 0, 20, 0)
+        Me.BtnConfirmPayment.Name = "BtnConfirmPayment"
+        Me.BtnConfirmPayment.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.BtnConfirmPayment.Size = New System.Drawing.Size(136, 64)
+        Me.BtnConfirmPayment.TabIndex = 2
+        Me.BtnConfirmPayment.Text = "&Confirmar pago"
+        Me.BtnConfirmPayment.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnConfirmPayment.UseVisualStyleBackColor = True
         '
         'ToolTip
         '
@@ -477,11 +477,11 @@ Partial Class FrmCollectMembership
         Me.Controls.Add(Me.Panel)
         Me.Controls.Add(Me.LblDisplayName)
         Me.Controls.Add(Me.BtnCancelPayment)
-        Me.Controls.Add(Me.BtnPayMonth)
+        Me.Controls.Add(Me.BtnConfirmPayment)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Name = "FrmCollectMembership"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "PAGO - CUOTA MENSUAL"
+        Me.Text = "CUOTA MENSUAL O DIARIA"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.Panel.ResumeLayout(False)
@@ -516,7 +516,7 @@ Partial Class FrmCollectMembership
     Friend WithEvents LblTotalToPay As Label
     Friend WithEvents TxtPrcPgs As TextBox
     Friend WithEvents BtnCancelPayment As Button
-    Friend WithEvents BtnPayMonth As Button
+    Friend WithEvents BtnConfirmPayment As Button
     Friend WithEvents LblDisplayName As Label
     Friend WithEvents ChkFdiPgs As CheckBox
     Friend WithEvents ChkFdpPgs As CheckBox

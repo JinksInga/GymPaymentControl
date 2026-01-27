@@ -91,10 +91,10 @@ Public Class FrmListDebtors
                     Case 1 : DgvIndividual.CurrentCell = DgvIndividual.Item(1, 0) 'APELLIDO
                 End Select
 
-                BtnPayMonth.Enabled = True
+                BtnCollectMonth.Enabled = True
 
             Else
-                BtnPayMonth.Enabled = False
+                BtnCollectMonth.Enabled = False
 
             End If
 
@@ -144,10 +144,10 @@ Public Class FrmListDebtors
                     Case 1 : DgvFamilyGroup.CurrentCell = DgvFamilyGroup.Item(1, 0) 'NOMBRE DEL GRUPO
                 End Select
 
-                BtnPayMonth.Enabled = True
+                BtnCollectMonth.Enabled = True
 
             Else
-                BtnPayMonth.Enabled = False
+                BtnCollectMonth.Enabled = False
 
             End If
 
@@ -163,16 +163,27 @@ Public Class FrmListDebtors
         '|
         '|
         '|
+        ' Detectamos qué DGV estamos usando
+        Dim dgvActivo = If(RbPayIndividual.Checked, DgvIndividual, DgvFamilyGroup)
 
-        Dim totalReg As Integer = DgvIndividual.RowCount ' + DgvFamilyGroup.RowCount
+        ' Usamos la interfaz común para contar sin importar el tipo de DTO
+        Dim lista = TryCast(dgvActivo.DataSource, IEnumerable(Of IPaymentSummary))
 
-        If criterio = "" Then
-            SlblTitle.Text = If(totalReg = 0, "Lista vacía", "Nº de Registros")
+        If lista Is Nothing Then
+            SlblMessage.Text = "0 - Registros."
+            Exit Sub
+        End If
+
+        Dim totalReg = lista.Count(Function(x) Not x.IsSummaryRow)
+
+        If String.IsNullOrWhiteSpace(criterio) Then
+            SlblTitle.Text = "Nº de Registros"
             SlblMessage.Text = $" {totalReg} - Registros pendientes de pago."
         Else
             SlblTitle.Text = "Buscando..."
-            SlblMessage.Text = $" {totalReg} - Registro(s) que coincide(n) con su búsqueda."
+            SlblMessage.Text = $" {totalReg} - Resultado(s) encontrado(s)."
         End If
+
     End Sub
     ''
     ''
@@ -203,21 +214,29 @@ Public Class FrmListDebtors
             DgvIndividual.Visible = True
             DgvFamilyGroup.Visible = False
 
-            ' 2. Configurar ComboBox
+            ' 1. Limpiamos el texto sin disparar filtros innecesarios si es posible
+            TxtSearch.Clear()
+
+            ' 2. En lugar de ir a la BD, refrescamos el enlace con la lista que ya tenemos
+            ' Esto limpia cualquier filtro que haya quedado pegado en el Grid
+            DgvIndividual.DataSource = Nothing
+            DgvIndividual.DataSource = listIndividualPayment
+
+            ' 3. Ajustes finales de UI
             CmbFilter.Items.Clear()
             CmbFilter.Items.AddRange({"   NOMBRE", "   APELLIDO"})
             CmbFilter.SelectedIndex = 0
 
-            ' 3. Limpiar búsqueda anterior
-            TxtSearch.Clear()
             TxtSearch.Focus()
 
             ' 4. 
-            'DgvIndividual.CurrentCell = Nothing
-            DgvFamilyGroup.CurrentCell = Nothing
-            BtnPayMonth.Enabled = False
+            DgvIndividual.CurrentCell = Nothing
+            'DgvFamilyGroup.CurrentCell = Nothing
+            BtnCollectMonth.Enabled = False
+
+            ActualizarStatusBar("")
         End If
-        '
+
     End Sub
     ''
     ''
@@ -235,19 +254,27 @@ Public Class FrmListDebtors
             DgvIndividual.Visible = False
             DgvFamilyGroup.Visible = True
 
+            ' 3. Limpiar búsqueda anterior
+            TxtSearch.Clear()
+
+            ' 2. En lugar de ir a la BD, refrescamos el enlace con la lista que ya tenemos
+            ' Esto limpia cualquier filtro que haya quedado pegado en el Grid
+            DgvFamilyGroup.DataSource = Nothing
+            DgvFamilyGroup.DataSource = listGroupPayment
+
             ' 2. Configurar ComboBox
             CmbFilter.Items.Clear()
             CmbFilter.Items.AddRange({"   INTEGRANTES", "   NOMBRE GRUPO"})
             CmbFilter.SelectedIndex = 0
 
-            ' 3. Limpiar búsqueda anterior
-            TxtSearch.Clear()
             TxtSearch.Focus()
 
             ' 4. 
-            DgvIndividual.CurrentCell = Nothing
-            'DgvFamilyGroup.CurrentCell = Nothing
-            BtnPayMonth.Enabled = False
+            'DgvIndividual.CurrentCell = Nothing
+            DgvFamilyGroup.CurrentCell = Nothing
+            BtnCollectMonth.Enabled = False
+
+            ActualizarStatusBar("")
         End If
 
     End Sub
@@ -321,7 +348,7 @@ Public Class FrmListDebtors
         '|
         ' Si estamos buscando, no queremos que aparezcan iconos de error
         If _isFiltering Then Exit Sub
-        CheckRowDataGridView(DgvIndividual, LblErrorProvider, BtnPayMonth, ErrorProvider, "Selecciona una fila que contenga un PAGO.")
+        CheckRowDataGridView(DgvIndividual, LblErrorProvider, BtnCollectMonth, ErrorProvider, "Selecciona una fila que contenga un PAGO.")
 
     End Sub
     ''
@@ -394,13 +421,13 @@ Public Class FrmListDebtors
         '
         ' Si estamos buscando, no queremos que aparezcan iconos de error
         If _isFiltering Then Exit Sub
-        CheckRowDataGridView(DgvFamilyGroup, LblErrorProvider, BtnPayMonth, ErrorProvider, "Selecciona una fila que contenga un PAGO.")
+        CheckRowDataGridView(DgvFamilyGroup, LblErrorProvider, BtnCollectMonth, ErrorProvider, "Selecciona una fila que contenga un PAGO.")
 
     End Sub
     ''
     ''
     ''
-    Private Sub BtnPayMonth_Click(sender As Object, e As EventArgs) Handles BtnPayMonth.Click
+    Private Sub BtnPayMonth_Click(sender As Object, e As EventArgs) Handles BtnCollectMonth.Click
 
         '|
         '|
@@ -442,30 +469,51 @@ Public Class FrmListDebtors
         '|
         '|
 
-        Dim newMonth = Date.Now.ToString("MMMM").ToUpper
-        Dim strMsgBox As String = "                                ¡¡¡ ATENCIÓN !!!" & Environment.NewLine &
-                                  Environment.NewLine &
-                                  "   Se van a crear nuevos pagos mensuales para todos los" & Environment.NewLine &
-                                  $"   clientes y grupos familiares del mes de {newMonth}." & Environment.NewLine &
-                                  "   ________________________________________________________" & Environment.NewLine &
-                                  Environment.NewLine &
-                                  "                        ¿Estás seguro de crear registros masivos?"
+        Try
+            Dim newMonth = Date.Now.ToString("MMMM").ToUpper
+            Dim generator As New PaymentGenerator()
 
-        If MessageBox.Show(strMsgBox, "Registrar pagos nuevos", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) = DialogResult.Yes Then
+            ' 1. PRIMERO VALIDAMOS (Sin guardar nada aún)
+            ' Usamos la función de chequeo que no inserta registros
+            If Not generator.HasPendingMassivePayments() Then
 
-            Try
-                    Dim generator As New PaymentGenerator()
-
-                    generator.GenerateNewMonthPayments(UserSession.IdUser)
-
-                    MessageBox.Show("Se han generado los nuevos pagos correctamente.", "Pagos registrados", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
-                Catch ex As Exception
-                    MessageBox.Show("Error al generar deudas: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-
-                End Try
+                MessageBox.Show($"   Las membresías de SEPTIEMBRE ya están registradas en" & Environment.NewLine &
+                                "   la base de datos." & Environment.NewLine &
+                                Environment.NewLine &
+                                "   No es posible duplicar pagos existentes." & Environment.NewLine &
+                                "   ________________________________________________________" & Environment.NewLine &
+                                Environment.NewLine &
+                                "                                                          Operación cancelada.",
+                                "Aviso - Registro duplicado", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Exit Sub
 
             End If
+
+            ' 2. SI HAY PENDIENTES, PEDIMOS PERMISO
+            Dim strMsgBox As String = "                            ¡ ¡ ¡  ATENCIÓN  ! ! !" & Environment.NewLine & Environment.NewLine &
+                                      $"   Se crearán nuevos pagos de SEPTIEMBRE para todos los" & Environment.NewLine &
+                                      "   clientes y grupos familiares en actividad." & Environment.NewLine &
+                                      "   __________________________________________________________" & Environment.NewLine & Environment.NewLine &
+                                      "      ¿Desea continuar con la creación masiva de registros?"
+
+            If MessageBox.Show(strMsgBox, "Registrar pagos nuevos", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+
+                ' 3. SÓLO AQUÍ EJECUTAMOS EL GUARDADO REAL
+                ' Esta es la única vez que llamamos a la función que hace INSERT
+                Dim registrosCreados As Integer = generator.GenerateNewMonthPayments(UserSession.IdUser)
+
+                MessageBox.Show($"Se han generado {registrosCreados} nuevos pagos correctamente.",
+                                "Proceso finalizado", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+                ' Actualizamos la interfaz
+                RefreshDgvIndividual()
+                RefreshDgvFamilyGroup()
+                ActualizarStatusBar("")
+            End If
+
+        Catch ex As Exception
+            MessageBox.Show("Error al generar deudas: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
 
     End Sub
     ''
@@ -494,7 +542,7 @@ Public Class FrmListDebtors
             listIndividualPayment = _paymentManager.GetListIndividualDebtors()
             ConfigureDataGridView(DgvIndividual, "PrcPgs", "DscPgs", "Total", "APagar")
             LoadDataGridView(DgvIndividual, listIndividualPayment)
-            UpdateSummary(listIndividualPayment, LblSolitos)
+            ActualizarStatusBar("") 'UpdateSummary(listIndividualPayment, LblSoli)
 
         Catch ex As Exception
             MessageBox.Show($"Pagos individuales: {Environment.NewLine}{ex.Message}", "Error al cargar", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -514,7 +562,7 @@ Public Class FrmListDebtors
             listGroupPayment = _paymentManager.GetListGroupDebtors()
             ConfigureDataGridView(DgvFamilyGroup, "PrcPgsGf", "DscPgsGf", "TtlPgsGf", "ApgrGf")
             LoadDataGridView(DgvFamilyGroup, listGroupPayment)
-            UpdateSummary(listGroupPayment, LblToditos)
+            ActualizarStatusBar("") 'UpdateSummary(listGroupPayment, LblToditos)
 
         Catch ex As Exception
             MessageBox.Show($"Pagos grupales:{Environment.NewLine}{ex.Message}", "Error al cargar", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -569,18 +617,6 @@ Public Class FrmListDebtors
         dataGridView.DataSource = list
 
     End Sub
-
-    Private Sub UpdateSummary(Of T As IPaymentSummary)(list As List(Of T), label As Label)
-
-        '|
-        '|
-        '|
-
-        Dim outstandingPayments = list.Where(Function(x) Not x.IsSummaryRow).Count
-        label.Text = $"{outstandingPayments} - Registros pendientes de pago."
-
-    End Sub
-
 
     Private Sub OpenFrmCollectMembership(dto As IPaymentCalculable)
 
