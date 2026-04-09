@@ -24,13 +24,13 @@ Namespace Models
         ' Identificadores
         ' ======================
         Public Property IdPgs As Integer Implements IPaymentCalculable.IdPgs ' Id del pago
-        Public Property IdGrp As Integer            ' Id del grupo familiar
+        Public Property IdGrp As Integer ' Id del grupo familiar
 
         ' ======================
         ' Datos del grupo
         ' ======================
         Public Property GroupName As String
-        Public Property Members As String           ' Lista concatenada de integrantes
+        Public Property GroupMembers As String ' Lista concatenada de integrantes
 
         ' ======================
         ' Datos del pago
@@ -38,7 +38,7 @@ Namespace Models
         Public Property MtdPgs As String Implements IPaymentCalculable.MtdPgs ' Método de pago (GRUPAL)
         Public Property FdiPgs As Date Implements IPaymentCalculable.FdiPgs ' Fecha de inicio
         Public Property FdpPgs As Date Implements IPaymentCalculable.FdpPgs ' Fecha de pago
-        Public Property LongDate As String        ' Fecha formateada para UI
+        Public Property LongDate As String ' Fecha formateada para UI
 
         ' ======================
         ' Valores económicos
@@ -53,7 +53,7 @@ Namespace Models
         ' Control de resumen
         ' ======================
         Public Property IsSummaryRow As Boolean Implements IPaymentSummary.IsSummaryRow
-        Public Property NumberMonths As Integer            ' Nº de meses agrupados en la fila resumen
+        Public Property NumberMonths As Integer ' Nº de meses agrupados en la fila resumen
 
         ' ======================
         ' Propiedades calculadas
@@ -73,6 +73,12 @@ Namespace Models
             End Get
         End Property
 
+        'Devuelve una lista con los nombres de los integrantes del grupo
+        Public ReadOnly Property Members As String Implements IPaymentCalculable.Members
+            Get
+                Return Me.GroupMembers
+            End Get
+        End Property
         ''
         ''
     End Class

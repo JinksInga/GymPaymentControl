@@ -98,30 +98,7 @@ Public Class FrmCollectMembership
     ''
     ''
     Private Sub CmbMtdPgs_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CmbMtdPgs.SelectedIndexChanged
-
         '
-        '|
-        '|
-
-        'Dim strDetail As String
-
-        'Select Case CmbMtdPgs.SelectedIndex
-        '    Case 0 'BONO
-        '        strDetail = "Cuota mensual +" & vbCrLf & "guantes +" & vbCrLf & "vendas"
-
-        '    Case 1 'DIARIO
-        '        strDetail = "Pago diario, " & TxtPrcPgs.Text & " por cada clase suelta."
-
-        '    Case 2 'MENSAL
-        '        strDetail = "Con descuento de " & TxtDscPgs.Text & " por edad."
-
-        '    Case Else 'GRUPO FAMILIAR
-        '        strDetail = "Jinkis" & vbCrLf & "Sarita" & vbCrLf & "Marjorie"
-
-        'End Select
-
-        'TxtDetailMethod.Text = strDetail
-
     End Sub
     ''
     ''
@@ -185,29 +162,33 @@ Public Class FrmCollectMembership
     Public Sub PreparePayment(payment As IPaymentCalculable, mode As TransactionMode)
 
         _isLoading = True ' <-- BLOQUEO
-
-        _selectedPayment = payment ' _selectedPayment debe ser de tipo IPaymentCalculable
+        _selectedPayment = payment
         _currentMode = mode
 
-        ' Configuramos la UI según el modo
-        'If _currentMode = TransactionMode.NewPayment Then
-        '    Me.Text = "NUEVO PAGO MENSUAL"
-        '    BtnConfirmPayment.Text = "Registrar Pago"
+        'If _selectedPayment.MtdPgs.Contains("GRUPAL") AndAlso TypeOf _selectedPayment Is GroupPaymentDTO Then
+        '    ' Solo si es el DTO de Grupo (deudores) mostramos "GRUPO: XXX"
+        '    Dim gName As String = DirectCast(_selectedPayment, GroupPaymentDTO).GroupName
+        '    LblDisplayName.Text = "GRUPO: " & If(Not String.IsNullOrEmpty(gName), gName, "FAMILIAR")
         'Else
-        '    Me.Text = "COBRAR MES PENDIENTE"
-        '    BtnConfirmPayment.Text = "Confirmar Cobro"
+        '    ' En cualquier otro caso (Individual, Mensual, Diario), mostramos el nombre del Cliente
+        '    LblDisplayName.Text = _selectedPayment.DisplayName
         'End If
+        ' Si es el DTO de Grupo (deudores), priorizamos el nombre del grupo.
+        If TypeOf _selectedPayment Is GroupPaymentDTO Then
+            Dim gName As String = DirectCast(_selectedPayment, GroupPaymentDTO).GroupName
+            LblDisplayName.Text = "GRUPO: " & If(Not String.IsNullOrEmpty(gName), gName, "FAMILIAR")
+        Else
+            ' Si es Individual, Mensual o Diario, nombre del cliente normal.
+            LblDisplayName.Text = _selectedPayment.DisplayName
+        End If
 
-        'With _selectedPayment
-        ' Usamos la propiedad DisplayName que definiremos en los DTOs
-        LblDisplayName.Text = _selectedPayment.DisplayName
+        ' --- Asignación de Controles ---
         DtpFdiPgs.Value = _selectedPayment.FdiPgs
-
         ' Usamos los valores numéricos; el TextChanged se encargará del " €"
-        TxtPrcPgs.Text = $"{ _selectedPayment.PrcPgs} €"
-        TxtDscPgs.Text = $"{ _selectedPayment.DscPgs} €"
+        TxtPrcPgs.Text = $"{_selectedPayment.PrcPgs} €"
+        TxtDscPgs.Text = $"{_selectedPayment.DscPgs} €"
 
-        Dim strMtdPgs As String = _selectedPayment.MtdPgs 'Método de pago (DIARIO / MENSUAL / GRUPAL)
+        Dim strMtdPgs As String = _selectedPayment.MtdPgs
 
         Select Case True
             Case strMtdPgs.Contains("DIARIO")
@@ -217,7 +198,6 @@ Public Class FrmCollectMembership
 
             Case strMtdPgs.Contains("MENSUAL")
                 CmbMtdPgs.Text = "MENSUAL"
-
                 If payment.DscPgs = 0 Then
                     TxtDetailMethod.Text = "TARIFA INDIVIDUAL : Sin Descuento."
                 Else
@@ -228,28 +208,43 @@ Public Class FrmCollectMembership
             Case strMtdPgs.Contains("GRUPAL")
                 CmbMtdPgs.Text = "GRUPO FAMILIAR"
 
-                If TypeOf payment Is GroupPaymentDTO Then
-                    TxtDetailMethod.Text = "INTEGRANTES : " & DirectCast(payment, GroupPaymentDTO).Members
-                End If
-                TxtDetailMethod.ForeColor = Color.Indigo
+                'If TypeOf payment Is IndividualPaymentDTO Then
+                '    ' El nombre del grupo ya lo inyectamos en el botón del formulario anterior
+                '    ' Caso: Cliente individual con tarifa de grupo (Ficha de Cliente)
+                '    Dim ind = DirectCast(payment, IndividualPaymentDTO)
+                '    Dim strGroupName As String = If(Not String.IsNullOrEmpty(ind.GroupName), ind.GroupName, "un grupo familiar")
 
-                'Case strMtdPgs.Contains("BONO")
-                '    CmbMtdPgs.Text = "BONO"
+                '    'TxtDetailMethod.Text = $"NOTA: Este cobro aplica tarifa reducida por pertenecer a {strGroupName}."
+                '    TxtDetailMethod.Text = $"{strGroupName}{Environment.NewLine}" &
+                '        $"Este cobro aplica tarifa reducida aplicado a los grupos de Nº integrantes."
+                'Else
+                '    ' Caso: Cobro a toda la familia (Desde Deudores)
+                '    ' Si es GroupPaymentDTO (cobro masivo), mostramos integrantes
+                '    TxtDetailMethod.Text = "INTEGRANTES : " & payment.Members
+                'End If
+                ' Lógica de Nota Informativa vs Integrantes
+                If TypeOf _selectedPayment Is IndividualPaymentDTO Then
+                    ' Como GroupName ya está en la base, no necesitamos Shadows ni Castings complejos
+                    Dim ind = DirectCast(_selectedPayment, IndividualPaymentDTO)
+                    Dim nGrupo = If(Not String.IsNullOrEmpty(ind.GroupName), ind.GroupName, "un grupo familiar")
+                    TxtDetailMethod.Text = $"NOTA: Este cobro aplica tarifa reducida por pertenecer a: {nGrupo}."
+                Else
+                    ' Si es GroupPaymentDTO, mostramos la lista de miembros
+                    TxtDetailMethod.Text = "INTEGRANTES : " & _selectedPayment.Members
+                End If
+
+                TxtDetailMethod.ForeColor = Color.Indigo
 
             Case Else
                 CmbMtdPgs.SelectedIndex = -1
-
         End Select
 
         _isLoading = False ' <-- LIBERACIÓN
-
-        ' Llamamos a tu lógica de prorrateo
-        ''CalculateProratedPayment(_selectedPayment)
-        ' Ahora que todo está cargado, forzamos un único cálculo real
         CalculatePrice()
 
     End Sub
-
+    ''
+    ''
     Private Sub ChangeFontError()
         '
         LblTotal.Text = "ERROR"
@@ -283,7 +278,7 @@ Public Class FrmCollectMembership
             .DscPgs = ParseMoney(TxtDscPgs.Text)
 
             ' 2. Usamos tu nuevo módulo de utilidad
-            CalculateProratedPayment(_selectedPayment)
+            CalculatePaymentAmount(_selectedPayment)
 
             ' 3. Mostramos los resultados calculados en las etiquetas
             LblTotal.Text = .Total.ToString("C2")

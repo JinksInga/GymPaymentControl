@@ -122,6 +122,7 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\BaseRepository.vb" />
     <Compile Include="Data\SqlRepository.vb" />
     <Compile Include="Forms\FrmCollectMembership.Designer.vb">
       <DependentUpon>FrmCollectMembership.vb</DependentUpon>
@@ -184,12 +185,14 @@
     <Compile Include="Models\ClientPaymentDTO.vb" />
     <Compile Include="Models\GroupPaymentDTO.vb" />
     <Compile Include="Models\IndividualPaymentDTO.vb" />
+    <Compile Include="Models\RateResult.vb" />
     <Compile Include="Models\UserDTO.vb" />
     <Compile Include="Models\UserSession.vb" />
     <Compile Include="Services\AuthManager.vb" />
     <Compile Include="Services\PaymentGenerator.vb" />
     <Compile Include="Services\PaymentManager.vb" />
     <Compile Include="Utils\DateUtils.vb" />
+    <Compile Include="Utils\NavigateToForm.vb" />
     <Compile Include="Utils\PaymentCalculator.vb" />
     <Compile Include="Utils\Validations.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
@@ -208,7 +211,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Services\ClientService.vb" />
+    <Compile Include="Services\ClientManager.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Forms\FrmClientsPayments.resx">
@@ -320,6 +323,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <None Include="image\ic_cancel_search_30x30.png" />
     <None Include="image\ic_new_payment_28x32.png" />
     <None Include="image\ic_inactive_50x50.png" />
     <None Include="image\ic_in_activity_50x50.png" />

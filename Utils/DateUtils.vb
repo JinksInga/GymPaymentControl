@@ -60,6 +60,19 @@
             Return longDate.ToString("d MMMM yyyy", cultureEs).ToUpper()
 
         End Function
+
+        Public Function IsDateNotAssigned(noDate As DateTime) As Boolean
+
+            '|----------------------------------------------------------------------------
+            '| VALIDAR FECHAS NO VALIDAS O NO ASIGNADAS
+            '|-----------------------------------------
+            '| * Cuando en MySQL una fecha no es asignadas lo guarda como "0000-00-00",
+            '|   al leer ese valor el DataReader de VB.NET no puede mapear correctamente
+            '|   a DateTime convirtiendo automáticamente en DateTime.MinValue (01/01/0001)
+
+            Return noDate = Date.MinValue
+
+        End Function
         ''
         ''
         ''

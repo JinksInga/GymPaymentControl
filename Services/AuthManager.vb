@@ -1,24 +1,25 @@
-﻿Imports System.Configuration
-Imports System.Security.Cryptography
+﻿Imports System.Security.Cryptography
 Imports System.Text
+Imports GymPaymentControl.Data
 Imports GymPaymentControl.Models
 Imports MySql.Data.MySqlClient
 
 Namespace Services
     Public Class AuthManager
 
-        Private ReadOnly _connectionString As String = ConfigurationManager.ConnectionStrings("MyConnectionMySQL").ConnectionString
+        ' Al heredar, obtenemos el motor de conexión.
+        Inherits BaseRepository
 
         ' Busca un usuario y devuelve sus datos si existe
         Public Function GetUser(username As String) As UserDTO
 
-            Using conn As New MySqlConnection(_connectionString)
+            Using connection = GetConnection()
 
                 Dim sql = "SELECT id_user, nom_user, pwd_user, crg_user FROM usuarios WHERE nom_user = @user"
-                Dim cmd As New MySqlCommand(sql, conn)
+                Dim cmd As New MySqlCommand(sql, connection)
 
                 cmd.Parameters.AddWithValue("@user", username)
-                conn.Open()
+                connection.Open()
 
                 Using reader = cmd.ExecuteReader()
 
@@ -45,15 +46,15 @@ Namespace Services
         ' Valida Login completo
         Public Function ValidateLogin(username As String, password As String) As UserDTO
 
-            Using conn As New MySqlConnection(_connectionString)
+            Using connection = GetConnection()
 
                 Dim sql = "SELECT * FROM usuarios WHERE nom_user = @user AND pwd_user = @pwd"
-                Dim cmd As New MySqlCommand(sql, conn)
+                Dim cmd As New MySqlCommand(sql, connection)
                 Dim validateKey As String = EncryptKey(password)
 
                 cmd.Parameters.AddWithValue("@user", username)
                 cmd.Parameters.AddWithValue("@pwd", validateKey)
-                conn.Open()
+                connection.Open()
 
                 Using reader = cmd.ExecuteReader()
 
@@ -77,15 +78,15 @@ Namespace Services
         ' Actualiza la contraseña
         Public Sub UpdatePassword(userId As Integer, newPassword As String)
 
-            Using conn As New MySqlConnection(_connectionString)
+            Using connection = GetConnection()
 
                 Dim sql As String = "UPDATE usuarios SET pwd_user = @pwd WHERE id_user = @id"
 
-                Using cmd As New MySqlCommand(sql, conn)
+                Using cmd As New MySqlCommand(sql, connection)
 
                     cmd.Parameters.AddWithValue("@pwd", EncryptKey(newPassword))
                     cmd.Parameters.AddWithValue("@id", userId)
-                    conn.Open()
+                    connection.Open()
 
                     Dim filasAfectadas As Integer = cmd.ExecuteNonQuery()
 
@@ -123,14 +124,14 @@ Namespace Services
 
         Public Sub RegisterSession()
 
-            Using conn As New MySqlConnection(_connectionString)
+            Using connection = GetConnection() 'As New MySqlConnection(_connectionString)
                 ' Usamos NOW() de MySQL para que la hora la ponga el servidor de base de datos
                 Dim sql As String = "INSERT INTO sesion_user (id_user, fh_entrada) VALUES (@id, NOW())"
 
-                Using cmd As New MySqlCommand(sql, conn)
+                Using cmd As New MySqlCommand(sql, connection)
 
                     cmd.Parameters.AddWithValue("@id", UserSession.IdUser)
-                    conn.Open()
+                    connection.Open()
                     cmd.ExecuteNonQuery()
 
                 End Using

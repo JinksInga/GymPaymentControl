@@ -3,139 +3,55 @@ Imports MySql.Data.MySqlClient
 
 Public Module SqlRepository
 
-    Private ReadOnly ConnectionString As String = ConfigurationManager.ConnectionStrings("MyConnectionMySQL").ConnectionString
+    'Private ReadOnly ConnectionString As String = ConfigurationManager.ConnectionStrings("MyConnectionMySQL").ConnectionString
 
-    '|----------------------------------------------------
-    '| DEVUELVE TRUE SI LA CONSULTA TIENE REGISTROS
-    '|----------------------------------------------------
-    Public Function Exists(sqlQuery As String) As Boolean
+    'Public Function Exists(sqlQuery As String) As Boolean
 
-        Using conString As New MySqlConnection(ConnectionString)
+    '    Using conString As New MySqlConnection(ConnectionString)
 
-            Using sqlCommand As New MySqlCommand(sqlQuery, conString)
+    '        Using sqlCommand As New MySqlCommand(sqlQuery, conString)
 
-                conString.Open()
+    '            conString.Open()
 
-                Using exeReader = sqlCommand.ExecuteReader()
-                    Return exeReader.HasRows
-                End Using
+    '            Using exeReader = sqlCommand.ExecuteReader()
+    '                Return exeReader.HasRows
+    '            End Using
 
-            End Using
+    '        End Using
 
-        End Using
+    '    End Using
 
-    End Function
+    'End Function
 
-    '|----------------------------------------------------
-    '| DEVUELVE UN VALOR ESCALAR (ID, TOTAL, ETC)
-    '|----------------------------------------------------
-    Public Function ExecuteScalar(Of T)(sqlQuery As String, Optional existParameterList As List(Of MySqlParameter) = Nothing) As T
+    'Public Function ExecuteScalar(Of T)(sqlQuery As String, Optional existParameterList As List(Of MySqlParameter) = Nothing) As T
 
-        Using conString As New MySqlConnection(ConnectionString)
+    '    Using conString As New MySqlConnection(ConnectionString)
 
-            Using sqlCommand As New MySqlCommand(sqlQuery, conString)
+    '        Using sqlCommand As New MySqlCommand(sqlQuery, conString)
 
-                ' Si se pasan parámetros, agregarlos al comando
-                If existParameterList IsNot Nothing Then
-                    sqlCommand.Parameters.AddRange(existParameterList.ToArray())
-                End If
+    '            ' Si se pasan parámetros, agregarlos al comando
+    '            If existParameterList IsNot Nothing Then
+    '                sqlCommand.Parameters.AddRange(existParameterList.ToArray())
+    '            End If
 
-                conString.Open()
+    '            conString.Open()
 
-                Dim result As Object = sqlCommand.ExecuteScalar()
+    '            Dim result As Object = sqlCommand.ExecuteScalar()
 
-                ' Si la consulta no devuelve nada
-                If result Is Nothing OrElse result Is DBNull.Value Then
-                    Return Nothing
-                End If
+    '            ' Si la consulta no devuelve nada
+    '            If result Is Nothing OrElse result Is DBNull.Value Then
+    '                Return Nothing
+    '            End If
 
-                Return CType(result, T)
-            End Using
+    '            Return CType(result, T)
+    '        End Using
 
-        End Using
+    '    End Using
 
-    End Function
+    'End Function
 
-    ' Añade estas versiones que aceptan Transaction al SqlRepository
-    Public Function ExecuteScalar(sqlQuery As String, parameterList As List(Of MySqlParameter),
-                                  sqlConnection As MySqlConnection, sqlTransaction As MySqlTransaction) As Object
-
-        Using sqlCommand As New MySqlCommand(sqlQuery, sqlConnection)
-
-            sqlCommand.Transaction = sqlTransaction
-
-            If parameterList IsNot Nothing Then sqlCommand.Parameters.AddRange(parameterList.ToArray())
-
-            Return sqlCommand.ExecuteScalar()
-
-        End Using
-
-    End Function
-
-    '|----------------------------------------------------
-    '| DEVUELVE UN DataTable (PARA GRIDS)
-    '|----------------------------------------------------
-    Public Function GetDataTable(sqlQuery As String) As DataTable
-
-        Using conString As New MySqlConnection(ConnectionString)
-
-            Using sqlCommand As New MySqlCommand(sqlQuery, conString)
-
-                Using dtAdapter As New MySqlDataAdapter(sqlCommand)
-
-                    Dim dtTable As New DataTable()
-
-                    dtAdapter.Fill(dtTable)
-                    Return dtTable
-
-                End Using
-
-            End Using
-
-        End Using
-
-    End Function
-
-    '|-------------------------------------------------------------------------
-    '| Ejecuta una instrucción SQL que NO devuelve filas, NO se usa para SELECT
-    '|-------------------------------------------------------------------------
-    Public Sub ExecuteNonQuery(sqlQuery As String,
-                               parameterList As List(Of MySqlParameter),
-                               sqlConnection As MySqlConnection,
-                               sqlTransaction As MySqlTransaction)
-
-        Using sqlCommand As New MySqlCommand(sqlQuery, sqlConnection, sqlTransaction)
-
-            If parameterList IsNot Nothing Then sqlCommand.Parameters.AddRange(parameterList.ToArray()) 'End If
-
-            sqlCommand.ExecuteNonQuery()
-
-        End Using
-
-    End Sub
-
-    Public Sub ExecuteNonQuery(sqlQuery As String,
-                               Optional optParameterList As List(Of MySqlParameter) = Nothing)
-
-        Using connectionString As New MySqlConnection(SqlRepository.ConnectionString)
-
-            Using sqlCommand As New MySqlCommand(sqlQuery, connectionString)
-
-                If optParameterList IsNot Nothing Then sqlCommand.Parameters.AddRange(optParameterList.ToArray()) 'End If
-
-                connectionString.Open()
-                sqlCommand.ExecuteNonQuery()
-
-            End Using
-
-        End Using
-
-    End Sub
-    ' Añade estas versiones que aceptan Transaction al SqlRepository
-    'Public Function ExecuteNonQuery(sqlQuery As String,
-    '                                parameterList As List(Of MySqlParameter),
-    '                                sqlConnection As MySqlConnection,
-    '                                sqlTransaction As MySqlTransaction) As Integer
+    'Public Function ExecuteScalar(sqlQuery As String, parameterList As List(Of MySqlParameter),
+    '                              sqlConnection As MySqlConnection, sqlTransaction As MySqlTransaction) As Object
 
     '    Using sqlCommand As New MySqlCommand(sqlQuery, sqlConnection)
 
@@ -143,72 +59,24 @@ Public Module SqlRepository
 
     '        If parameterList IsNot Nothing Then sqlCommand.Parameters.AddRange(parameterList.ToArray())
 
-    '        Return sqlCommand.ExecuteNonQuery()
+    '        Return sqlCommand.ExecuteScalar()
 
     '    End Using
 
     'End Function
 
-    '|--------------------------------------------------------------------------------
-    '| INSERTAR UN REGISTRO A LA TABLA CLIENTES Y OBTENER EL ID DEL CLIENTE REGISTRADO
-    '|--------------------------------------------------------------------------------
-    '
-    ' Versión optimizada de tu función de repositorio
-    'Public Function ExecuteInsertAndGetId(sqlQuery As String, parameterList As List(Of MySqlParameter)) As Integer
-
-    '    Using conString As New MySqlConnection(ConnectionString)
-
-    '        ' Añadimos el SELECT al final del string SQL original
-    '        Using sqlCommand As New MySqlCommand(sqlQuery & "; SELECT LAST_INSERT_ID();", conString)
-
-    '            sqlCommand.Parameters.AddRange(parameterList.ToArray())
-    '            conString.Open()
-
-    '            ' ExecuteScalar ejecutará el INSERT y devolverá el resultado del SELECT LAST_INSERT_ID()
-    '            Return Convert.ToInt32(sqlCommand.ExecuteScalar())
-
-    '        End Using
-
-    '    End Using
-
-    'End Function
-    Public Function ExecuteInsertAndGetId(sqlQuery As String,
-                                          parameterList As List(Of MySqlParameter),
-                                          sqlConnection As MySqlConnection,
-                                          sqlTransaction As MySqlTransaction) As Integer
-
-        Using sqlCommand As New MySqlCommand(sqlQuery & "; SELECT LAST_INSERT_ID();", sqlConnection, sqlTransaction)
-
-            If parameterList IsNot Nothing Then sqlCommand.Parameters.AddRange(parameterList.ToArray()) 'End If
-
-            Return Convert.ToInt32(sqlCommand.ExecuteScalar())
-
-        End Using
-
-    End Function
-
-    '|-------------------------------------------------------------------------
-    '| OBTENER LA TARIFA CORRESPONDIENTE DEL NUEVO CLIENTE O DEL GRUPO FAMILIAR
-    '|-------------------------------------------------------------------------
-    'Public Function GetRate(sqlQuery As String, parameterList As List(Of MySqlParameter)) As RateResult
-
-    '    Dim resultado As New RateResult With {.Exists = False, .Price = 0, .Discount = 0}
+    'Public Function GetDataTable(sqlQuery As String) As DataTable
 
     '    Using conString As New MySqlConnection(ConnectionString)
 
     '        Using sqlCommand As New MySqlCommand(sqlQuery, conString)
 
-    '            If parameterList IsNot Nothing Then sqlCommand.Parameters.AddRange(parameterList.ToArray())
+    '            Using dtAdapter As New MySqlDataAdapter(sqlCommand)
 
-    '            conString.Open()
+    '                Dim dtTable As New DataTable()
 
-    '            Using exeReader = sqlCommand.ExecuteReader()
-
-    '                If exeReader.Read() Then
-    '                    resultado.Exists = True
-    '                    resultado.Price = If(exeReader.IsDBNull(0), 0, exeReader.GetDecimal(0))
-    '                    resultado.Discount = If(exeReader.IsDBNull(1), 0, exeReader.GetDecimal(1))
-    '                End If
+    '                dtAdapter.Fill(dtTable)
+    '                Return dtTable
 
     '            End Using
 
@@ -216,71 +84,132 @@ Public Module SqlRepository
 
     '    End Using
 
-    '    Return resultado
+    'End Function
+
+    'Public Sub ExecuteNonQuery(sqlQuery As String,
+    '                           parameterList As List(Of MySqlParameter),
+    '                           sqlConnection As MySqlConnection,
+    '                           sqlTransaction As MySqlTransaction)
+
+    '    Using sqlCommand As New MySqlCommand(sqlQuery, sqlConnection, sqlTransaction)
+
+    '        If parameterList IsNot Nothing Then sqlCommand.Parameters.AddRange(parameterList.ToArray()) 'End If
+
+    '        sqlCommand.ExecuteNonQuery()
+
+    '    End Using
+
+    'End Sub
+
+    'Public Sub ExecuteNonQuery(sqlQuery As String,
+    '                           Optional optParameterList As List(Of MySqlParameter) = Nothing)
+
+    '    Using connectionString As New MySqlConnection(SqlRepository.ConnectionString)
+
+    '        Using sqlCommand As New MySqlCommand(sqlQuery, connectionString)
+
+    '            If optParameterList IsNot Nothing Then sqlCommand.Parameters.AddRange(optParameterList.ToArray()) 'End If
+
+    '            connectionString.Open()
+    '            sqlCommand.ExecuteNonQuery()
+
+    '        End Using
+
+    '    End Using
+
+    'End Sub
+
+    'Public Function ExecuteInsertAndGetId(sqlQuery As String,
+    '                                      parameterList As List(Of MySqlParameter),
+    '                                      sqlConnection As MySqlConnection,
+    '                                      sqlTransaction As MySqlTransaction) As Integer
+
+    '    Using sqlCommand As New MySqlCommand(sqlQuery & "; SELECT LAST_INSERT_ID();", sqlConnection, sqlTransaction)
+
+    '        If parameterList IsNot Nothing Then sqlCommand.Parameters.AddRange(parameterList.ToArray())
+
+    '        Return Convert.ToInt32(sqlCommand.ExecuteScalar())
+
+    '    End Using
 
     'End Function
-    Public Function GetRate(sqlQuery As String,
-                            parameterList As List(Of MySqlParameter),
-                            sqlConnection As MySqlConnection,
-                            sqlTransaction As MySqlTransaction) As RateResult
 
-        Dim result As New RateResult With {.Exists = False}
+    'Public Function GetRate(sqlQuery As String,
+    '                        parameterList As List(Of MySqlParameter),
+    '                        sqlConnection As MySqlConnection,
+    '                        sqlTransaction As MySqlTransaction) As RateResult
 
-        Using sqlCommand As New MySqlCommand(sqlQuery, sqlConnection, sqlTransaction)
+    '    Dim result As New RateResult With {.Exists = False}
 
-            If parameterList IsNot Nothing Then sqlCommand.Parameters.AddRange(parameterList.ToArray()) 'End If
+    '    Using sqlCommand As New MySqlCommand(sqlQuery, sqlConnection, sqlTransaction)
 
-            Using dr = sqlCommand.ExecuteReader()
+    '        If parameterList IsNot Nothing Then sqlCommand.Parameters.AddRange(parameterList.ToArray())
 
-                If dr.Read() Then
-                    result.Exists = True
-                    result.Exists = If(dr.IsDBNull(0), 0D, dr.GetDecimal(0))
-                    result.Discount = If(dr.IsDBNull(1), 0D, dr.GetDecimal(1))
-                End If
+    '        Using dr = sqlCommand.ExecuteReader()
 
-            End Using
+    '            If dr.Read() Then
+    '                result.Exists = True
+    '                result.Exists = If(dr.IsDBNull(0), 0D, dr.GetDecimal(0))
+    '                result.Discount = If(dr.IsDBNull(1), 0D, dr.GetDecimal(1))
+    '            End If
 
-        End Using
+    '        End Using
 
-        Return result
+    '    End Using
 
-    End Function
+    '    Return result
+
+    'End Function
 
     '|-------------------------------------
     '| ESTRUCTURA PARA LA FUNCION GetRate
     '|-------------------------------------
-    Public Structure RateResult
-        Public Exists As Boolean
-        Public Price As Decimal
-        Public Discount As Decimal
-    End Structure
+    'Public Structure RateResult
+    '    Public Exists As Boolean
+    '    Public Price As Decimal
+    '    Public Discount As Decimal
+    'End Structure
 
     '|----------
     '| en principio sirve para mostrar los pagos diarios clases suelas, tambien nos muestra los datos de la tabla grupo
     '|----------
     '|
-    Public Function ExecuteDataTable(sqlQuery As String, parameterList As List(Of MySqlParameter)) As DataTable
+    'Public Function ExecuteDataTable(sqlQuery As String, parameterList As List(Of MySqlParameter)) As DataTable
 
-        Dim dtTable As New DataTable()
+    '    Dim dtTable As New DataTable()
 
-        Using conString As New MySqlConnection(ConnectionString)
+    '    Using conString As New MySqlConnection(ConnectionString)
 
-            Using sqlCommand As New MySqlCommand(sqlQuery, conString)
+    '        Using sqlCommand As New MySqlCommand(sqlQuery, conString)
 
-                If parameterList IsNot Nothing AndAlso parameterList.Count > 0 Then
-                    sqlCommand.Parameters.AddRange(parameterList.ToArray())
-                End If
+    '            If parameterList IsNot Nothing AndAlso parameterList.Count > 0 Then
+    '                sqlCommand.Parameters.AddRange(parameterList.ToArray())
+    '            End If
 
-                Using dtAdapter As New MySqlDataAdapter(sqlCommand)
-                    dtAdapter.Fill(dtTable)
-                End Using
+    '            Using dtAdapter As New MySqlDataAdapter(sqlCommand)
+    '                dtAdapter.Fill(dtTable)
+    '            End Using
 
-            End Using
+    '        End Using
 
-        End Using
+    '    End Using
 
-        Return dtTable
+    '    Return dtTable
 
-    End Function
+    'End Function
+
+    ''Mantenemos GetDataTable por si algún reporte viejo lo necesita
+    'Protected Function ExecuteDataTable(sqlQuery As String, Optional parameterList As List(Of MySqlParameter) = Nothing) As DataTable
+    '    Dim dtTable As New DataTable()
+    '    Using conn = GetConnection()
+    '        Using cmd As New MySqlCommand(sqlQuery, conn)
+    '            If parameterList IsNot Nothing Then cmd.Parameters.AddRange(parameterList.ToArray())
+    '            Using dtAdapter As New MySqlDataAdapter(cmd)
+    '                dtAdapter.Fill(dtTable)
+    '            End Using
+    '        End Using
+    '    End Using
+    '    Return dtTable
+    'End Function
 
 End Module

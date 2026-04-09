@@ -121,8 +121,8 @@
   <data name="ic_go_out_34x31" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_go_out_34x31.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_inactive_50x50" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_inactive_50x50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_in_activity_50x50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_in_activity_50x50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ic_new_24x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_new_24x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -142,11 +142,11 @@
   <data name="ic_remove_30x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_remove_30x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_okay_round_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_okay_round_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="ic_cancel_c_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_cancel_c_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ic_new_payment_28x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_new_payment_28x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ic_cancel_pay_34x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_cancel_pay_34x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -172,6 +172,9 @@
   <data name="ic_save_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_save_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="ic_inactive_50x50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_inactive_50x50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="ic_okay_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_okay_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -190,8 +193,8 @@
   <data name="img_user_password" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\img_user_password.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_in_activity_50x50" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_in_activity_50x50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_okay_round_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_okay_round_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ic_error_28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_error_28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -202,7 +205,7 @@
   <data name="ic_modify_28x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\ic_modify_28x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ic_new_payment_28x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\ic_new_payment_28x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ic_cancel_search_30x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\ic_cancel_search_30x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

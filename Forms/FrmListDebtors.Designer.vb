@@ -68,10 +68,10 @@ Partial Class FrmListDebtors
         Me.APgrGf = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.empty = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.DgvIndividual = New System.Windows.Forms.DataGridView()
-        Me.Nombre = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.Apellido = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.NomCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.ApeCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.AgeText = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.MesAnio = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.FdiPgs = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.PrcPgs = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.DscPgs = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Total = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -442,7 +442,7 @@ Partial Class FrmListDebtors
         Me.DgvIndividual.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1
         Me.DgvIndividual.ColumnHeadersHeight = 32
         Me.DgvIndividual.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
-        Me.DgvIndividual.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.Nombre, Me.Apellido, Me.AgeText, Me.MesAnio, Me.PrcPgs, Me.DscPgs, Me.Total, Me.daysOfMonthInv, Me.APagar, Me.Column})
+        Me.DgvIndividual.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.NomCli, Me.ApeCli, Me.AgeText, Me.FdiPgs, Me.PrcPgs, Me.DscPgs, Me.Total, Me.daysOfMonthInv, Me.APagar, Me.Column})
         DataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
         DataGridViewCellStyle9.BackColor = System.Drawing.Color.MistyRose
         DataGridViewCellStyle9.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
@@ -471,27 +471,27 @@ Partial Class FrmListDebtors
         Me.DgvIndividual.Size = New System.Drawing.Size(1078, 536)
         Me.DgvIndividual.TabIndex = 2
         '
-        'Nombre
+        'NomCli
         '
-        Me.Nombre.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.Nombre.DataPropertyName = "Name"
-        Me.Nombre.HeaderText = "NOMBRE"
-        Me.Nombre.Name = "Nombre"
-        Me.Nombre.ReadOnly = True
-        Me.Nombre.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.Nombre.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.Nombre.Width = 185
+        Me.NomCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.NomCli.DataPropertyName = "Name"
+        Me.NomCli.HeaderText = "NOMBRE"
+        Me.NomCli.Name = "NomCli"
+        Me.NomCli.ReadOnly = True
+        Me.NomCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.NomCli.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.NomCli.Width = 185
         '
-        'Apellido
+        'ApeCli
         '
-        Me.Apellido.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.Apellido.DataPropertyName = "LastName"
-        Me.Apellido.HeaderText = "APELLIDO"
-        Me.Apellido.Name = "Apellido"
-        Me.Apellido.ReadOnly = True
-        Me.Apellido.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.Apellido.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.Apellido.Width = 185
+        Me.ApeCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.ApeCli.DataPropertyName = "LastName"
+        Me.ApeCli.HeaderText = "APELLIDO"
+        Me.ApeCli.Name = "ApeCli"
+        Me.ApeCli.ReadOnly = True
+        Me.ApeCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.ApeCli.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.ApeCli.Width = 185
         '
         'AgeText
         '
@@ -506,18 +506,18 @@ Partial Class FrmListDebtors
         Me.AgeText.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
         Me.AgeText.Width = 95
         '
-        'MesAnio
+        'FdiPgs
         '
-        Me.MesAnio.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.MesAnio.DataPropertyName = "LongDate"
+        Me.FdiPgs.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.FdiPgs.DataPropertyName = "LongFdiPgs"
         DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        Me.MesAnio.DefaultCellStyle = DataGridViewCellStyle3
-        Me.MesAnio.HeaderText = "MES Y AÑO"
-        Me.MesAnio.Name = "MesAnio"
-        Me.MesAnio.ReadOnly = True
-        Me.MesAnio.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.MesAnio.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.MesAnio.Width = 135
+        Me.FdiPgs.DefaultCellStyle = DataGridViewCellStyle3
+        Me.FdiPgs.HeaderText = "MES Y AÑO"
+        Me.FdiPgs.Name = "FdiPgs"
+        Me.FdiPgs.ReadOnly = True
+        Me.FdiPgs.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.FdiPgs.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.FdiPgs.Width = 135
         '
         'PrcPgs
         '
@@ -728,10 +728,10 @@ Partial Class FrmListDebtors
     Friend WithEvents daysOfMonthGrp As DataGridViewTextBoxColumn
     Friend WithEvents APgrGf As DataGridViewTextBoxColumn
     Friend WithEvents empty As DataGridViewTextBoxColumn
-    Friend WithEvents Nombre As DataGridViewTextBoxColumn
-    Friend WithEvents Apellido As DataGridViewTextBoxColumn
+    Friend WithEvents NomCli As DataGridViewTextBoxColumn
+    Friend WithEvents ApeCli As DataGridViewTextBoxColumn
     Friend WithEvents AgeText As DataGridViewTextBoxColumn
-    Friend WithEvents MesAnio As DataGridViewTextBoxColumn
+    Friend WithEvents FdiPgs As DataGridViewTextBoxColumn
     Friend WithEvents PrcPgs As DataGridViewTextBoxColumn
     Friend WithEvents DscPgs As DataGridViewTextBoxColumn
     Friend WithEvents Total As DataGridViewTextBoxColumn

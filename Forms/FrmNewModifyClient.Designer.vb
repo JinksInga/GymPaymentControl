@@ -23,8 +23,8 @@ Partial Class FrmNewModifyClient
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.ToolTip = New System.Windows.Forms.ToolTip(Me.components)
         Me.GbOtros = New System.Windows.Forms.GroupBox()
         Me.RbInactiveState = New System.Windows.Forms.RadioButton()
@@ -131,7 +131,7 @@ Partial Class FrmNewModifyClient
         Me.LblEstadoCli.Margin = New System.Windows.Forms.Padding(0, 12, 0, 0)
         Me.LblEstadoCli.Name = "LblEstadoCli"
         Me.LblEstadoCli.Size = New System.Drawing.Size(114, 16)
-        Me.LblEstadoCli.TabIndex = 4
+        Me.LblEstadoCli.TabIndex = 1
         Me.LblEstadoCli.Text = "Estado del cliente"
         '
         'DtpFdi
@@ -154,7 +154,7 @@ Partial Class FrmNewModifyClient
         Me.LblFinscripcion.Margin = New System.Windows.Forms.Padding(24, 12, 0, 0)
         Me.LblFinscripcion.Name = "LblFinscripcion"
         Me.LblFinscripcion.Size = New System.Drawing.Size(131, 16)
-        Me.LblFinscripcion.TabIndex = 3
+        Me.LblFinscripcion.TabIndex = 0
         Me.LblFinscripcion.Text = "Fecha de Inscripción"
         '
         'GbMetodoPago
@@ -282,20 +282,20 @@ Partial Class FrmNewModifyClient
         Me.DgvListaNombre.AllowUserToDeleteRows = False
         Me.DgvListaNombre.AllowUserToResizeColumns = False
         Me.DgvListaNombre.AllowUserToResizeRows = False
-        DataGridViewCellStyle1.BackColor = System.Drawing.Color.White
-        Me.DgvListaNombre.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle1
+        DataGridViewCellStyle3.BackColor = System.Drawing.Color.White
+        Me.DgvListaNombre.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle3
         Me.DgvListaNombre.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None
         Me.DgvListaNombre.ColumnHeadersHeight = 4
         Me.DgvListaNombre.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
         Me.DgvListaNombre.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.ColIdGrupo, Me.ColNomGrupo, Me.ColNumIntgrntes, Me.ColIntgrntesReg})
-        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        DataGridViewCellStyle2.BackColor = System.Drawing.Color.PaleTurquoise
-        DataGridViewCellStyle2.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText
-        DataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        DataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.DgvListaNombre.DefaultCellStyle = DataGridViewCellStyle2
+        DataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle4.BackColor = System.Drawing.Color.PaleTurquoise
+        DataGridViewCellStyle4.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText
+        DataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        DataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.DgvListaNombre.DefaultCellStyle = DataGridViewCellStyle4
         Me.DgvListaNombre.Enabled = False
         Me.DgvListaNombre.Location = New System.Drawing.Point(0, 56)
         Me.DgvListaNombre.Margin = New System.Windows.Forms.Padding(0, 4, 0, 0)
@@ -429,7 +429,7 @@ Partial Class FrmNewModifyClient
         Me.LblDireccion.Margin = New System.Windows.Forms.Padding(0, 12, 0, 0)
         Me.LblDireccion.Name = "LblDireccion"
         Me.LblDireccion.Size = New System.Drawing.Size(64, 16)
-        Me.LblDireccion.TabIndex = 5
+        Me.LblDireccion.TabIndex = 2
         Me.LblDireccion.Text = "Dirección"
         '
         'LblEmail
@@ -440,7 +440,7 @@ Partial Class FrmNewModifyClient
         Me.LblEmail.Margin = New System.Windows.Forms.Padding(0, 12, 0, 0)
         Me.LblEmail.Name = "LblEmail"
         Me.LblEmail.Size = New System.Drawing.Size(45, 16)
-        Me.LblEmail.TabIndex = 4
+        Me.LblEmail.TabIndex = 1
         Me.LblEmail.Text = "E-Mail"
         '
         'LblTelefono
@@ -451,7 +451,7 @@ Partial Class FrmNewModifyClient
         Me.LblTelefono.Margin = New System.Windows.Forms.Padding(0, 12, 0, 0)
         Me.LblTelefono.Name = "LblTelefono"
         Me.LblTelefono.Size = New System.Drawing.Size(61, 16)
-        Me.LblTelefono.TabIndex = 3
+        Me.LblTelefono.TabIndex = 0
         Me.LblTelefono.Text = "Teléfono"
         '
         'GbDatos
@@ -494,7 +494,7 @@ Partial Class FrmNewModifyClient
         Me.LblEdad.Margin = New System.Windows.Forms.Padding(0)
         Me.LblEdad.Name = "LblEdad"
         Me.LblEdad.Size = New System.Drawing.Size(40, 16)
-        Me.LblEdad.TabIndex = 7
+        Me.LblEdad.TabIndex = 3
         Me.LblEdad.Text = "Edad"
         '
         'TxtApellido
@@ -546,7 +546,7 @@ Partial Class FrmNewModifyClient
         Me.LblFnacimiento.Margin = New System.Windows.Forms.Padding(0, 12, 0, 0)
         Me.LblFnacimiento.Name = "LblFnacimiento"
         Me.LblFnacimiento.Size = New System.Drawing.Size(135, 16)
-        Me.LblFnacimiento.TabIndex = 6
+        Me.LblFnacimiento.TabIndex = 2
         Me.LblFnacimiento.Text = "Fecha de Nacimiento"
         '
         'LblApellido
@@ -557,7 +557,7 @@ Partial Class FrmNewModifyClient
         Me.LblApellido.Margin = New System.Windows.Forms.Padding(0, 12, 0, 0)
         Me.LblApellido.Name = "LblApellido"
         Me.LblApellido.Size = New System.Drawing.Size(57, 16)
-        Me.LblApellido.TabIndex = 5
+        Me.LblApellido.TabIndex = 1
         Me.LblApellido.Text = "Apellido"
         '
         'LblNombre
@@ -568,7 +568,7 @@ Partial Class FrmNewModifyClient
         Me.LblNombre.Margin = New System.Windows.Forms.Padding(24, 12, 0, 0)
         Me.LblNombre.Name = "LblNombre"
         Me.LblNombre.Size = New System.Drawing.Size(56, 16)
-        Me.LblNombre.TabIndex = 4
+        Me.LblNombre.TabIndex = 0
         Me.LblNombre.Text = "Nombre"
         '
         'BtnActualizar

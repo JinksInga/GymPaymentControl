@@ -11,6 +11,9 @@
         ' Mostrar el nombre completo y la edad del cliente o el nombre del grupo familiar
         ReadOnly Property DisplayName As String
 
+        ' Para mostrar los integrantes de un grupo famillliar
+        ReadOnly Property Members As String
+
         ' Identificador único para poder hacer el UPDATE en la BD
         Property IdPgs As Integer
 

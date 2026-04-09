@@ -1,14 +1,13 @@
-﻿Imports GymPaymentControl.FrmCollectMembership
-Imports GymPaymentControl.Interfaces
+﻿Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
-
+Imports GymPaymentControl.Utils
 
 Public Class FrmListDebtors
     '
     Private ReadOnly _paymentManager As New PaymentManager()
     Private ReadOnly _fontSummary As Font = New Font("Arial", 10, FontStyle.Bold)
-    Private _isFiltering As Boolean = False
+    Private _isFiltering As Boolean ' = False
 
     ' Variables para guardar la carga completa original
     Private listIndividualPayment As List(Of IndividualPaymentDTO)
@@ -114,7 +113,7 @@ Public Class FrmListDebtors
                                            Dim coincideWith As Boolean = False
 
                                            If CmbFilter.SelectedIndex = 0 Then
-                                               coincideWith = (x.Members IsNot Nothing AndAlso x.Members.Contains(searchCriteria))
+                                               coincideWith = (x.GroupMembers IsNot Nothing AndAlso x.GroupMembers.Contains(searchCriteria))
                                            Else
                                                coincideWith = (x.GroupName IsNot Nothing AndAlso x.GroupName.Contains(searchCriteria))
                                            End If
@@ -124,7 +123,7 @@ Public Class FrmListDebtors
                                               listGroupPayment.Any(Function(group)
                                                                        Return group.IdGrp =
                                                                        x.IdGrp AndAlso Not group.IsSummaryRow AndAlso
-                                                                       ((CmbFilter.SelectedIndex = 0 AndAlso group.Members IsNot Nothing AndAlso group.Members.Contains(searchCriteria)) OrElse
+                                                                       ((CmbFilter.SelectedIndex = 0 AndAlso group.GroupMembers IsNot Nothing AndAlso group.GroupMembers.Contains(searchCriteria)) OrElse
                                                                        (CmbFilter.SelectedIndex = 1 AndAlso group.GroupName IsNot Nothing AndAlso group.GroupName.Contains(searchCriteria)))
                                                                    End Function)
 
@@ -231,7 +230,6 @@ Public Class FrmListDebtors
 
             ' 4. 
             DgvIndividual.CurrentCell = Nothing
-            'DgvFamilyGroup.CurrentCell = Nothing
             BtnCollectMonth.Enabled = False
 
             ActualizarStatusBar("")
@@ -270,7 +268,6 @@ Public Class FrmListDebtors
             TxtSearch.Focus()
 
             ' 4. 
-            'DgvIndividual.CurrentCell = Nothing
             DgvFamilyGroup.CurrentCell = Nothing
             BtnCollectMonth.Enabled = False
 
@@ -427,19 +424,18 @@ Public Class FrmListDebtors
     ''
     ''
     ''
-    Private Sub BtnPayMonth_Click(sender As Object, e As EventArgs) Handles BtnCollectMonth.Click
+    Private Sub BtnCollectMonth_Click(sender As Object, e As EventArgs) Handles BtnCollectMonth.Click
 
         '|
         '|
         '|
         If RbPayIndividual.Checked Then
 
-            Dim dto = TryCast(DgvIndividual.CurrentRow?.DataBoundItem, IndividualPaymentDTO)
+            Dim selectedPayment = TryCast(DgvIndividual.CurrentRow?.DataBoundItem, IndividualPaymentDTO)
 
-            If dto IsNot Nothing AndAlso Not dto.IsSummaryRow Then
-                ' Creamos la copia antes de enviarla al formulario, blindaje total
-                Dim dtoClone = DirectCast(dto.Clone(), IndividualPaymentDTO)
-                OpenFrmCollectMembership(dto)
+            If selectedPayment IsNot Nothing AndAlso Not selectedPayment.IsSummaryRow Then
+                ' Aquí le pasamos la función que refresca los deudores individuales
+                OpenFrmCollectMembership(selectedPayment, AddressOf RefreshDgvIndividual)
             Else
                 ShowMessageBox()
             End If
@@ -448,12 +444,11 @@ Public Class FrmListDebtors
 
         If RbPayGroup.Checked Then
 
-            Dim dto = TryCast(DgvFamilyGroup.CurrentRow?.DataBoundItem, GroupPaymentDTO)
+            Dim selectedPayment = TryCast(DgvFamilyGroup.CurrentRow?.DataBoundItem, GroupPaymentDTO)
 
-            If dto IsNot Nothing AndAlso Not dto.IsSummaryRow Then
-                ' Creamos la copia antes de enviarla al formulario, blindaje total
-                Dim dtoClone = DirectCast(dto.Clone(), GroupPaymentDTO)
-                OpenFrmCollectMembership(dto)
+            If selectedPayment IsNot Nothing AndAlso Not selectedPayment.IsSummaryRow Then
+                ' Aquí le pasamos la función que refresca los deudores individuales
+                OpenFrmCollectMembership(selectedPayment, AddressOf RefreshDgvFamilyGroup)
             Else
                 ShowMessageBox()
             End If
@@ -477,7 +472,7 @@ Public Class FrmListDebtors
             ' Usamos la función de chequeo que no inserta registros
             If Not generator.HasPendingMassivePayments() Then
 
-                MessageBox.Show($"   Las membresías de SEPTIEMBRE ya están registradas en" & Environment.NewLine &
+                MessageBox.Show($"   Las membresías de {newMonth} ya están registradas en" & Environment.NewLine &
                                 "   la base de datos." & Environment.NewLine &
                                 Environment.NewLine &
                                 "   No es posible duplicar pagos existentes." & Environment.NewLine &
@@ -491,7 +486,7 @@ Public Class FrmListDebtors
 
             ' 2. SI HAY PENDIENTES, PEDIMOS PERMISO
             Dim strMsgBox As String = "                            ¡ ¡ ¡  ATENCIÓN  ! ! !" & Environment.NewLine & Environment.NewLine &
-                                      $"   Se crearán nuevos pagos de SEPTIEMBRE para todos los" & Environment.NewLine &
+                                      $"   Se crearán nuevos pagos de {newMonth} para todos los" & Environment.NewLine &
                                       "   clientes y grupos familiares en actividad." & Environment.NewLine &
                                       "   __________________________________________________________" & Environment.NewLine & Environment.NewLine &
                                       "      ¿Desea continuar con la creación masiva de registros?"
@@ -500,7 +495,7 @@ Public Class FrmListDebtors
 
                 ' 3. SÓLO AQUÍ EJECUTAMOS EL GUARDADO REAL
                 ' Esta es la única vez que llamamos a la función que hace INSERT
-                Dim registrosCreados As Integer = generator.GenerateNewMonthPayments(UserSession.IdUser)
+                Dim registrosCreados As Integer = generator.GenerateNewMonthPayments()
 
                 MessageBox.Show($"Se han generado {registrosCreados} nuevos pagos correctamente.",
                                 "Proceso finalizado", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -542,7 +537,7 @@ Public Class FrmListDebtors
             listIndividualPayment = _paymentManager.GetListIndividualDebtors()
             ConfigureDataGridView(DgvIndividual, "PrcPgs", "DscPgs", "Total", "APagar")
             LoadDataGridView(DgvIndividual, listIndividualPayment)
-            ActualizarStatusBar("") 'UpdateSummary(listIndividualPayment, LblSoli)
+            ActualizarStatusBar("")
 
         Catch ex As Exception
             MessageBox.Show($"Pagos individuales: {Environment.NewLine}{ex.Message}", "Error al cargar", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -562,7 +557,7 @@ Public Class FrmListDebtors
             listGroupPayment = _paymentManager.GetListGroupDebtors()
             ConfigureDataGridView(DgvFamilyGroup, "PrcPgsGf", "DscPgsGf", "TtlPgsGf", "ApgrGf")
             LoadDataGridView(DgvFamilyGroup, listGroupPayment)
-            ActualizarStatusBar("") 'UpdateSummary(listGroupPayment, LblToditos)
+            ActualizarStatusBar("")
 
         Catch ex As Exception
             MessageBox.Show($"Pagos grupales:{Environment.NewLine}{ex.Message}", "Error al cargar", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -616,28 +611,6 @@ Public Class FrmListDebtors
         dataGridView.DataSource = Nothing
         dataGridView.DataSource = list
 
-    End Sub
-
-    Private Sub OpenFrmCollectMembership(dto As IPaymentCalculable)
-
-        '|
-        '|
-        '|
-        ' 1. CREAMOS EL CLON (La "fotocopia" de seguridad)
-        Dim dtoClone = dto.Clone()
-
-        Using form As New FrmCollectMembership()
-            ' 2. PASAMOS EL CLON AL FORMULARIO
-            ' Ahora, si el formulario pone el descuento a 0, solo afectará al CLON.
-            form.PreparePayment(dtoClone, TransactionMode.UpdatePayment)
-
-            If form.ShowDialog() = DialogResult.OK Then
-                ' 3. REFRESCAMOS SOLO SI SE CONFIRMA EL PAGO
-                ' El objeto original en el DGV no se verá "ensuciado" si el usuario cancela.
-                If TypeOf dto Is IndividualPaymentDTO Then RefreshDgvIndividual()
-                If TypeOf dto Is GroupPaymentDTO Then RefreshDgvFamilyGroup()
-            End If
-        End Using
     End Sub
 
     Private Sub RefreshDgvIndividual()

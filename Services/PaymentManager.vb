@@ -1,4 +1,4 @@
-﻿Imports System.Configuration
+﻿Imports GymPaymentControl.Data
 Imports GymPaymentControl.FrmCollectMembership
 Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
@@ -13,8 +13,8 @@ Namespace Services
     ' - Construir filas de resumen para presentación
     Public Class PaymentManager
 
-        ' Cadena de conexión a MySQL tomada desde App.config
-        Private ReadOnly _connectionString As String = ConfigurationManager.ConnectionStrings("MyConnectionMySQL").ConnectionString
+        ' Al heredar, obtenemos el motor de conexión.
+        Inherits BaseRepository
 
         ' Propiedad de solo lectura que permite leer la cadena de conexión desde fuera de la clase, sin permitir su modificación.
         Public ReadOnly Property ConnectionString As String
@@ -55,7 +55,8 @@ Namespace Services
                                         AND c.id_grp IS NULL
                                         ORDER BY p.id_cli, p.fdi_pgs"
 
-            Using connection As New MySqlConnection(_connectionString)
+            Using connection = GetConnection()
+
                 Using command As New MySqlCommand(sqlQuery, connection)
 
                     connection.Open()
@@ -77,7 +78,7 @@ Namespace Services
                                     .FdiPgs = dataReader.GetDateTime("fdi_pgs")
                                 }
                             ' Formato de fecha largo para presentación
-                            dto.LongDate = ConvertLongDate(dto.FdiPgs)
+                            dto.LongFdiPgs = ConvertLongDate(dto.FdiPgs)
 
                             listIndividualPayment.Add(dto)
 
@@ -95,23 +96,8 @@ Namespace Services
         Private Sub CalculateIndividualPayments(items As List(Of IndividualPaymentDTO))
 
             For Each item In items
-                CalculateIndividualPayment(item)
+                CalculatePaymentAmount(item)
             Next
-
-        End Sub
-
-        ' Aplica la lógica de cálculo según el método de pago
-        Private Sub CalculateIndividualPayment(item As IndividualPaymentDTO)
-            ' Pagos mensuales → cálculo prorrateado
-            If item.MtdPgs.Contains("MENSUAL") Then
-                CalculateProratedPayment(item)
-
-            Else
-                ' Pagos diarios u otros → pago completo
-                item.DaysOfMonth = 1
-                item.Total = item.PrcPgs
-                item.TotalToPay = item.PrcPgs
-            End If
 
         End Sub
 
@@ -179,7 +165,8 @@ Namespace Services
                                 GROUP BY p.id_pgs
                                 ORDER BY g.id_grp, p.fdi_pgs ASC"
 
-            Using connection As New MySqlConnection(_connectionString)
+            Using connection = GetConnection()
+
                 Using command As New MySqlCommand(sql, connection)
 
                     connection.Open()
@@ -193,7 +180,7 @@ Namespace Services
                                     .IdPgs = dataReader("id_pgs"),
                                     .IdGrp = dataReader("id_grp"),
                                     .GroupName = dataReader("nom_grp").ToString(),
-                                    .Members = dataReader("INTEGRANTES").ToString(),
+                                    .GroupMembers = dataReader("INTEGRANTES").ToString(),
                                     .MtdPgs = dataReader("mtd_pgs"),
                                     .PrcPgs = Convert.ToDecimal(dataReader("prc_pgs")),
                                     .DscPgs = Convert.ToDecimal(dataReader("dsc_pgs")),
@@ -216,15 +203,8 @@ Namespace Services
         Private Sub CalculateGroupPayments(items As List(Of GroupPaymentDTO))
 
             For Each item In items
-                CalculateGroupPayment(item)
+                CalculatePaymentAmount(item)
             Next
-
-        End Sub
-
-        ' Todos los pagos grupales son prorrateados
-        Private Sub CalculateGroupPayment(item As GroupPaymentDTO)
-
-            CalculateProratedPayment(item)
 
         End Sub
 
@@ -280,7 +260,7 @@ Namespace Services
                             WHERE id_pgs=@idPgs"
             End If
 
-            Using connection As New MySqlConnection(_connectionString)
+            Using connection = GetConnection()
 
                 Dim command As New MySqlCommand(sqlQuery, connection)
 
@@ -307,32 +287,69 @@ Namespace Services
 
                 connection.Open()
                 Return command.ExecuteNonQuery() > 0
+
             End Using
+
         End Function
         ''
         ''
-        ''
-        Public Function HasClients() As Boolean
+        Public Function GetPaymentHistory(idClient As Integer, idGroup As Integer?) As List(Of IndividualPaymentDTO)
 
-            Try
-                Using connection As New MySqlConnection(_connectionString)
+            Dim historyList As New List(Of IndividualPaymentDTO)
 
+            ' El cerebro decide el SQL: Si hay grupo, prioriza grupo, si no, por cliente
+            Dim sqlQuery As String
+            Dim idForQuery As Integer
+
+            ' Definimos la base de la consulta para no repetir texto
+            Dim sqQueryBase As String = "SELECT p.*, u.nom_user FROM pagos p
+                                         LEFT JOIN usuarios u ON p.id_user = u.id_user "
+
+            If idGroup.HasValue AndAlso idGroup.Value > 0 Then
+                sqlQuery = sqQueryBase & "WHERE p.id_grp = @id ORDER BY p.fdi_pgs DESC"
+                idForQuery = idGroup.Value
+            Else
+                sqlQuery = sqQueryBase & "WHERE p.id_cli = @id ORDER BY p.fdi_pgs DESC"
+                idForQuery = idClient
+            End If
+
+            Using connection = GetConnection()
+
+                Using command As New MySqlCommand(sqlQuery, connection)
+
+                    command.Parameters.AddWithValue("@id", idForQuery)
                     connection.Open()
 
-                    ' Un simple COUNT(1) es lo más rápido que existe en SQL
-                    Dim sqlQuery As String = "SELECT COUNT(1) FROM clientes"
+                    Using dr = command.ExecuteReader()
 
-                    Using command As New MySqlCommand(sqlQuery, connection)
-                        Dim count = Convert.ToInt32(command.ExecuteScalar())
-                        Return count > 0
+                        While dr.Read()
+
+                            'Dim strFrmPgs As String = If(dr.IsDBNull(dr.GetOrdinal("frm_pgs")), String.Empty, dr.GetString("frm_pgs"))
+                            '.FrmPgs = If(String.IsNullOrWhiteSpace(strFrmPgs), "IMPAGO", strFrmPgs),
+                            historyList.Add(New IndividualPaymentDTO With
+                                            {
+                                                .IdPgs = dr.GetInt32("id_pgs"),
+                                                .FdiPgs = dr.GetDateTime("fdi_pgs"),
+                                                .LongFdiPgs = ConvertLongDate(dr.GetDateTime("fdi_pgs")),
+                                                .FdpPgs = If(dr.IsDBNull(dr.GetOrdinal("fdp_pgs")), Date.MinValue, dr.GetDateTime("fdp_pgs")),
+                                                .LongFdpPgs = If(dr.GetDateTime("fdp_pgs") = Date.MinValue, "SIN FECHA", ConvertLongDate(dr.GetDateTime("fdp_pgs"))),
+                                                .MtdPgs = dr.GetString("mtd_pgs"),
+                                                .FrmPgs = If(dr.IsDBNull(dr.GetOrdinal("frm_pgs")), "IMPAGO", dr.GetString("frm_pgs")),
+                                                .PrcPgs = dr.GetDecimal("prc_pgs"),
+                                                .DscPgs = dr.GetDecimal("dsc_pgs"),
+                                                .NomUser = If(dr.IsDBNull(dr.GetOrdinal("nom_user")), "N/A", dr.GetString("nom_user"))
+                                            })
+                        End While
+
                     End Using
-
                 End Using
+            End Using
 
-            Catch ex As Exception
-                ' Manejo de errores profesional
-                Throw New Exception("Error al verificar tabla clientes: " & ex.Message)
-            End Try
+            ' ¡AQUÍ REUTILIZAMOS TUS FUNCIONES!
+            ' Al pasar la lista por aquí, se calcularán nDias y TotalToPay para cada registro
+            CalculateIndividualPayments(historyList)
+
+            Return historyList
 
         End Function
         ''

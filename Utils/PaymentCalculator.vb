@@ -3,16 +3,31 @@
 Namespace Utils
     Public Module PaymentCalculator
 
-        Public Sub CalculateProratedPayment(item As IPaymentCalculable)
-
+        ''' <summary>
+        ''' Calcula el importe final basándose en el método de pago (MENSUAL, GRUPAL o DIARIO)
+        ''' </summary>
+        Public Sub CalculatePaymentAmount(item As IPaymentCalculable)
+            ' 1. Cálculo base (Precio - Descuento)
             item.Total = item.PrcPgs - item.DscPgs
 
-            Dim daysInMonth = DateTime.DaysInMonth(item.FdiPgs.Year, item.FdiPgs.Month)
+            ' 2. Aplicamos lógica según el método
+            If item.MtdPgs = "MENSUAL" OrElse item.MtdPgs = "GRUPAL" Then
+                ' Lógica de Prorrateo
+                Dim daysInMonth = DateTime.DaysInMonth(item.FdiPgs.Year, item.FdiPgs.Month)
+                item.DaysOfMonth = (daysInMonth - item.FdiPgs.Day) + 1
 
-            item.DaysOfMonth = (daysInMonth - item.FdiPgs.Day) + 1
-            item.TotalToPay = (item.Total / daysInMonth) * item.DaysOfMonth
+                ' Calculamos el proporcional
+                item.TotalToPay = (item.Total / daysInMonth) * item.DaysOfMonth
+            Else
+                ' Lógica para pagos DIARIOS u otros
+                item.DaysOfMonth = 1
+                item.TotalToPay = item.Total ' Aquí ya lleva el descuento restado
+            End If
 
+            ' 3. Opcional: Redondear a 2 decimales para evitar problemas de céntimos
+            item.TotalToPay = Math.Round(item.TotalToPay, 2)
         End Sub
 
     End Module
+
 End Namespace

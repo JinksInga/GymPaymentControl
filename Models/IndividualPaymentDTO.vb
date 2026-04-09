@@ -7,6 +7,11 @@ Namespace Models
     ' dentro de los DataGridView.
     Public Class IndividualPaymentDTO
 
+        ' ======================
+        ' Datos del cliente - Heredamos todas las propiedades del DTO
+        ' ======================
+        Inherits ClientPaymentDTO
+
         ' Implementa:
         ' - ISelectableRow → permite identificar si la fila es seleccionable en el Grid
         ' - IPaymentSummary → indica si la fila es una fila de resumen
@@ -26,25 +31,19 @@ Namespace Models
         ' Identificadores
         ' ======================
         Public Property IdPgs As Integer Implements IPaymentCalculable.IdPgs ' Id del pago
-        Public Property IdCli As Integer            ' Id del cliente
-
-        ' ======================
-        ' Datos del cliente
-        ' ======================
-        Public Property Name As String
-        Public Property LastName As String
-
-        ' Edad calculada (en años) como texto base
-        ' El formato final se expone mediante AgeText
-        Public Property Age As String
+        Public Property IdCli As Integer ' Id del cliente
+        'Public Property IdUser As Integer? ' Permite saber quién cobró la mensualidad (puede ser Null)
+        Public Property NomUser As String   ' El nombre que viene al hacer LEFT JOIN
 
         ' ======================
         ' Datos del pago
         ' ======================
         Public Property MtdPgs As String Implements IPaymentCalculable.MtdPgs ' Método de pago (DIARIO o MENSUAL)
+        Public Property FrmPgs As String ' Forma de pago (Efectivo, tarjeta, etc.)
         Public Property FdiPgs As Date Implements IPaymentCalculable.FdiPgs ' Fecha de inicio
+        Public Property LongFdiPgs As String ' Reemplaza a LongDate (Fecha Inicio)
         Public Property FdpPgs As Date Implements IPaymentCalculable.FdpPgs ' Fecha de pago
-        Public Property LongDate As String        ' Fecha formateada para UI
+        Public Property LongFdpPgs As String ' Reemplaza a LongDate (Fecha de Pago)
 
         ' ======================
         ' Valores económicos
@@ -59,7 +58,7 @@ Namespace Models
         ' Control de resumen
         ' ======================
         Public Property IsSummaryRow As Boolean Implements IPaymentSummary.IsSummaryRow
-        Public Property NumberMonths As Integer            ' Nº de meses agrupados en la fila resumen
+        Public Property NumberMonths As Integer ' Nº de meses agrupados en la fila resumen
 
         ' ======================
         ' Propiedades calculadas
@@ -87,6 +86,18 @@ Namespace Models
             End Get
         End Property
 
+        ' Devolvemos el nombre del cliente
+        Public ReadOnly Property Members As String Implements IPaymentCalculable.Members
+            Get
+                ' Si el cliente pertenece a un grupo y hemos cargado los integrantes...
+                If Not String.IsNullOrEmpty(Me.GroupMembers) Then
+                    Return Me.GroupMembers
+                Else
+                    ' Si es un pago individual puro, mostramos solo al cliente
+                    Return $"{Me.Name} {Me.LastName}"
+                End If
+            End Get
+        End Property
         ''
         ''
     End Class

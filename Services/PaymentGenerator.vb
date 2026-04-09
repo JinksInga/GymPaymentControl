@@ -1,4 +1,4 @@
-﻿Imports System.Configuration
+﻿Imports GymPaymentControl.Data
 Imports GymPaymentControl.Utils
 Imports MySql.Data.MySqlClient
 
@@ -15,8 +15,8 @@ Namespace Services
     ''' </summary>
     Public Class PaymentGenerator
 
-        ' Cadena de conexión a la base de datos
-        Private ReadOnly _connectionString As String = ConfigurationManager.ConnectionStrings("MyConnectionMySQL").ConnectionString
+        ' Al heredar, obtenemos el motor de conexión.
+        Inherits BaseRepository
 
         ''' <summary>
         ''' Genera los pagos correspondientes al mes actual para:
@@ -26,14 +26,14 @@ Namespace Services
         ''' Todo el proceso se ejecuta dentro de una transacción.
         ''' </summary>
         ''' <param name="idUser">Usuario que ejecuta el proceso (auditoría)</param>
-        Public Function GenerateNewMonthPayments(idUser As Integer) As Integer
+        Public Function GenerateNewMonthPayments() As Integer
 
             Dim filasInsertadas As Integer '= 0
 
             ' Primer día del mes actual (clave para evitar duplicados)
             Dim firstDayOfMonth As New DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)
 
-            Using connection As New MySqlConnection(_connectionString)
+            Using connection = GetConnection()
 
                 connection.Open()
 
@@ -70,7 +70,7 @@ Namespace Services
                                     InsertPaymentRecord(connection, transaction, firstDayOfMonth,
                                                          Convert.ToDecimal(individualRate("prcio_trfa")),
                                                          Convert.ToDecimal(individualRate("dscto_trfa")),
-                                                         idUser, idCli:=idCli, mtdPgs:="MENSUAL")
+                                                         idCli:=idCli, mtdPgs:="MENSUAL")
 
                                     ' SUMAMOS SOLO SI SE INSERTÓ EL REGISTRO
                                     filasInsertadas += 1
@@ -103,7 +103,7 @@ Namespace Services
                                     InsertPaymentRecord(connection, transaction, firstDayOfMonth,
                                                         Convert.ToDecimal(groupRate("prcio_trfa")) * numberMembers,
                                                         Convert.ToDecimal(groupRate("dscto_trfa")),
-                                                        idUser, idGrp:=idGrp, mtdPgs:="GRUPAL")
+                                                        idGrp:=idGrp, mtdPgs:="GRUPAL")
 
                                     ' SUMAMOS AL MISMO CONTADOR PARA TENER EL TOTAL GLOBAL
                                     filasInsertadas += 1
@@ -205,21 +205,22 @@ Namespace Services
         ''' </summary>
         Private Sub InsertPaymentRecord(connection As MySqlConnection, transaction As MySqlTransaction,
                                         dateTime As DateTime,
-                                        price As Decimal, discount As Decimal, idUser As Integer,
+                                        price As Decimal, discount As Decimal,
                                         Optional idCli As Integer? = Nothing,
                                         Optional idGrp As Integer? = Nothing,
                                         Optional mtdPgs As String = "")
 
             Dim sqlQuery As String = "INSERT INTO pagos (fdi_pgs, frm_pgs, mtd_pgs, prc_pgs, dsc_pgs, id_cli, id_grp, id_user)
-                                      VALUES (@fdi, '', @metodo, @prc, @dsc, @idCli, @idGrp, @idUser)"
+                                      VALUES (@fdi, @forma, @metodo, @prc, @dsc, @idCli, @idGrp, @idUser)"
 
             Using command As New MySqlCommand(sqlQuery, connection, transaction)
 
                 command.Parameters.AddWithValue("@fdi", dateTime.ToString("yyyy-MM-dd"))
+                command.Parameters.AddWithValue("@forma", DBNull.Value)
                 command.Parameters.AddWithValue("@metodo", mtdPgs)
                 command.Parameters.AddWithValue("@prc", price)
                 command.Parameters.AddWithValue("@dsc", discount)
-                command.Parameters.AddWithValue("@idUser", idUser)
+                command.Parameters.AddWithValue("@idUser", DBNull.Value)
 
                 ' Manejo correcto de nulos para las llaves foráneas
                 command.Parameters.AddWithValue("@idCli", If(idCli.HasValue, idCli.Value, DBNull.Value))
@@ -276,7 +277,7 @@ Namespace Services
 
             Dim firstDayOfMonth As New DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)
 
-            Using connection As New MySqlConnection(_connectionString)
+            Using connection = GetConnection()
 
                 connection.Open()
 
