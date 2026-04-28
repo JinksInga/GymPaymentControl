@@ -4,9 +4,9 @@
         ' ======================
         ' DATOS DEL CLIENTE
         ' ======================
-        Public Property Name As String
+        Public Property FirstName As String
         Public Property LastName As String
-        Public Property DateBirth As Date
+        Public Property BirthDate As Date
         Public Property Age As Integer
         Public Property Phone As String
         Public Property Email As String
@@ -22,6 +22,7 @@
         Public Property IdGroup As Integer?
         Public Property GroupName As String
         Public Property GroupMembers As Integer
+        Public Property ShouldExpandGroup As Boolean = False
 
         ' ======================
         ' RESULTADO

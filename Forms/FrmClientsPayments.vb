@@ -1,6 +1,7 @@
 ﻿Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 Imports GymPaymentControl.Utils
+Imports Mysqlx.XDevAPI
 
 Public Class FrmClientsPayments
 
@@ -22,10 +23,8 @@ Public Class FrmClientsPayments
 
             ' 2. Verificación inteligente
             ' Usamos el manager que ya tienes instanciado
-            BtnFindClient.Enabled = _clientManager.HasClients()
-
             ' Si hay clientes, cargamos la lista inicial en memoria
-            If BtnFindClient.Enabled Then _clientList = _clientManager.GetClientsForSearch()
+            RefreshCustomerList()
 
             ' 1. Evitamos que el DGV cree columnas extra
             DgvPaymentList.AutoGenerateColumns = False
@@ -106,14 +105,16 @@ Public Class FrmClientsPayments
     Private Sub BtnSelect_Click(sender As Object, e As EventArgs) Handles BtnSelect.Click
         '4
     End Sub
-
+    ''
+    ''
     Private Sub DgvClientList_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvClientList.CellContentClick
     End Sub
     Private Sub DgvClientList_DoubleClick(sender As Object, e As EventArgs) Handles DgvClientList.DoubleClick
         '
         UploadDataAndPayments()
     End Sub
-
+    ''
+    ''
     Private Sub RbActive_CheckedChanged(sender As Object, e As EventArgs) Handles RbActive.CheckedChanged
         '
         strState = If(RbActive.Checked, "ACTIVO", "INACTIVO")
@@ -153,11 +154,36 @@ Public Class FrmClientsPayments
     End Sub
 
     Private Sub BtnNewClient_Click(sender As Object, e As EventArgs) Handles BtnNewClient.Click
-        '8
+
+        '| -------------------------------------------------------------------------------------
+        '| REGISTRAR UN NUEVO CLIENTE EN LA BASE DE DATOS
+        '| ----------------------------------------------
+        '| * Limpiamos los controles y todos los labels del contenedor PnlDatosCliente llamando
+        '|   a la subrutina CleanControls().
+        '|
+        '| * Desactivamos los botones llamando a la subrutina DisableButtons().
+        '|
+        '| * Ocultamos el boton BtnActualizar para mostrar el boton de BtnGuardar.
+        '| * Hacemos al formulario FrmNewModifyClient como hijo del formulario principal.
+        '| * Mostramos el formulario FrmNewModifyClient.
+
+        CleanControls()
+        DisableButtons()
+
+        'NavigateToForm.OpenFrmNewClient(AddressOf RefreshPaymentHistory)
+        NavigateToForm.OpenFrmNewClient(AddressOf GlobalRefreshAfterSave)
+
     End Sub
 
     Private Sub BtnModifyData_Click(sender As Object, e As EventArgs) Handles BtnModifyData.Click
-        '9
+        '
+        ' Suponiendo que ya tienes cargado tu DTO del cliente seleccionado
+        If _selectedClient IsNot Nothing Then
+            NavigateToForm.OpenFrmModifyClient(_selectedClient, AddressOf RefreshPaymentHistory)
+            'Else
+            '    MsgBox("Por favor, selecciona un cliente primero.")
+        End If
+
     End Sub
 
     Private Sub BtnDeleteClient_Click(sender As Object, e As EventArgs) Handles BtnDeleteClient.Click
@@ -237,7 +263,7 @@ Public Class FrmClientsPayments
             selectedPayment.GroupName = _selectedClient.GroupName
 
             ' Aseguramos los datos básicos para el DisplayName
-            selectedPayment.Name = _selectedClient.Name
+            selectedPayment.FirstName = _selectedClient.FirstName
             selectedPayment.LastName = _selectedClient.LastName
             selectedPayment.Age = _selectedClient.Age
 
@@ -273,7 +299,7 @@ Public Class FrmClientsPayments
             Select Case CmbFilter.SelectedIndex 'strFilter
 
                 Case 1 '"NAME"
-                    filteredList = filteredList.Where(Function(c) c.Name.StartsWith(strSearch))
+                    filteredList = filteredList.Where(Function(c) c.FirstName.StartsWith(strSearch))
 
                 Case 2 '"LASTNAME"
                     filteredList = filteredList.Where(Function(c) c.LastName.StartsWith(strSearch))
@@ -282,7 +308,7 @@ Public Class FrmClientsPayments
                     filteredList = filteredList.Where(Function(c) c.Phone.StartsWith(strSearch))
 
                 Case Else
-                    filteredList = filteredList.Where(Function(c) c.Name.StartsWith(strSearch))
+                    filteredList = filteredList.Where(Function(c) c.FirstName.StartsWith(strSearch))
 
             End Select
 
@@ -335,37 +361,26 @@ Public Class FrmClientsPayments
 
     End Sub
 
-    Sub UploadDataAndPayments()
-
-        '| * Llenamos la variable 'strFlags' con la cadena "SKIP_SEARCH" que se usará en 'TxtBuscar' para
-        '|   hacer comprobaciones y evitar hacer consultas inecesarias.
-        '| * Pasamos la información del cliente seleccionado, del DgvClientes a los Labels, llamando a
-        '|   la subrutina Sub_Fill_Data_DgvClientes().
-        '|
-        '| IF : Comprobamos si el 'LblGrpFamCli' tiene información para buscar un grupo familiar, si se cumple
-        '|      la condición hacemos la consulta a la BBDD y lo almacenamos en la variable 'sqlConsulta'.
-        '|      * Llamamos a la subrutina principal Sub_Crud_Sql() que va a recibir dos parametros, el primero
-        '|        es la consulta y el segundo es la cadena 'SubFillGroupName' que servirá para el Select Case de
-        '|        la subrutina principal que a su vez llama a la subrutina SubFillGroupName que se encarga de
-        '|        recoger el nombre del grupo familiar.
-        '|
-        '| * Llamamos a las subrutina 'Sub_SelectRecord_CancelSearch()' y 'Sub_Activate_Buttons()' para
-        '|   activar, desactivar y ocultar controles.
-        '|
-        '| * Llamamos a la subrutina Sub_View_Payment_List() para consultar los pagos del cliente.
-        '|
-        '| * Limpiamos la variable strFlags para futuras comprobaciones.
+    Sub UploadDataAndPayments(Optional client As IndividualPaymentDTO = Nothing)
 
         _isCleaning = True
-        ' 1. Obtenemos el objeto desde el Grid
-        'Dim client = DirectCast(DgvClientList.CurrentRow.DataBoundItem, IndividualPaymentDTO)987
-        _selectedClient = DirectCast(DgvClientList.CurrentRow.DataBoundItem, IndividualPaymentDTO)
+        '' 1. Obtenemos el objeto desde el Grid
+        ''_selectedClient = DirectCast(DgvClientList.CurrentRow.DataBoundItem, IndividualPaymentDTO)
+
+        ' 1. Decisión inteligente: ¿Me pasaron un cliente o lo busco en el Grid?
+        If client IsNot Nothing Then
+            _selectedClient = client
+        ElseIf DgvClientList.CurrentRow IsNot Nothing Then
+            _selectedClient = DirectCast(DgvClientList.CurrentRow.DataBoundItem, IndividualPaymentDTO)
+        Else
+            Exit Sub ' Si no hay nada, salimos
+        End If
 
         ' 2. Llenamos Labels de texto
         FillLabelsClientData(_selectedClient)
 
+        ' 3. Lógica de Grupo (Tu código actual)
         If _selectedClient.IdGroup.HasValue Then
-            'LblGrpFamCli.Text = _clientManager.GetGroupName(_selectedClient.IdGroup.Value)
             Dim strGroupName = _clientManager.GetGroupName(_selectedClient.IdGroup.Value)
             _selectedClient.GroupName = strGroupName
             LblGrpFamCli.Text = strGroupName
@@ -373,6 +388,7 @@ Public Class FrmClientsPayments
             _selectedClient.GroupName = ""
             LblGrpFamCli.Text = ""
         End If
+
         ' 4. Cargamos el historial de pagos (Usando PaymentManager)
         ' El DGV de pagos ahora recibe una LISTA de objetos, no un DataTable
         DgvPaymentList.DataSource = _paymentManager.GetPaymentHistory(_selectedClient.IdCli, _selectedClient.IdGroup)
@@ -388,9 +404,9 @@ Public Class FrmClientsPayments
 
     Sub FillLabelsClientData(client As IndividualPaymentDTO)
 
-        LblNomCli.Text = client.Name
+        LblNomCli.Text = client.FirstName
         LblApeCli.Text = client.LastName
-        LblFdnCli.Text = ConvertVeryLongDate(client.DateBirth)
+        LblFdnCli.Text = ConvertVeryLongDate(client.BirthDate)
         LblEdadCli.Text = client.AgeText
         LblTlfCli.Text = client.Phone
         LblEmlCli.Text = client.Email
@@ -401,7 +417,52 @@ Public Class FrmClientsPayments
         LblGrpFamCli.Text = client.IdGroup
 
     End Sub
+    ''
+    ''
+    Private Sub RefreshCustomerList()
 
+        BtnFindClient.Enabled = _clientManager.HasClients()
+
+        If BtnFindClient.Enabled Then _clientList = _clientManager.GetClientsForSearch()
+
+    End Sub
+    ''
+    ''
+    Private Sub RefreshPaymentHistory()
+        ' Seguridad ante todo: Si no hay cliente, no hay historial que buscar
+        ' Verificamos que no sea Nothing por seguridad
+        If _selectedClient IsNot Nothing Then
+            ' Cargamos los datos
+            DgvPaymentList.DataSource = _paymentManager.GetPaymentHistory(_selectedClient.IdCli, _selectedClient.IdGroup)
+            ' Lo ponemos aquí, una sola vez después de cargar
+            DgvPaymentList.CurrentCell = Nothing
+
+            'Else
+            ' Opcional: Si no hay cliente, podemos limpiar el Grid para que no muestre datos viejos
+            'DgvPaymentList.DataSource = Nothing
+        End If
+
+    End Sub
+    ''
+    ''
+    Public Sub GlobalRefreshAfterSave(newId As Integer)
+
+        ' 1. Refrescamos la lista de clientes en memoria
+        RefreshCustomerList()
+
+        ' 2. Buscamos el objeto del nuevo cliente dentro de la lista recién cargada
+        ' Usamos LINQ para encontrarlo rápido
+        Dim newClient = _clientList.FirstOrDefault(Function(c) c.IdCli = newId)
+
+        ' 3. Cargamos sus datos en los Labels y el historial de pagos
+        If newClient IsNot Nothing Then
+            'llama internamente a la carga de pagos
+            UploadDataAndPayments(newClient)
+        End If
+
+    End Sub
+    ''
+    ''
     Private Sub ActivateButtons()
 
         '| -----------------------------
@@ -473,19 +534,6 @@ Public Class FrmClientsPayments
         DgvClientList.Visible = True
         LblResult.Visible = True
         DgvClientList.BringToFront()
-
-    End Sub
-    ''
-    ''
-    Private Sub RefreshPaymentHistory()
-        ' Verificamos que no sea Nothing por seguridad
-        'If _selectedClient IsNot Nothing Then
-
-        DgvPaymentList.DataSource = _paymentManager.GetPaymentHistory(_selectedClient.IdCli, _selectedClient.IdGroup)
-            ' Lo ponemos aquí, una sola vez después de cargar
-            DgvPaymentList.CurrentCell = Nothing
-
-        'End If
 
     End Sub
     ''

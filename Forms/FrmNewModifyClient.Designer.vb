@@ -30,45 +30,45 @@ Partial Class FrmNewModifyClient
         Me.RbInactiveState = New System.Windows.Forms.RadioButton()
         Me.RbActiveStatus = New System.Windows.Forms.RadioButton()
         Me.LblEstadoCli = New System.Windows.Forms.Label()
-        Me.DtpFdi = New System.Windows.Forms.DateTimePicker()
+        Me.DtpRegistrationDate = New System.Windows.Forms.DateTimePicker()
         Me.LblFinscripcion = New System.Windows.Forms.Label()
         Me.GbMetodoPago = New System.Windows.Forms.GroupBox()
-        Me.RbDiario = New System.Windows.Forms.RadioButton()
-        Me.RbMensual = New System.Windows.Forms.RadioButton()
-        Me.RbGrupoFamiliar = New System.Windows.Forms.RadioButton()
-        Me.BtnAddGrupo = New System.Windows.Forms.Button()
+        Me.RbDailyPayment = New System.Windows.Forms.RadioButton()
+        Me.RbMonthlyPayment = New System.Windows.Forms.RadioButton()
+        Me.RbGroupPayment = New System.Windows.Forms.RadioButton()
+        Me.BtnAddGroup = New System.Windows.Forms.Button()
         Me.GbListaGrupoFamiliar = New System.Windows.Forms.GroupBox()
-        Me.LblNumIntgrntes = New System.Windows.Forms.Label()
-        Me.TxtListaNom = New System.Windows.Forms.TextBox()
-        Me.DgvListaNombre = New System.Windows.Forms.DataGridView()
-        Me.ColIdGrupo = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.ColNomGrupo = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.ColNumIntgrntes = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.ColIntgrntesReg = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.BtnCancelar = New System.Windows.Forms.Button()
+        Me.LblNumberMembers = New System.Windows.Forms.Label()
+        Me.TxtListGroupsDailyPayment = New System.Windows.Forms.TextBox()
+        Me.DgvListGroupsDailyPayment = New System.Windows.Forms.DataGridView()
+        Me.colIdDailyGroup = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colNameDailyGroup = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colNumMembers = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colMembersReg = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.BtnCancelRegistration = New System.Windows.Forms.Button()
         Me.GbContacto = New System.Windows.Forms.GroupBox()
-        Me.TxtDireccion = New System.Windows.Forms.TextBox()
+        Me.TxtAddress = New System.Windows.Forms.TextBox()
         Me.TxtEmail = New System.Windows.Forms.TextBox()
-        Me.TxtTelefono = New System.Windows.Forms.TextBox()
+        Me.TxtPhone = New System.Windows.Forms.TextBox()
         Me.LblDireccion = New System.Windows.Forms.Label()
         Me.LblEmail = New System.Windows.Forms.Label()
         Me.LblTelefono = New System.Windows.Forms.Label()
         Me.GbDatos = New System.Windows.Forms.GroupBox()
-        Me.DtpFdn = New System.Windows.Forms.DateTimePicker()
+        Me.DtpBirthdate = New System.Windows.Forms.DateTimePicker()
         Me.LblEdad = New System.Windows.Forms.Label()
-        Me.TxtApellido = New System.Windows.Forms.TextBox()
-        Me.TxtNombre = New System.Windows.Forms.TextBox()
-        Me.TxtEdad = New System.Windows.Forms.Label()
+        Me.TxtLastName = New System.Windows.Forms.TextBox()
+        Me.TxtFirstName = New System.Windows.Forms.TextBox()
+        Me.TxtCustomerAge = New System.Windows.Forms.Label()
         Me.LblFnacimiento = New System.Windows.Forms.Label()
         Me.LblApellido = New System.Windows.Forms.Label()
         Me.LblNombre = New System.Windows.Forms.Label()
-        Me.BtnActualizar = New System.Windows.Forms.Button()
-        Me.BtnGuardar = New System.Windows.Forms.Button()
+        Me.BtnUpdateCustomerData = New System.Windows.Forms.Button()
+        Me.BtnSaveCustomerData = New System.Windows.Forms.Button()
         Me.ErrorProvider = New System.Windows.Forms.ErrorProvider(Me.components)
         Me.GbOtros.SuspendLayout()
         Me.GbMetodoPago.SuspendLayout()
         Me.GbListaGrupoFamiliar.SuspendLayout()
-        CType(Me.DgvListaNombre, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.DgvListGroupsDailyPayment, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GbContacto.SuspendLayout()
         Me.GbDatos.SuspendLayout()
         CType(Me.ErrorProvider, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -79,7 +79,7 @@ Partial Class FrmNewModifyClient
         Me.GbOtros.Controls.Add(Me.RbInactiveState)
         Me.GbOtros.Controls.Add(Me.RbActiveStatus)
         Me.GbOtros.Controls.Add(Me.LblEstadoCli)
-        Me.GbOtros.Controls.Add(Me.DtpFdi)
+        Me.GbOtros.Controls.Add(Me.DtpRegistrationDate)
         Me.GbOtros.Controls.Add(Me.LblFinscripcion)
         Me.GbOtros.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GbOtros.Location = New System.Drawing.Point(439, 25)
@@ -134,17 +134,17 @@ Partial Class FrmNewModifyClient
         Me.LblEstadoCli.TabIndex = 1
         Me.LblEstadoCli.Text = "Estado del cliente"
         '
-        'DtpFdi
+        'DtpRegistrationDate
         '
-        Me.DtpFdi.CalendarFont = New System.Drawing.Font("Microsoft Sans Serif", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DtpFdi.CustomFormat = "' ' dddd ', ' dd ' de ' MMMM ' de ' yyyy"
-        Me.DtpFdi.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.DtpFdi.Format = System.Windows.Forms.DateTimePickerFormat.Custom
-        Me.DtpFdi.Location = New System.Drawing.Point(24, 51)
-        Me.DtpFdi.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
-        Me.DtpFdi.Name = "DtpFdi"
-        Me.DtpFdi.Size = New System.Drawing.Size(328, 26)
-        Me.DtpFdi.TabIndex = 0
+        Me.DtpRegistrationDate.CalendarFont = New System.Drawing.Font("Microsoft Sans Serif", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DtpRegistrationDate.CustomFormat = "' ' dddd ', ' dd ' de ' MMMM ' de ' yyyy"
+        Me.DtpRegistrationDate.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
+        Me.DtpRegistrationDate.Format = System.Windows.Forms.DateTimePickerFormat.Custom
+        Me.DtpRegistrationDate.Location = New System.Drawing.Point(24, 51)
+        Me.DtpRegistrationDate.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
+        Me.DtpRegistrationDate.Name = "DtpRegistrationDate"
+        Me.DtpRegistrationDate.Size = New System.Drawing.Size(328, 26)
+        Me.DtpRegistrationDate.TabIndex = 0
         '
         'LblFinscripcion
         '
@@ -159,10 +159,10 @@ Partial Class FrmNewModifyClient
         '
         'GbMetodoPago
         '
-        Me.GbMetodoPago.Controls.Add(Me.RbDiario)
-        Me.GbMetodoPago.Controls.Add(Me.RbMensual)
-        Me.GbMetodoPago.Controls.Add(Me.RbGrupoFamiliar)
-        Me.GbMetodoPago.Controls.Add(Me.BtnAddGrupo)
+        Me.GbMetodoPago.Controls.Add(Me.RbDailyPayment)
+        Me.GbMetodoPago.Controls.Add(Me.RbMonthlyPayment)
+        Me.GbMetodoPago.Controls.Add(Me.RbGroupPayment)
+        Me.GbMetodoPago.Controls.Add(Me.BtnAddGroup)
         Me.GbMetodoPago.Controls.Add(Me.GbListaGrupoFamiliar)
         Me.GbMetodoPago.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GbMetodoPago.Location = New System.Drawing.Point(439, 204)
@@ -174,70 +174,70 @@ Partial Class FrmNewModifyClient
         Me.GbMetodoPago.TabStop = False
         Me.GbMetodoPago.Text = "Método de pago :"
         '
-        'RbDiario
+        'RbDailyPayment
         '
-        Me.RbDiario.Appearance = System.Windows.Forms.Appearance.Button
-        Me.RbDiario.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.RbDiario.Image = Global.GymPaymentControl.My.Resources.Resources.ic_daily_27x30
-        Me.RbDiario.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.RbDiario.Location = New System.Drawing.Point(24, 27)
-        Me.RbDiario.Margin = New System.Windows.Forms.Padding(24, 12, 0, 0)
-        Me.RbDiario.Name = "RbDiario"
-        Me.RbDiario.Padding = New System.Windows.Forms.Padding(30, 0, 30, 0)
-        Me.RbDiario.Size = New System.Drawing.Size(160, 40)
-        Me.RbDiario.TabIndex = 0
-        Me.RbDiario.Text = "Diario"
-        Me.RbDiario.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        Me.RbDiario.UseVisualStyleBackColor = True
+        Me.RbDailyPayment.Appearance = System.Windows.Forms.Appearance.Button
+        Me.RbDailyPayment.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.RbDailyPayment.Image = Global.GymPaymentControl.My.Resources.Resources.ic_daily_27x30
+        Me.RbDailyPayment.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.RbDailyPayment.Location = New System.Drawing.Point(24, 27)
+        Me.RbDailyPayment.Margin = New System.Windows.Forms.Padding(24, 12, 0, 0)
+        Me.RbDailyPayment.Name = "RbDailyPayment"
+        Me.RbDailyPayment.Padding = New System.Windows.Forms.Padding(30, 0, 30, 0)
+        Me.RbDailyPayment.Size = New System.Drawing.Size(160, 40)
+        Me.RbDailyPayment.TabIndex = 0
+        Me.RbDailyPayment.Text = "Diario"
+        Me.RbDailyPayment.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        Me.RbDailyPayment.UseVisualStyleBackColor = True
         '
-        'RbMensual
+        'RbMonthlyPayment
         '
-        Me.RbMensual.Appearance = System.Windows.Forms.Appearance.Button
-        Me.RbMensual.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.RbMensual.Image = Global.GymPaymentControl.My.Resources.Resources.ic_monthly_30x30
-        Me.RbMensual.ImageAlign = System.Drawing.ContentAlignment.MiddleRight
-        Me.RbMensual.Location = New System.Drawing.Point(192, 27)
-        Me.RbMensual.Margin = New System.Windows.Forms.Padding(8, 0, 24, 0)
-        Me.RbMensual.Name = "RbMensual"
-        Me.RbMensual.Padding = New System.Windows.Forms.Padding(20, 0, 20, 0)
-        Me.RbMensual.Size = New System.Drawing.Size(160, 40)
-        Me.RbMensual.TabIndex = 1
-        Me.RbMensual.Text = "Mensual"
-        Me.RbMensual.UseVisualStyleBackColor = True
+        Me.RbMonthlyPayment.Appearance = System.Windows.Forms.Appearance.Button
+        Me.RbMonthlyPayment.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.RbMonthlyPayment.Image = Global.GymPaymentControl.My.Resources.Resources.ic_monthly_30x30
+        Me.RbMonthlyPayment.ImageAlign = System.Drawing.ContentAlignment.MiddleRight
+        Me.RbMonthlyPayment.Location = New System.Drawing.Point(192, 27)
+        Me.RbMonthlyPayment.Margin = New System.Windows.Forms.Padding(8, 0, 24, 0)
+        Me.RbMonthlyPayment.Name = "RbMonthlyPayment"
+        Me.RbMonthlyPayment.Padding = New System.Windows.Forms.Padding(20, 0, 20, 0)
+        Me.RbMonthlyPayment.Size = New System.Drawing.Size(160, 40)
+        Me.RbMonthlyPayment.TabIndex = 1
+        Me.RbMonthlyPayment.Text = "Mensual"
+        Me.RbMonthlyPayment.UseVisualStyleBackColor = True
         '
-        'RbGrupoFamiliar
+        'RbGroupPayment
         '
-        Me.RbGrupoFamiliar.Appearance = System.Windows.Forms.Appearance.Button
-        Me.RbGrupoFamiliar.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.RbGrupoFamiliar.Image = Global.GymPaymentControl.My.Resources.Resources.ic_family_group_53x30
-        Me.RbGrupoFamiliar.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.RbGrupoFamiliar.Location = New System.Drawing.Point(24, 75)
-        Me.RbGrupoFamiliar.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
-        Me.RbGrupoFamiliar.Name = "RbGrupoFamiliar"
-        Me.RbGrupoFamiliar.Padding = New System.Windows.Forms.Padding(25, 0, 25, 0)
-        Me.RbGrupoFamiliar.Size = New System.Drawing.Size(230, 40)
-        Me.RbGrupoFamiliar.TabIndex = 2
-        Me.RbGrupoFamiliar.Text = "Grupo familiar"
-        Me.RbGrupoFamiliar.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        Me.RbGrupoFamiliar.UseVisualStyleBackColor = True
+        Me.RbGroupPayment.Appearance = System.Windows.Forms.Appearance.Button
+        Me.RbGroupPayment.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.RbGroupPayment.Image = Global.GymPaymentControl.My.Resources.Resources.ic_family_group_53x30
+        Me.RbGroupPayment.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.RbGroupPayment.Location = New System.Drawing.Point(24, 75)
+        Me.RbGroupPayment.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
+        Me.RbGroupPayment.Name = "RbGroupPayment"
+        Me.RbGroupPayment.Padding = New System.Windows.Forms.Padding(25, 0, 25, 0)
+        Me.RbGroupPayment.Size = New System.Drawing.Size(230, 40)
+        Me.RbGroupPayment.TabIndex = 2
+        Me.RbGroupPayment.Text = "Grupo familiar"
+        Me.RbGroupPayment.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        Me.RbGroupPayment.UseVisualStyleBackColor = True
         '
-        'BtnAddGrupo
+        'BtnAddGroup
         '
-        Me.BtnAddGrupo.Enabled = False
-        Me.BtnAddGrupo.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnAddGrupo.Image = Global.GymPaymentControl.My.Resources.Resources.ic_add_group_37x30
-        Me.BtnAddGrupo.Location = New System.Drawing.Point(262, 75)
-        Me.BtnAddGrupo.Margin = New System.Windows.Forms.Padding(8, 0, 0, 0)
-        Me.BtnAddGrupo.Name = "BtnAddGrupo"
-        Me.BtnAddGrupo.Size = New System.Drawing.Size(90, 40)
-        Me.BtnAddGrupo.TabIndex = 3
-        Me.BtnAddGrupo.UseVisualStyleBackColor = True
+        Me.BtnAddGroup.Enabled = False
+        Me.BtnAddGroup.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnAddGroup.Image = Global.GymPaymentControl.My.Resources.Resources.ic_add_group_37x30
+        Me.BtnAddGroup.Location = New System.Drawing.Point(262, 75)
+        Me.BtnAddGroup.Margin = New System.Windows.Forms.Padding(8, 0, 0, 0)
+        Me.BtnAddGroup.Name = "BtnAddGroup"
+        Me.BtnAddGroup.Size = New System.Drawing.Size(90, 40)
+        Me.BtnAddGroup.TabIndex = 3
+        Me.BtnAddGroup.UseVisualStyleBackColor = True
         '
         'GbListaGrupoFamiliar
         '
-        Me.GbListaGrupoFamiliar.Controls.Add(Me.LblNumIntgrntes)
-        Me.GbListaGrupoFamiliar.Controls.Add(Me.TxtListaNom)
-        Me.GbListaGrupoFamiliar.Controls.Add(Me.DgvListaNombre)
+        Me.GbListaGrupoFamiliar.Controls.Add(Me.LblNumberMembers)
+        Me.GbListaGrupoFamiliar.Controls.Add(Me.TxtListGroupsDailyPayment)
+        Me.GbListaGrupoFamiliar.Controls.Add(Me.DgvListGroupsDailyPayment)
         Me.GbListaGrupoFamiliar.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GbListaGrupoFamiliar.Location = New System.Drawing.Point(24, 131)
         Me.GbListaGrupoFamiliar.Margin = New System.Windows.Forms.Padding(0, 16, 0, 0)
@@ -248,46 +248,46 @@ Partial Class FrmNewModifyClient
         Me.GbListaGrupoFamiliar.TabStop = False
         Me.GbListaGrupoFamiliar.Text = "Lista vacia"
         '
-        'LblNumIntgrntes
+        'LblNumberMembers
         '
-        Me.LblNumIntgrntes.BackColor = System.Drawing.Color.Azure
-        Me.LblNumIntgrntes.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.LblNumIntgrntes.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblNumIntgrntes.ForeColor = System.Drawing.Color.MediumBlue
-        Me.LblNumIntgrntes.Location = New System.Drawing.Point(258, 26)
-        Me.LblNumIntgrntes.Margin = New System.Windows.Forms.Padding(0)
-        Me.LblNumIntgrntes.Name = "LblNumIntgrntes"
-        Me.LblNumIntgrntes.Size = New System.Drawing.Size(70, 26)
-        Me.LblNumIntgrntes.TabIndex = 2
-        Me.LblNumIntgrntes.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.LblNumberMembers.BackColor = System.Drawing.Color.Azure
+        Me.LblNumberMembers.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.LblNumberMembers.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblNumberMembers.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblNumberMembers.Location = New System.Drawing.Point(258, 26)
+        Me.LblNumberMembers.Margin = New System.Windows.Forms.Padding(0)
+        Me.LblNumberMembers.Name = "LblNumberMembers"
+        Me.LblNumberMembers.Size = New System.Drawing.Size(70, 26)
+        Me.LblNumberMembers.TabIndex = 2
+        Me.LblNumberMembers.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
-        'TxtListaNom
+        'TxtListGroupsDailyPayment
         '
-        Me.TxtListaNom.BackColor = System.Drawing.Color.Azure
-        Me.TxtListaNom.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
-        Me.TxtListaNom.Enabled = False
-        Me.TxtListaNom.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TxtListaNom.ForeColor = System.Drawing.Color.MediumBlue
-        Me.TxtListaNom.Location = New System.Drawing.Point(0, 26)
-        Me.TxtListaNom.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
-        Me.TxtListaNom.MaxLength = 30
-        Me.TxtListaNom.Name = "TxtListaNom"
-        Me.TxtListaNom.Size = New System.Drawing.Size(255, 26)
-        Me.TxtListaNom.TabIndex = 0
-        Me.TxtListaNom.WordWrap = False
+        Me.TxtListGroupsDailyPayment.BackColor = System.Drawing.Color.Azure
+        Me.TxtListGroupsDailyPayment.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
+        Me.TxtListGroupsDailyPayment.Enabled = False
+        Me.TxtListGroupsDailyPayment.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TxtListGroupsDailyPayment.ForeColor = System.Drawing.Color.MediumBlue
+        Me.TxtListGroupsDailyPayment.Location = New System.Drawing.Point(0, 26)
+        Me.TxtListGroupsDailyPayment.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
+        Me.TxtListGroupsDailyPayment.MaxLength = 30
+        Me.TxtListGroupsDailyPayment.Name = "TxtListGroupsDailyPayment"
+        Me.TxtListGroupsDailyPayment.Size = New System.Drawing.Size(255, 26)
+        Me.TxtListGroupsDailyPayment.TabIndex = 0
+        Me.TxtListGroupsDailyPayment.WordWrap = False
         '
-        'DgvListaNombre
+        'DgvListGroupsDailyPayment
         '
-        Me.DgvListaNombre.AllowUserToAddRows = False
-        Me.DgvListaNombre.AllowUserToDeleteRows = False
-        Me.DgvListaNombre.AllowUserToResizeColumns = False
-        Me.DgvListaNombre.AllowUserToResizeRows = False
+        Me.DgvListGroupsDailyPayment.AllowUserToAddRows = False
+        Me.DgvListGroupsDailyPayment.AllowUserToDeleteRows = False
+        Me.DgvListGroupsDailyPayment.AllowUserToResizeColumns = False
+        Me.DgvListGroupsDailyPayment.AllowUserToResizeRows = False
         DataGridViewCellStyle3.BackColor = System.Drawing.Color.White
-        Me.DgvListaNombre.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle3
-        Me.DgvListaNombre.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None
-        Me.DgvListaNombre.ColumnHeadersHeight = 4
-        Me.DgvListaNombre.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
-        Me.DgvListaNombre.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.ColIdGrupo, Me.ColNomGrupo, Me.ColNumIntgrntes, Me.ColIntgrntesReg})
+        Me.DgvListGroupsDailyPayment.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle3
+        Me.DgvListGroupsDailyPayment.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None
+        Me.DgvListGroupsDailyPayment.ColumnHeadersHeight = 4
+        Me.DgvListGroupsDailyPayment.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
+        Me.DgvListGroupsDailyPayment.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colIdDailyGroup, Me.colNameDailyGroup, Me.colNumMembers, Me.colMembersReg})
         DataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
         DataGridViewCellStyle4.BackColor = System.Drawing.Color.PaleTurquoise
         DataGridViewCellStyle4.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
@@ -295,77 +295,77 @@ Partial Class FrmNewModifyClient
         DataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight
         DataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText
         DataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.DgvListaNombre.DefaultCellStyle = DataGridViewCellStyle4
-        Me.DgvListaNombre.Enabled = False
-        Me.DgvListaNombre.Location = New System.Drawing.Point(0, 56)
-        Me.DgvListaNombre.Margin = New System.Windows.Forms.Padding(0, 4, 0, 0)
-        Me.DgvListaNombre.MultiSelect = False
-        Me.DgvListaNombre.Name = "DgvListaNombre"
-        Me.DgvListaNombre.ReadOnly = True
-        Me.DgvListaNombre.RowHeadersWidth = 4
-        Me.DgvListaNombre.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
-        Me.DgvListaNombre.RowTemplate.DividerHeight = 2
-        Me.DgvListaNombre.RowTemplate.Height = 25
-        Me.DgvListaNombre.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect
-        Me.DgvListaNombre.Size = New System.Drawing.Size(328, 130)
-        Me.DgvListaNombre.TabIndex = 1
+        Me.DgvListGroupsDailyPayment.DefaultCellStyle = DataGridViewCellStyle4
+        Me.DgvListGroupsDailyPayment.Enabled = False
+        Me.DgvListGroupsDailyPayment.Location = New System.Drawing.Point(0, 56)
+        Me.DgvListGroupsDailyPayment.Margin = New System.Windows.Forms.Padding(0, 4, 0, 0)
+        Me.DgvListGroupsDailyPayment.MultiSelect = False
+        Me.DgvListGroupsDailyPayment.Name = "DgvListGroupsDailyPayment"
+        Me.DgvListGroupsDailyPayment.ReadOnly = True
+        Me.DgvListGroupsDailyPayment.RowHeadersWidth = 4
+        Me.DgvListGroupsDailyPayment.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
+        Me.DgvListGroupsDailyPayment.RowTemplate.DividerHeight = 2
+        Me.DgvListGroupsDailyPayment.RowTemplate.Height = 25
+        Me.DgvListGroupsDailyPayment.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect
+        Me.DgvListGroupsDailyPayment.Size = New System.Drawing.Size(328, 130)
+        Me.DgvListGroupsDailyPayment.TabIndex = 1
         '
-        'ColIdGrupo
+        'colIdDailyGroup
         '
-        Me.ColIdGrupo.HeaderText = "ColIdGrupo"
-        Me.ColIdGrupo.Name = "ColIdGrupo"
-        Me.ColIdGrupo.ReadOnly = True
-        Me.ColIdGrupo.Visible = False
+        Me.colIdDailyGroup.HeaderText = "colIdDailyGroup"
+        Me.colIdDailyGroup.Name = "colIdDailyGroup"
+        Me.colIdDailyGroup.ReadOnly = True
+        Me.colIdDailyGroup.Visible = False
         '
-        'ColNomGrupo
+        'colNameDailyGroup
         '
-        Me.ColNomGrupo.HeaderText = ""
-        Me.ColNomGrupo.Name = "ColNomGrupo"
-        Me.ColNomGrupo.ReadOnly = True
-        Me.ColNomGrupo.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.ColNomGrupo.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.ColNomGrupo.Width = 303
+        Me.colNameDailyGroup.HeaderText = "colNameDailyGroup"
+        Me.colNameDailyGroup.Name = "colNameDailyGroup"
+        Me.colNameDailyGroup.ReadOnly = True
+        Me.colNameDailyGroup.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.colNameDailyGroup.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.colNameDailyGroup.Width = 303
         '
-        'ColNumIntgrntes
+        'colNumMembers
         '
-        Me.ColNumIntgrntes.HeaderText = "ColNumIntgrntes"
-        Me.ColNumIntgrntes.Name = "ColNumIntgrntes"
-        Me.ColNumIntgrntes.ReadOnly = True
-        Me.ColNumIntgrntes.Visible = False
+        Me.colNumMembers.HeaderText = "colNumMembers"
+        Me.colNumMembers.Name = "colNumMembers"
+        Me.colNumMembers.ReadOnly = True
+        Me.colNumMembers.Visible = False
         '
-        'ColIntgrntesReg
+        'colMembersReg
         '
-        Me.ColIntgrntesReg.HeaderText = "ColIntgrntesReg"
-        Me.ColIntgrntesReg.Name = "ColIntgrntesReg"
-        Me.ColIntgrntesReg.ReadOnly = True
-        Me.ColIntgrntesReg.Visible = False
+        Me.colMembersReg.HeaderText = "colMembersReg"
+        Me.colMembersReg.Name = "colMembersReg"
+        Me.colMembersReg.ReadOnly = True
+        Me.colMembersReg.Visible = False
         '
-        'BtnCancelar
+        'BtnCancelRegistration
         '
-        Me.BtnCancelar.BackColor = System.Drawing.SystemColors.Control
-        Me.BtnCancelar.FlatAppearance.BorderColor = System.Drawing.Color.Red
-        Me.BtnCancelar.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(128, Byte), Integer), CType(CType(128, Byte), Integer))
-        Me.BtnCancelar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(192, Byte), Integer))
-        Me.BtnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.BtnCancelar.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnCancelar.ForeColor = System.Drawing.Color.Brown
-        Me.BtnCancelar.Image = Global.GymPaymentControl.My.Resources.Resources.ic_cancel_28x28
-        Me.BtnCancelar.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnCancelar.Location = New System.Drawing.Point(837, 212)
-        Me.BtnCancelar.Margin = New System.Windows.Forms.Padding(0)
-        Me.BtnCancelar.Name = "BtnCancelar"
-        Me.BtnCancelar.Padding = New System.Windows.Forms.Padding(0, 7, 0, 4)
-        Me.BtnCancelar.Size = New System.Drawing.Size(135, 75)
-        Me.BtnCancelar.TabIndex = 6
-        Me.BtnCancelar.Text = "&Cancelar"
-        Me.BtnCancelar.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnCancelar.UseVisualStyleBackColor = False
+        Me.BtnCancelRegistration.BackColor = System.Drawing.SystemColors.Control
+        Me.BtnCancelRegistration.FlatAppearance.BorderColor = System.Drawing.Color.Red
+        Me.BtnCancelRegistration.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(128, Byte), Integer), CType(CType(128, Byte), Integer))
+        Me.BtnCancelRegistration.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(192, Byte), Integer))
+        Me.BtnCancelRegistration.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.BtnCancelRegistration.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnCancelRegistration.ForeColor = System.Drawing.Color.Brown
+        Me.BtnCancelRegistration.Image = Global.GymPaymentControl.My.Resources.Resources.ic_cancel_28x28
+        Me.BtnCancelRegistration.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnCancelRegistration.Location = New System.Drawing.Point(837, 212)
+        Me.BtnCancelRegistration.Margin = New System.Windows.Forms.Padding(0)
+        Me.BtnCancelRegistration.Name = "BtnCancelRegistration"
+        Me.BtnCancelRegistration.Padding = New System.Windows.Forms.Padding(0, 7, 0, 4)
+        Me.BtnCancelRegistration.Size = New System.Drawing.Size(135, 75)
+        Me.BtnCancelRegistration.TabIndex = 6
+        Me.BtnCancelRegistration.Text = "&Cancelar"
+        Me.BtnCancelRegistration.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnCancelRegistration.UseVisualStyleBackColor = False
         '
         'GbContacto
         '
-        Me.GbContacto.Controls.Add(Me.TxtDireccion)
+        Me.GbContacto.Controls.Add(Me.TxtAddress)
         Me.GbContacto.Controls.Add(Me.TxtEmail)
-        Me.GbContacto.Controls.Add(Me.TxtTelefono)
+        Me.GbContacto.Controls.Add(Me.TxtPhone)
         Me.GbContacto.Controls.Add(Me.LblDireccion)
         Me.GbContacto.Controls.Add(Me.LblEmail)
         Me.GbContacto.Controls.Add(Me.LblTelefono)
@@ -379,20 +379,20 @@ Partial Class FrmNewModifyClient
         Me.GbContacto.TabStop = False
         Me.GbContacto.Text = "Datos de contacto :"
         '
-        'TxtDireccion
+        'TxtAddress
         '
-        Me.TxtDireccion.BackColor = System.Drawing.Color.Azure
-        Me.TxtDireccion.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
-        Me.TxtDireccion.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.TxtDireccion.ForeColor = System.Drawing.Color.MediumBlue
-        Me.TxtDireccion.Location = New System.Drawing.Point(24, 175)
-        Me.TxtDireccion.Margin = New System.Windows.Forms.Padding(0, 8, 0, 24)
-        Me.TxtDireccion.MaxLength = 100
-        Me.TxtDireccion.Multiline = True
-        Me.TxtDireccion.Name = "TxtDireccion"
-        Me.TxtDireccion.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
-        Me.TxtDireccion.Size = New System.Drawing.Size(350, 80)
-        Me.TxtDireccion.TabIndex = 2
+        Me.TxtAddress.BackColor = System.Drawing.Color.Azure
+        Me.TxtAddress.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
+        Me.TxtAddress.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
+        Me.TxtAddress.ForeColor = System.Drawing.Color.MediumBlue
+        Me.TxtAddress.Location = New System.Drawing.Point(24, 175)
+        Me.TxtAddress.Margin = New System.Windows.Forms.Padding(0, 8, 0, 24)
+        Me.TxtAddress.MaxLength = 100
+        Me.TxtAddress.Multiline = True
+        Me.TxtAddress.Name = "TxtAddress"
+        Me.TxtAddress.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
+        Me.TxtAddress.Size = New System.Drawing.Size(350, 80)
+        Me.TxtAddress.TabIndex = 2
         '
         'TxtEmail
         '
@@ -408,18 +408,18 @@ Partial Class FrmNewModifyClient
         Me.TxtEmail.TabIndex = 1
         Me.TxtEmail.WordWrap = False
         '
-        'TxtTelefono
+        'TxtPhone
         '
-        Me.TxtTelefono.BackColor = System.Drawing.Color.Azure
-        Me.TxtTelefono.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.TxtTelefono.ForeColor = System.Drawing.Color.MediumBlue
-        Me.TxtTelefono.Location = New System.Drawing.Point(24, 51)
-        Me.TxtTelefono.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
-        Me.TxtTelefono.MaxLength = 15
-        Me.TxtTelefono.Name = "TxtTelefono"
-        Me.TxtTelefono.Size = New System.Drawing.Size(350, 26)
-        Me.TxtTelefono.TabIndex = 0
-        Me.TxtTelefono.WordWrap = False
+        Me.TxtPhone.BackColor = System.Drawing.Color.Azure
+        Me.TxtPhone.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
+        Me.TxtPhone.ForeColor = System.Drawing.Color.MediumBlue
+        Me.TxtPhone.Location = New System.Drawing.Point(24, 51)
+        Me.TxtPhone.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
+        Me.TxtPhone.MaxLength = 15
+        Me.TxtPhone.Name = "TxtPhone"
+        Me.TxtPhone.Size = New System.Drawing.Size(350, 26)
+        Me.TxtPhone.TabIndex = 0
+        Me.TxtPhone.WordWrap = False
         '
         'LblDireccion
         '
@@ -456,11 +456,11 @@ Partial Class FrmNewModifyClient
         '
         'GbDatos
         '
-        Me.GbDatos.Controls.Add(Me.DtpFdn)
+        Me.GbDatos.Controls.Add(Me.DtpBirthdate)
         Me.GbDatos.Controls.Add(Me.LblEdad)
-        Me.GbDatos.Controls.Add(Me.TxtApellido)
-        Me.GbDatos.Controls.Add(Me.TxtNombre)
-        Me.GbDatos.Controls.Add(Me.TxtEdad)
+        Me.GbDatos.Controls.Add(Me.TxtLastName)
+        Me.GbDatos.Controls.Add(Me.TxtFirstName)
+        Me.GbDatos.Controls.Add(Me.TxtCustomerAge)
         Me.GbDatos.Controls.Add(Me.LblFnacimiento)
         Me.GbDatos.Controls.Add(Me.LblApellido)
         Me.GbDatos.Controls.Add(Me.LblNombre)
@@ -474,17 +474,17 @@ Partial Class FrmNewModifyClient
         Me.GbDatos.TabStop = False
         Me.GbDatos.Text = "Datos del cliente :"
         '
-        'DtpFdn
+        'DtpBirthdate
         '
-        Me.DtpFdn.CalendarFont = New System.Drawing.Font("Microsoft Sans Serif", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DtpFdn.CustomFormat = "' ' dd ' de  ' MMMM ' de  ' yyyy"
-        Me.DtpFdn.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.DtpFdn.Format = System.Windows.Forms.DateTimePickerFormat.Custom
-        Me.DtpFdn.Location = New System.Drawing.Point(24, 175)
-        Me.DtpFdn.Margin = New System.Windows.Forms.Padding(0, 8, 0, 24)
-        Me.DtpFdn.Name = "DtpFdn"
-        Me.DtpFdn.Size = New System.Drawing.Size(270, 26)
-        Me.DtpFdn.TabIndex = 2
+        Me.DtpBirthdate.CalendarFont = New System.Drawing.Font("Microsoft Sans Serif", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DtpBirthdate.CustomFormat = "' ' dd ' de  ' MMMM ' de  ' yyyy"
+        Me.DtpBirthdate.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
+        Me.DtpBirthdate.Format = System.Windows.Forms.DateTimePickerFormat.Custom
+        Me.DtpBirthdate.Location = New System.Drawing.Point(24, 175)
+        Me.DtpBirthdate.Margin = New System.Windows.Forms.Padding(0, 8, 0, 24)
+        Me.DtpBirthdate.Name = "DtpBirthdate"
+        Me.DtpBirthdate.Size = New System.Drawing.Size(270, 26)
+        Me.DtpBirthdate.TabIndex = 2
         '
         'LblEdad
         '
@@ -497,46 +497,46 @@ Partial Class FrmNewModifyClient
         Me.LblEdad.TabIndex = 3
         Me.LblEdad.Text = "Edad"
         '
-        'TxtApellido
+        'TxtLastName
         '
-        Me.TxtApellido.BackColor = System.Drawing.Color.Azure
-        Me.TxtApellido.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
-        Me.TxtApellido.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.TxtApellido.ForeColor = System.Drawing.Color.MediumBlue
-        Me.TxtApellido.Location = New System.Drawing.Point(24, 113)
-        Me.TxtApellido.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
-        Me.TxtApellido.MaxLength = 30
-        Me.TxtApellido.Name = "TxtApellido"
-        Me.TxtApellido.Size = New System.Drawing.Size(350, 26)
-        Me.TxtApellido.TabIndex = 1
-        Me.TxtApellido.WordWrap = False
+        Me.TxtLastName.BackColor = System.Drawing.Color.Azure
+        Me.TxtLastName.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
+        Me.TxtLastName.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
+        Me.TxtLastName.ForeColor = System.Drawing.Color.MediumBlue
+        Me.TxtLastName.Location = New System.Drawing.Point(24, 113)
+        Me.TxtLastName.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
+        Me.TxtLastName.MaxLength = 30
+        Me.TxtLastName.Name = "TxtLastName"
+        Me.TxtLastName.Size = New System.Drawing.Size(350, 26)
+        Me.TxtLastName.TabIndex = 1
+        Me.TxtLastName.WordWrap = False
         '
-        'TxtNombre
+        'TxtFirstName
         '
-        Me.TxtNombre.BackColor = System.Drawing.Color.Azure
-        Me.TxtNombre.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
-        Me.TxtNombre.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TxtNombre.ForeColor = System.Drawing.Color.MediumBlue
-        Me.TxtNombre.Location = New System.Drawing.Point(24, 51)
-        Me.TxtNombre.Margin = New System.Windows.Forms.Padding(24, 8, 24, 0)
-        Me.TxtNombre.MaxLength = 30
-        Me.TxtNombre.Name = "TxtNombre"
-        Me.TxtNombre.Size = New System.Drawing.Size(350, 26)
-        Me.TxtNombre.TabIndex = 0
-        Me.TxtNombre.WordWrap = False
+        Me.TxtFirstName.BackColor = System.Drawing.Color.Azure
+        Me.TxtFirstName.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
+        Me.TxtFirstName.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TxtFirstName.ForeColor = System.Drawing.Color.MediumBlue
+        Me.TxtFirstName.Location = New System.Drawing.Point(24, 51)
+        Me.TxtFirstName.Margin = New System.Windows.Forms.Padding(24, 8, 24, 0)
+        Me.TxtFirstName.MaxLength = 30
+        Me.TxtFirstName.Name = "TxtFirstName"
+        Me.TxtFirstName.Size = New System.Drawing.Size(350, 26)
+        Me.TxtFirstName.TabIndex = 0
+        Me.TxtFirstName.WordWrap = False
         '
-        'TxtEdad
+        'TxtCustomerAge
         '
-        Me.TxtEdad.BackColor = System.Drawing.Color.Azure
-        Me.TxtEdad.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.TxtEdad.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.TxtEdad.ForeColor = System.Drawing.Color.MediumBlue
-        Me.TxtEdad.Location = New System.Drawing.Point(304, 175)
-        Me.TxtEdad.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
-        Me.TxtEdad.Name = "TxtEdad"
-        Me.TxtEdad.Size = New System.Drawing.Size(70, 26)
-        Me.TxtEdad.TabIndex = 3
-        Me.TxtEdad.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.TxtCustomerAge.BackColor = System.Drawing.Color.Azure
+        Me.TxtCustomerAge.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.TxtCustomerAge.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
+        Me.TxtCustomerAge.ForeColor = System.Drawing.Color.MediumBlue
+        Me.TxtCustomerAge.Location = New System.Drawing.Point(304, 175)
+        Me.TxtCustomerAge.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
+        Me.TxtCustomerAge.Name = "TxtCustomerAge"
+        Me.TxtCustomerAge.Size = New System.Drawing.Size(70, 26)
+        Me.TxtCustomerAge.TabIndex = 3
+        Me.TxtCustomerAge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'LblFnacimiento
         '
@@ -571,43 +571,43 @@ Partial Class FrmNewModifyClient
         Me.LblNombre.TabIndex = 0
         Me.LblNombre.Text = "Nombre"
         '
-        'BtnActualizar
+        'BtnUpdateCustomerData
         '
-        Me.BtnActualizar.BackColor = System.Drawing.SystemColors.Control
-        Me.BtnActualizar.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
-        Me.BtnActualizar.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.BtnActualizar.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnActualizar.ForeColor = System.Drawing.Color.Green
-        Me.BtnActualizar.Image = Global.GymPaymentControl.My.Resources.Resources.ic_update_28x27
-        Me.BtnActualizar.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnActualizar.Location = New System.Drawing.Point(837, 41)
-        Me.BtnActualizar.Margin = New System.Windows.Forms.Padding(0, 20, 0, 0)
-        Me.BtnActualizar.Name = "BtnActualizar"
-        Me.BtnActualizar.Padding = New System.Windows.Forms.Padding(0, 7, 0, 4)
-        Me.BtnActualizar.Size = New System.Drawing.Size(135, 75)
-        Me.BtnActualizar.TabIndex = 5
-        Me.BtnActualizar.Text = "&Actualizar"
-        Me.BtnActualizar.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnActualizar.UseVisualStyleBackColor = False
+        Me.BtnUpdateCustomerData.BackColor = System.Drawing.SystemColors.Control
+        Me.BtnUpdateCustomerData.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
+        Me.BtnUpdateCustomerData.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.BtnUpdateCustomerData.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnUpdateCustomerData.ForeColor = System.Drawing.Color.Green
+        Me.BtnUpdateCustomerData.Image = Global.GymPaymentControl.My.Resources.Resources.ic_update_28x27
+        Me.BtnUpdateCustomerData.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnUpdateCustomerData.Location = New System.Drawing.Point(837, 41)
+        Me.BtnUpdateCustomerData.Margin = New System.Windows.Forms.Padding(0, 20, 0, 0)
+        Me.BtnUpdateCustomerData.Name = "BtnUpdateCustomerData"
+        Me.BtnUpdateCustomerData.Padding = New System.Windows.Forms.Padding(0, 7, 0, 4)
+        Me.BtnUpdateCustomerData.Size = New System.Drawing.Size(135, 75)
+        Me.BtnUpdateCustomerData.TabIndex = 5
+        Me.BtnUpdateCustomerData.Text = "&Actualizar"
+        Me.BtnUpdateCustomerData.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnUpdateCustomerData.UseVisualStyleBackColor = False
         '
-        'BtnGuardar
+        'BtnSaveCustomerData
         '
-        Me.BtnGuardar.BackColor = System.Drawing.SystemColors.Control
-        Me.BtnGuardar.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer))
-        Me.BtnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.BtnGuardar.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnGuardar.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer))
-        Me.BtnGuardar.Image = Global.GymPaymentControl.My.Resources.Resources.ic_save_28x28
-        Me.BtnGuardar.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnGuardar.Location = New System.Drawing.Point(837, 41)
-        Me.BtnGuardar.Margin = New System.Windows.Forms.Padding(24, 32, 16, 0)
-        Me.BtnGuardar.Name = "BtnGuardar"
-        Me.BtnGuardar.Padding = New System.Windows.Forms.Padding(0, 7, 0, 4)
-        Me.BtnGuardar.Size = New System.Drawing.Size(135, 75)
-        Me.BtnGuardar.TabIndex = 4
-        Me.BtnGuardar.Text = "&Guardar"
-        Me.BtnGuardar.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnGuardar.UseVisualStyleBackColor = False
+        Me.BtnSaveCustomerData.BackColor = System.Drawing.SystemColors.Control
+        Me.BtnSaveCustomerData.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer))
+        Me.BtnSaveCustomerData.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.BtnSaveCustomerData.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnSaveCustomerData.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer))
+        Me.BtnSaveCustomerData.Image = Global.GymPaymentControl.My.Resources.Resources.ic_save_28x28
+        Me.BtnSaveCustomerData.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnSaveCustomerData.Location = New System.Drawing.Point(837, 41)
+        Me.BtnSaveCustomerData.Margin = New System.Windows.Forms.Padding(24, 32, 16, 0)
+        Me.BtnSaveCustomerData.Name = "BtnSaveCustomerData"
+        Me.BtnSaveCustomerData.Padding = New System.Windows.Forms.Padding(0, 7, 0, 4)
+        Me.BtnSaveCustomerData.Size = New System.Drawing.Size(135, 75)
+        Me.BtnSaveCustomerData.TabIndex = 4
+        Me.BtnSaveCustomerData.Text = "&Guardar"
+        Me.BtnSaveCustomerData.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnSaveCustomerData.UseVisualStyleBackColor = False
         '
         'ErrorProvider
         '
@@ -620,11 +620,11 @@ Partial Class FrmNewModifyClient
         Me.ClientSize = New System.Drawing.Size(997, 578)
         Me.Controls.Add(Me.GbOtros)
         Me.Controls.Add(Me.GbMetodoPago)
-        Me.Controls.Add(Me.BtnCancelar)
+        Me.Controls.Add(Me.BtnCancelRegistration)
         Me.Controls.Add(Me.GbContacto)
         Me.Controls.Add(Me.GbDatos)
-        Me.Controls.Add(Me.BtnGuardar)
-        Me.Controls.Add(Me.BtnActualizar)
+        Me.Controls.Add(Me.BtnSaveCustomerData)
+        Me.Controls.Add(Me.BtnUpdateCustomerData)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.MaximizeBox = False
         Me.MinimizeBox = False
@@ -636,7 +636,7 @@ Partial Class FrmNewModifyClient
         Me.GbMetodoPago.ResumeLayout(False)
         Me.GbListaGrupoFamiliar.ResumeLayout(False)
         Me.GbListaGrupoFamiliar.PerformLayout()
-        CType(Me.DgvListaNombre, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.DgvListGroupsDailyPayment, System.ComponentModel.ISupportInitialize).EndInit()
         Me.GbContacto.ResumeLayout(False)
         Me.GbContacto.PerformLayout()
         Me.GbDatos.ResumeLayout(False)
@@ -650,39 +650,39 @@ Partial Class FrmNewModifyClient
     Friend WithEvents RbInactiveState As RadioButton
     Friend WithEvents RbActiveStatus As RadioButton
     Friend WithEvents LblEstadoCli As Label
-    Friend WithEvents DtpFdi As DateTimePicker
+    Friend WithEvents DtpRegistrationDate As DateTimePicker
     Friend WithEvents LblFinscripcion As Label
     Friend WithEvents GbMetodoPago As GroupBox
-    Friend WithEvents RbDiario As RadioButton
-    Friend WithEvents RbMensual As RadioButton
-    Friend WithEvents RbGrupoFamiliar As RadioButton
-    Friend WithEvents BtnAddGrupo As Button
+    Friend WithEvents RbDailyPayment As RadioButton
+    Friend WithEvents RbMonthlyPayment As RadioButton
+    Friend WithEvents RbGroupPayment As RadioButton
+    Friend WithEvents BtnAddGroup As Button
     Friend WithEvents GbListaGrupoFamiliar As GroupBox
-    Friend WithEvents LblNumIntgrntes As Label
-    Friend WithEvents TxtListaNom As TextBox
-    Friend WithEvents DgvListaNombre As DataGridView
-    Friend WithEvents ColIdGrupo As DataGridViewTextBoxColumn
-    Friend WithEvents ColNomGrupo As DataGridViewTextBoxColumn
-    Friend WithEvents ColNumIntgrntes As DataGridViewTextBoxColumn
-    Friend WithEvents ColIntgrntesReg As DataGridViewTextBoxColumn
-    Friend WithEvents BtnCancelar As Button
+    Friend WithEvents LblNumberMembers As Label
+    Friend WithEvents TxtListGroupsDailyPayment As TextBox
+    Friend WithEvents DgvListGroupsDailyPayment As DataGridView
+    Friend WithEvents BtnCancelRegistration As Button
     Friend WithEvents GbContacto As GroupBox
-    Friend WithEvents TxtDireccion As TextBox
+    Friend WithEvents TxtAddress As TextBox
     Friend WithEvents TxtEmail As TextBox
-    Friend WithEvents TxtTelefono As TextBox
+    Friend WithEvents TxtPhone As TextBox
     Friend WithEvents LblDireccion As Label
     Friend WithEvents LblEmail As Label
     Friend WithEvents LblTelefono As Label
     Friend WithEvents GbDatos As GroupBox
-    Friend WithEvents DtpFdn As DateTimePicker
+    Friend WithEvents DtpBirthdate As DateTimePicker
     Friend WithEvents LblEdad As Label
-    Friend WithEvents TxtApellido As TextBox
-    Friend WithEvents TxtNombre As TextBox
-    Friend WithEvents TxtEdad As Label
+    Friend WithEvents TxtLastName As TextBox
+    Friend WithEvents TxtFirstName As TextBox
+    Friend WithEvents TxtCustomerAge As Label
     Friend WithEvents LblFnacimiento As Label
     Friend WithEvents LblApellido As Label
     Friend WithEvents LblNombre As Label
-    Friend WithEvents BtnActualizar As Button
-    Friend WithEvents BtnGuardar As Button
+    Friend WithEvents BtnUpdateCustomerData As Button
+    Friend WithEvents BtnSaveCustomerData As Button
     Friend WithEvents ErrorProvider As ErrorProvider
+    Friend WithEvents colIdDailyGroup As DataGridViewTextBoxColumn
+    Friend WithEvents colNameDailyGroup As DataGridViewTextBoxColumn
+    Friend WithEvents colNumMembers As DataGridViewTextBoxColumn
+    Friend WithEvents colMembersReg As DataGridViewTextBoxColumn
 End Class

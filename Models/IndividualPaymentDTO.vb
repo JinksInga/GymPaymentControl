@@ -82,7 +82,7 @@ Namespace Models
         ' Devuelve el nombre completo del cliente y la edad.
         Public ReadOnly Property DisplayName As String Implements IPaymentCalculable.DisplayName
             Get
-                Return $"{Me.Name} {Me.LastName} - {Me.AgeText}"
+                Return $"{Me.FirstName} {Me.LastName} - {Me.AgeText}"
             End Get
         End Property
 
@@ -94,7 +94,7 @@ Namespace Models
                     Return Me.GroupMembers
                 Else
                     ' Si es un pago individual puro, mostramos solo al cliente
-                    Return $"{Me.Name} {Me.LastName}"
+                    Return $"{Me.FirstName} {Me.LastName}"
                 End If
             End Get
         End Property

@@ -58,7 +58,7 @@ Public Class FrmListDebtors
                                                 Dim coincideWith As Boolean = False
 
                                                 If CmbFilter.SelectedIndex = 0 Then
-                                                    coincideWith = (x.Name IsNot Nothing AndAlso x.Name.Contains(searchCriteria))
+                                                    coincideWith = (x.FirstName IsNot Nothing AndAlso x.FirstName.Contains(searchCriteria))
                                                 Else
                                                     coincideWith = (x.LastName IsNot Nothing AndAlso x.LastName.Contains(searchCriteria))
                                                 End If
@@ -70,7 +70,7 @@ Public Class FrmListDebtors
 
                                                                                 Return client.IdCli =
                                                                                 x.IdCli AndAlso Not client.IsSummaryRow AndAlso
-                                                                                ((CmbFilter.SelectedIndex = 0 AndAlso client.Name IsNot Nothing AndAlso client.Name.Contains(searchCriteria)) OrElse
+                                                                                ((CmbFilter.SelectedIndex = 0 AndAlso client.FirstName IsNot Nothing AndAlso client.FirstName.Contains(searchCriteria)) OrElse
                                                                                 (CmbFilter.SelectedIndex = 1 AndAlso client.LastName IsNot Nothing AndAlso client.LastName.Contains(searchCriteria)))
                                                                             End Function)
 

@@ -106,9 +106,9 @@ Namespace Services
             Using command As New MySqlCommand(sqlQuery, connection, transaction)
 
                 ' 2. Añadimos parámetros especificando el tipo de dato (Más seguro para fechas)
-                command.Parameters.Add("@nom", MySqlDbType.VarChar).Value = data.Name
+                command.Parameters.Add("@nom", MySqlDbType.VarChar).Value = data.FirstName
                 command.Parameters.Add("@ape", MySqlDbType.VarChar).Value = data.LastName
-                command.Parameters.Add("@fdn", MySqlDbType.Date).Value = data.DateBirth
+                command.Parameters.Add("@fdn", MySqlDbType.Date).Value = data.BirthDate
                 command.Parameters.Add("@tlf", MySqlDbType.VarChar).Value = data.Phone
                 command.Parameters.Add("@eml", MySqlDbType.VarChar).Value = data.Email
                 command.Parameters.Add("@dir", MySqlDbType.VarChar).Value = data.Address
@@ -130,7 +130,7 @@ Namespace Services
         End Function
 
         '|-------------------------------------------------------------------
-        '| CONSULTAR LA TARIFA CORRESPONDIENTE AL CLIENTE O AL GRUPO FAMILIAR - GEMINI
+        '| CONSULTAR LA TARIFA CORRESPONDIENTE AL CLIENTE O AL GRUPO FAMILIAR
         '|-------------------------------------------------------------------
         Private Function GetRate(connection As MySqlConnection,
                          transaction As MySqlTransaction,
@@ -196,7 +196,7 @@ Namespace Services
                     result.Discount = If(reader.IsDBNull(1), 0D, reader.GetDecimal(1))
                 End If
 
-            End Using
+            End Using ' El reader se cierra aquí automáticamente
 
         End Sub
 
@@ -262,18 +262,36 @@ Namespace Services
         '| INSERTAR PAGO DEL CLIENTE O AL GRUPO FAMILIAR
         '|----------------------------------------------
         Private Sub UpdateGroup(connection As MySqlConnection,
-                            transaction As MySqlTransaction,
-                            data As ClientPaymentDTO)
+                                transaction As MySqlTransaction,
+                                data As ClientPaymentDTO)
 
-            ' Solo incrementamos el contador de los que ya están registrados
-            Dim sqlQuery As String = "UPDATE grp_familiar SET intgrntes_reg_grp = intgrntes_reg_grp + 1 WHERE id_grp = @idgrp"
+            '' Solo incrementamos el contador de los que ya están registrados
+            'Dim sqlQuery As String = "UPDATE grp_familiar SET intgrntes_reg_grp = intgrntes_reg_grp + 1 WHERE id_grp = @idgrp"
+
+            'Using command As New MySqlCommand(sqlQuery, connection, transaction)
+
+            '    command.Parameters.Add("@idgrp", MySqlDbType.Int16).Value = data.IdGroup.Value
+            '    command.ExecuteNonQuery()
+
+            'End Using
+            Dim sqlQuery As String
+
+            ' SQL Atómico: Sumamos directamente en la DB
+            If data.ShouldExpandGroup Then
+                sqlQuery = "UPDATE grp_familiar
+                            SET intgrntes_reg_grp = intgrntes_reg_grp + 1, num_intgrntes_grp = num_intgrntes_grp + 1
+                            WHERE id_grp = @idgrp"
+            Else
+                sqlQuery = "UPDATE grp_familiar
+                            SET intgrntes_reg_grp = intgrntes_reg_grp + 1
+                            WHERE id_grp = @idgrp"
+            End If
 
             Using command As New MySqlCommand(sqlQuery, connection, transaction)
-
                 command.Parameters.Add("@idgrp", MySqlDbType.Int16).Value = data.IdGroup.Value
                 command.ExecuteNonQuery()
-
             End Using
+
         End Sub
 
         '|-----------------------------------------------------------------------
@@ -324,9 +342,9 @@ Namespace Services
                             Dim customerData As New IndividualPaymentDTO With
                                 {
                                     .IdCli = dataReader.GetInt32("id_cli"),
-                                    .Name = dataReader.GetString("nom_cli"),
+                                    .FirstName = dataReader.GetString("nom_cli"),
                                     .LastName = dataReader.GetString("ape_cli"),
-                                    .DateBirth = dataReader.GetDateTime("fdn_cli"),
+                                    .BirthDate = dataReader.GetDateTime("fdn_cli"),
                                     .Age = CalculateClientAge(dataReader.GetDateTime("fdn_cli")),
                                     .Phone = dataReader.GetString("tlf_cli"),
                                     .Email = dataReader.GetString("eml_cli"),

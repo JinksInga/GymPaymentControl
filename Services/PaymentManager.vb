@@ -69,7 +69,7 @@ Namespace Services
                                 {
                                     .IdPgs = dataReader("id_pgs"),
                                     .IdCli = dataReader("id_cli"),
-                                    .Name = dataReader("nom_cli").ToString(),
+                                    .FirstName = dataReader("nom_cli").ToString(),
                                     .LastName = dataReader("ape_cli").ToString(),
                                     .Age = CalculateClientAge(dataReader.GetDateTime("fdn_cli")),
                                     .MtdPgs = dataReader("mtd_pgs").ToString(),

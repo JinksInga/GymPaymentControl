@@ -31,7 +31,6 @@ Partial Class FrmClientsPayments
         Dim DataGridViewCellStyle15 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle16 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle17 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FrmClientsPayments))
         Dim DataGridViewCellStyle6 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle7 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle8 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
@@ -41,6 +40,7 @@ Partial Class FrmClientsPayments
         Dim DataGridViewCellStyle12 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle13 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle14 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FrmClientsPayments))
         Me.LblResult = New System.Windows.Forms.Label()
         Me.LblDirCli = New System.Windows.Forms.Label()
         Me.LblNomCli = New System.Windows.Forms.Label()
@@ -68,11 +68,6 @@ Partial Class FrmClientsPayments
         Me.LblFechaNacimiento = New System.Windows.Forms.Label()
         Me.LblApellido = New System.Windows.Forms.Label()
         Me.DgvClientList = New System.Windows.Forms.DataGridView()
-        Me.NomCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.ApeCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.FdnCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.TlfCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.EmlCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.GbState = New System.Windows.Forms.GroupBox()
         Me.RbActive = New System.Windows.Forms.RadioButton()
         Me.RbInactive = New System.Windows.Forms.RadioButton()
@@ -96,7 +91,6 @@ Partial Class FrmClientsPayments
         Me.BtnNewClient = New System.Windows.Forms.Button()
         Me.GbPaymentList = New System.Windows.Forms.GroupBox()
         Me.DgvPaymentList = New System.Windows.Forms.DataGridView()
-        Me.PictureBox = New System.Windows.Forms.PictureBox()
         Me.fdi_pgs = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.fdp_pgs = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.frm_pgs = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -106,6 +100,12 @@ Partial Class FrmClientsPayments
         Me.ndd_pgs = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.tap_pgs = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.nom_user = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.PictureBox = New System.Windows.Forms.PictureBox()
+        Me.NomCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.ApeCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.FdnCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.TlfCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.EmlCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.PnlDataClient.SuspendLayout()
         CType(Me.DgvClientList, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GbState.SuspendLayout()
@@ -532,63 +532,6 @@ Partial Class FrmClientsPayments
         Me.ToolTip.SetToolTip(Me.DgvClientList, "DOBLE CLIC PARA SELECCIONAR UN CLIENTE")
         Me.DgvClientList.Visible = False
         '
-        'NomCli
-        '
-        Me.NomCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.NomCli.DataPropertyName = "Name"
-        Me.NomCli.HeaderText = "Nombre"
-        Me.NomCli.MinimumWidth = 6
-        Me.NomCli.Name = "NomCli"
-        Me.NomCli.ReadOnly = True
-        Me.NomCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.NomCli.Width = 192
-        '
-        'ApeCli
-        '
-        Me.ApeCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.ApeCli.DataPropertyName = "LastName"
-        Me.ApeCli.HeaderText = "Apellido"
-        Me.ApeCli.MinimumWidth = 6
-        Me.ApeCli.Name = "ApeCli"
-        Me.ApeCli.ReadOnly = True
-        Me.ApeCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.ApeCli.Width = 192
-        '
-        'FdnCli
-        '
-        Me.FdnCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.FdnCli.DataPropertyName = "AgeText"
-        Me.FdnCli.HeaderText = "Edad"
-        Me.FdnCli.MinimumWidth = 6
-        Me.FdnCli.Name = "FdnCli"
-        Me.FdnCli.ReadOnly = True
-        Me.FdnCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.FdnCli.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.FdnCli.Width = 120
-        '
-        'TlfCli
-        '
-        Me.TlfCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.TlfCli.DataPropertyName = "Phone"
-        Me.TlfCli.HeaderText = "Telefóno"
-        Me.TlfCli.MinimumWidth = 6
-        Me.TlfCli.Name = "TlfCli"
-        Me.TlfCli.ReadOnly = True
-        Me.TlfCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.TlfCli.Width = 144
-        '
-        'EmlCli
-        '
-        Me.EmlCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.EmlCli.DataPropertyName = "Email"
-        Me.EmlCli.HeaderText = "E-mail"
-        Me.EmlCli.MinimumWidth = 6
-        Me.EmlCli.Name = "EmlCli"
-        Me.EmlCli.ReadOnly = True
-        Me.EmlCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.EmlCli.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.EmlCli.Width = 216
-        '
         'GbState
         '
         Me.GbState.Controls.Add(Me.RbActive)
@@ -975,16 +918,6 @@ Partial Class FrmClientsPayments
         Me.DgvPaymentList.Size = New System.Drawing.Size(1060, 276)
         Me.DgvPaymentList.TabIndex = 92
         '
-        'PictureBox
-        '
-        Me.PictureBox.Image = CType(resources.GetObject("PictureBox.Image"), System.Drawing.Image)
-        Me.PictureBox.Location = New System.Drawing.Point(25, 17)
-        Me.PictureBox.Margin = New System.Windows.Forms.Padding(16, 8, 0, 0)
-        Me.PictureBox.Name = "PictureBox"
-        Me.PictureBox.Size = New System.Drawing.Size(48, 48)
-        Me.PictureBox.TabIndex = 91
-        Me.PictureBox.TabStop = False
-        '
         'fdi_pgs
         '
         Me.fdi_pgs.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
@@ -1111,6 +1044,73 @@ Partial Class FrmClientsPayments
         Me.nom_user.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
         Me.nom_user.Width = 125
         '
+        'PictureBox
+        '
+        Me.PictureBox.Image = CType(resources.GetObject("PictureBox.Image"), System.Drawing.Image)
+        Me.PictureBox.Location = New System.Drawing.Point(25, 17)
+        Me.PictureBox.Margin = New System.Windows.Forms.Padding(16, 8, 0, 0)
+        Me.PictureBox.Name = "PictureBox"
+        Me.PictureBox.Size = New System.Drawing.Size(48, 48)
+        Me.PictureBox.TabIndex = 91
+        Me.PictureBox.TabStop = False
+        '
+        'NomCli
+        '
+        Me.NomCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.NomCli.DataPropertyName = "FirstName"
+        Me.NomCli.HeaderText = "Nombre"
+        Me.NomCli.MinimumWidth = 6
+        Me.NomCli.Name = "NomCli"
+        Me.NomCli.ReadOnly = True
+        Me.NomCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.NomCli.Width = 192
+        '
+        'ApeCli
+        '
+        Me.ApeCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.ApeCli.DataPropertyName = "LastName"
+        Me.ApeCli.HeaderText = "Apellido"
+        Me.ApeCli.MinimumWidth = 6
+        Me.ApeCli.Name = "ApeCli"
+        Me.ApeCli.ReadOnly = True
+        Me.ApeCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.ApeCli.Width = 192
+        '
+        'FdnCli
+        '
+        Me.FdnCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.FdnCli.DataPropertyName = "AgeText"
+        Me.FdnCli.HeaderText = "Edad"
+        Me.FdnCli.MinimumWidth = 6
+        Me.FdnCli.Name = "FdnCli"
+        Me.FdnCli.ReadOnly = True
+        Me.FdnCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.FdnCli.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.FdnCli.Width = 120
+        '
+        'TlfCli
+        '
+        Me.TlfCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.TlfCli.DataPropertyName = "Phone"
+        Me.TlfCli.HeaderText = "Telefóno"
+        Me.TlfCli.MinimumWidth = 6
+        Me.TlfCli.Name = "TlfCli"
+        Me.TlfCli.ReadOnly = True
+        Me.TlfCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.TlfCli.Width = 144
+        '
+        'EmlCli
+        '
+        Me.EmlCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.EmlCli.DataPropertyName = "Email"
+        Me.EmlCli.HeaderText = "E-mail"
+        Me.EmlCli.MinimumWidth = 6
+        Me.EmlCli.Name = "EmlCli"
+        Me.EmlCli.ReadOnly = True
+        Me.EmlCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.EmlCli.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.EmlCli.Width = 216
+        '
         'FrmClientsPayments
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -1192,11 +1192,6 @@ Partial Class FrmClientsPayments
     Friend WithEvents PnlBotonera As Panel
     Friend WithEvents GbPaymentList As GroupBox
     Friend WithEvents DgvPaymentList As DataGridView
-    Friend WithEvents NomCli As DataGridViewTextBoxColumn
-    Friend WithEvents ApeCli As DataGridViewTextBoxColumn
-    Friend WithEvents FdnCli As DataGridViewTextBoxColumn
-    Friend WithEvents TlfCli As DataGridViewTextBoxColumn
-    Friend WithEvents EmlCli As DataGridViewTextBoxColumn
     Friend WithEvents fdi_pgs As DataGridViewTextBoxColumn
     Friend WithEvents fdp_pgs As DataGridViewTextBoxColumn
     Friend WithEvents frm_pgs As DataGridViewTextBoxColumn
@@ -1206,4 +1201,9 @@ Partial Class FrmClientsPayments
     Friend WithEvents ndd_pgs As DataGridViewTextBoxColumn
     Friend WithEvents tap_pgs As DataGridViewTextBoxColumn
     Friend WithEvents nom_user As DataGridViewTextBoxColumn
+    Friend WithEvents NomCli As DataGridViewTextBoxColumn
+    Friend WithEvents ApeCli As DataGridViewTextBoxColumn
+    Friend WithEvents FdnCli As DataGridViewTextBoxColumn
+    Friend WithEvents TlfCli As DataGridViewTextBoxColumn
+    Friend WithEvents EmlCli As DataGridViewTextBoxColumn
 End Class
