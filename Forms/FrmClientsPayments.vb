@@ -176,12 +176,10 @@ Public Class FrmClientsPayments
     End Sub
 
     Private Sub BtnModifyData_Click(sender As Object, e As EventArgs) Handles BtnModifyData.Click
-        '
+
         ' Suponiendo que ya tienes cargado tu DTO del cliente seleccionado
         If _selectedClient IsNot Nothing Then
             NavigateToForm.OpenFrmModifyClient(_selectedClient, AddressOf RefreshPaymentHistory)
-            'Else
-            '    MsgBox("Por favor, selecciona un cliente primero.")
         End If
 
     End Sub

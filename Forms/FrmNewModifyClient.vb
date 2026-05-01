@@ -19,6 +19,8 @@ Public Class FrmNewModifyClient
     ' --- Variables de Memoria (Nivel Formulario) ---
     Private _selectedGroupId As Integer? = Nothing
     Private _currentGroupMaxMembers As Integer = 0
+    Private _strNameGroup As String
+    Private _intNumMembers, _intMembersReg As Integer
     ''
     ''
     Private Sub FrmNewModifyClient_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -95,7 +97,6 @@ Public Class FrmNewModifyClient
         DtpBirthdate.CustomFormat = "' ' dd ' de  ' MMMM ' de  ' yyyy"
 
     End Sub
-
     Private Sub DtpBirthdate_LostFocus(sender As Object, e As EventArgs) Handles DtpBirthdate.LostFocus
 
         '| -----------------------------------------------------------------------------------
@@ -243,91 +244,96 @@ Public Class FrmNewModifyClient
         Dim searchText = TxtListGroupsDailyPayment.Text.Trim()
         DgvListGroupsDailyPayment.DataSource = _clientManager.SearchFamilyGroup(searchText)
 
-        ' 2. Si está vacío, limpiamos
-        If String.IsNullOrWhiteSpace(searchText) Then
-            LblNumberMembers.Text = ""
-            Exit Sub
+        ' 2. Verificación de texto vacío y Limpieza total
+        If String.IsNullOrWhiteSpace(searchText) Then ResetGroupUI(True) : Exit Sub
+
+        ' 3. Buscar coincidencia exacta en los resultados
+        Dim matchRow = DgvListGroupsDailyPayment.Rows.Cast(Of DataGridViewRow)().
+                       FirstOrDefault(Function(r) r.Cells("colNameDailyGroup").Value?.ToString().ToUpper() = searchText.ToUpper())
+
+        If matchRow IsNot Nothing Then
+            ' --- COINCIDENCIA ENCONTRADA ---
+            _selectedGroupId = CInt(matchRow.Cells("colIdDailyGroup").Value)
+            _strNameGroup = matchRow.Cells("colNameDailyGroup").Value.ToString()
+            _intNumMembers = CInt(matchRow.Cells("colNumMembers").Value)
+            _intMembersReg = CInt(matchRow.Cells("colMembersReg").Value)
+
+            LblNumberMembers.Text = $"Registrados {_intMembersReg} de {_intNumMembers}"
+
+            UpdateExpansionUI(_intNumMembers = _intMembersReg)
+
+            _currentGroupMaxMembers = _intNumMembers
+        Else
+            ' --- SIN COINCIDENCIA EXACTA ---
+            ResetGroupUI(False)
+
         End If
 
-        ' 3. ¿Hay coincidencia exacta? (Para saber si el grupo está seleccionado)
-        If DgvListGroupsDailyPayment.RowCount > 0 Then
-            ' Buscamos entre las filas del grid la que coincida exactamente con el texto
-            Dim match = DgvListGroupsDailyPayment.Rows.Cast(Of DataGridViewRow)().
-                        FirstOrDefault(Function(r) r.Cells("colNameDailyGroup").Value?.ToString().ToUpper() = searchText.ToUpper())
+        ' Siempre reiniciamos la intención de expandir al cambiar el texto
+        _shouldExpandGroup = False
 
-            If match IsNot Nothing Then
-                Dim total = CInt(match.Cells("colNumMembers").Value)
-                Dim reg = CInt(match.Cells("colMembersReg").Value)
-                LblNumberMembers.Text = $"{reg} de {total}"
-
-                '' Valores para el guardado posterior
-                _selectedGroupId = CInt(match.Cells("colIdDailyGroup").Value)
-
-                ' Por defecto, al buscar/cargar, asumimos que NO expandimos.
-                ' Si se necesita expandir, el usuario lo decidirá haciendo Doble Clic en el Grid.
-                _currentGroupMaxMembers = total
-                _shouldExpandGroup = False
-
-            Else
-                ' Si el texto no coincide con nada exacto, reseteamos el ID
-                _selectedGroupId = 0
-                LblNumberMembers.Text = "..."
-
-            End If
-        End If
     End Sub
+    ''
+    ''
+    Private Sub BtnExpandCapacity_Click(sender As Object, e As EventArgs) Handles BtnExpandCapacity.Click
 
+        ' Preparamos el mensaje usando interpolación de strings (más moderno)
+        Dim strMsgBox As String =
+                "    Nombre del grupo  : {nameGroup}{vbCr}" &
+                "    Nº de Integrantes   : {numMembers}{vbCr}{vbCr}" &
+                "    El grupo seleccionado ya tiene los integrantes completos." & vbCr &
+                "    ___________________________________________________________" & vbCr & vbCr &
+                "                        ¿Seguro que quieres añadir otro integrante?"
+
+
+        If MsgBox(strMsgBox, vbExclamation + vbYesNo + vbDefaultButton2, "Comprobar datos") = vbYes Then
+            'TxtListGroupsDailyPayment.Text = nameGroup
+            _currentGroupMaxMembers += 1 'Preparamos el valor para el DTO
+            _shouldExpandGroup = True
+
+            ' UI Feedback
+            LblNumberMembers.ForeColor = Color.FromArgb(255, 128, 0) 'Color.Orange
+            LblNumberMembers.Text = "1 Cupo pendiente por registrar."
+            BtnExpandCapacity.Enabled = False
+            ErrorProvider.Clear()
+
+        End If
+
+    End Sub
+    ''
+    ''
     Private Sub DgvListGroupsDailyPayment_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvListGroupsDailyPayment.CellContentClick
-        '15 DgvListGroupsDailyPayment_CellContentClick
     End Sub
     Private Sub DgvListGroupsDailyPayment_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvListGroupsDailyPayment.CellClick
 
+        ' Verificaciones
         If e.RowIndex < 0 Then Exit Sub
+        Dim row As DataGridViewRow = DgvListGroupsDailyPayment.Rows(e.RowIndex)
+        If row Is Nothing Then Exit Sub
 
+        ' PAGO DIARIO
         If RbDailyPayment.Checked Then
-            TxtListGroupsDailyPayment.Text = DgvListGroupsDailyPayment.CurrentRow.Cells("colNameDailyGroup").Value.ToString()
+            TxtListGroupsDailyPayment.Text = row.Cells("colNameDailyGroup").Value.ToString()
         End If
 
-    End Sub
-    Private Sub DgvListGroupsDailyPayment_DoubleClick(sender As Object, e As EventArgs) Handles DgvListGroupsDailyPayment.DoubleClick
-
-        If DgvListGroupsDailyPayment.CurrentRow Is Nothing Then Exit Sub
-
+        ' PAGO GRUPAL
         If RbGroupPayment.Checked Then
-            Dim row = DgvListGroupsDailyPayment.CurrentRow
-            Dim nameGroup As String = row.Cells("colNameDailyGroup").Value.ToString()
-            Dim numMembers As Integer = CInt(row.Cells("colNumMembers").Value)
-            Dim membersReg As Integer = CInt(row.Cells("colMembersReg").Value)
 
-            ' --- NUEVO: Guardamos el ID para el DTO ---
-            _selectedGroupId = CInt(row.Cells("colIdDailyGroup").Value) ' Asume que tienes esta columna
+            _selectedGroupId = CInt(row.Cells("colIdDailyGroup").Value)
+            _strNameGroup = row.Cells("colNameDailyGroup").Value.ToString()
+            _intNumMembers = CInt(row.Cells("colNumMembers").Value)
+            _intMembersReg = CInt(row.Cells("colMembersReg").Value)
 
-            If numMembers = membersReg Then
-                ' Preparamos el mensaje usando interpolación de strings (más moderno)
-                Dim strMsgBox As String =
-                    $"    Nombre del grupo  : {nameGroup}{vbCr}" &
-                    $"    Nº de Integrantes   : {numMembers}{vbCr}{vbCr}" &
-                    "    El grupo seleccionado ya tiene los integrantes completos." & vbCr &
-                    "    ___________________________________________________________" & vbCr & vbCr &
-                    "                        ¿Seguro que quieres añadir otro integrante?"
+            TxtListGroupsDailyPayment.Text = _strNameGroup
+            'LblNumberMembers.Text = $"Registrados {_intMembersReg} de {_intNumMembers}"
 
+            '' Por defecto, al buscar/cargar, asumimos que NO expandimos.
+            '' Lógica de control para el botón de expansión
+            '_currentGroupMaxMembers = _intNumMembers
 
-                If MsgBox(strMsgBox, vbExclamation + vbYesNo + vbDefaultButton2, "Comprobar datos") = vbYes Then
-                    TxtListGroupsDailyPayment.Text = nameGroup
-                    _currentGroupMaxMembers = numMembers + 1 ' <--- Necesario para el precio
-                    _shouldExpandGroup = True
-                    'Else
-                    '    _shouldExpandGroup = False ' <-- El usuario canceló la expansión
-                    ' (Aquí podrías limpiar el campo de búsqueda si quieres)
-                End If
+            'UpdateExpansionUI(_intNumMembers = _intMembersReg)
 
-            Else
-                TxtListGroupsDailyPayment.Text = nameGroup
-                LblNumberMembers.Text = $"{membersReg} de {numMembers}"
-                _currentGroupMaxMembers = numMembers ' Mantiene el cupo actual
-                _shouldExpandGroup = False
-            End If
-
+            '_shouldExpandGroup = False
         End If
 
     End Sub
@@ -387,7 +393,8 @@ Public Class FrmNewModifyClient
     Private Sub BtnUpdateCustomerData_Click(sender As Object, e As EventArgs) Handles BtnUpdateCustomerData.Click
         'BtnUpdateCustomerData_Click
     End Sub
-
+    ''
+    ''
     Private Sub BtnCancelRegistration_Click(sender As Object, e As EventArgs) Handles BtnCancelRegistration.Click
         'BtnCancelRegistration_Click
     End Sub
@@ -431,8 +438,8 @@ Public Class FrmNewModifyClient
         _clientPaymentDTO = New ClientPaymentDTO()
 
         ' Configurar botones
-        BtnSaveCustomerData.Visible = True
-        BtnUpdateCustomerData.Visible = False ' El de actualizar datos
+        BtnSaveCustomerData.Enabled = True
+        BtnUpdateCustomerData.Enabled = False ' El de actualizar datos
 
         ' Configurar fechas por defecto
         DtpBirthdate.Format = DateTimePickerFormat.Custom
@@ -519,8 +526,8 @@ Public Class FrmNewModifyClient
         End Select
 
         ' 5. Ajustes Visuales
-        BtnSaveCustomerData.Visible = False
-        BtnUpdateCustomerData.Visible = True
+        BtnSaveCustomerData.Enabled = False
+        BtnUpdateCustomerData.Enabled = True
         Me.Text = "Modificando Datos: " & clientData.FirstName & " " & clientData.LastName
     End Sub
     ''
@@ -563,6 +570,36 @@ Public Class FrmNewModifyClient
     End Sub
     ''
     ''
+    Private Sub UpdateExpansionUI(isFull As Boolean)
+
+        If isFull Then
+            LblNumberMembers.ForeColor = Color.FromArgb(192, 0, 0) 'COLOR ROJO
+            BtnExpandCapacity.Enabled = True
+            ErrorProvider.SetError(BtnExpandCapacity,
+                                   $"El grupo {_strNameGroup} está lleno.
+                                       {Environment.NewLine}Haga clic en el botón [Ampliar cupo] para agregar un integrante.")
+        End If
+
+    End Sub
+    ''
+    ''
+    Private Sub ResetGroupUI(isFullClear As Boolean)
+
+        _selectedGroupId = 0
+        _currentGroupMaxMembers = 0
+        BtnExpandCapacity.Enabled = False
+        ErrorProvider.Clear()
+
+        LblNumberMembers.ForeColor = Color.FromArgb(0, 64, 0) 'COLOR VERDE
+        If isFullClear Then
+            LblNumberMembers.Text = ""
+        Else
+            LblNumberMembers.Text = "Buscando grupo ..."
+        End If
+
+    End Sub
+    ''
+    ''
     Private Sub ShowSuccessMessage(idClient As Integer)
         ' 1. Preparamos el texto del cuerpo (Guardado vs Actualizado)
         Dim strActionText As String = If(BtnSaveCustomerData.Visible, "GUARDADOS", "ACTUALIZADOS")
@@ -570,10 +607,10 @@ Public Class FrmNewModifyClient
 
         ' 2. Construimos el "Ticket" de confirmación (usando los datos que ya tenemos en los campos)
         Dim strMsgBox As String = "DATOS DEL CLIENTE" & vbCrLf & vbCrLf &
-                            "   NOMBRE   :  " & TxtFirstName.Text & " " & TxtLastName.Text & vbCrLf &
-                            "   CÓDIGO   :  " & strIdFormatted & vbCrLf &
-                            "   -----------------------------------------------" & vbCrLf &
-                            "   Datos " & strActionText & " correctamente."
+                                    "   NOMBRE   :  " & TxtFirstName.Text & " " & TxtLastName.Text & vbCrLf &
+                                    "   CÓDIGO   :  " & strIdFormatted & vbCrLf &
+                                    "   -----------------------------------------------" & vbCrLf &
+                                    "   Datos " & strActionText & " correctamente."
 
         MessageBox.Show(strMsgBox, "Operación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information)
 

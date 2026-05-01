@@ -323,6 +323,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <None Include="image\ic_expand_22x22.png" />
+    <None Include="image\ic_expand_24x24.png" />
     <None Include="image\ic_cancel_search_30x30.png" />
     <None Include="image\ic_new_payment_28x32.png" />
     <None Include="image\ic_inactive_50x50.png" />
