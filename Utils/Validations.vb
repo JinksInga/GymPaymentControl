@@ -96,10 +96,12 @@ Namespace Utils
             Return Regex.IsMatch(eMail, strRegex)
 
         End Function
-        ''
-        ''
-        ''
+
         Public Sub ValidateDecimalInput(sender As Object, e As KeyPressEventArgs)
+
+            '|
+            '|
+            '|
 
             Dim textBox = TryCast(sender, TextBox)
             If textBox Is Nothing Then Return
@@ -124,8 +126,69 @@ Namespace Utils
             End If
 
         End Sub
-        ''
-        ''
-        ''
+
+        Public Sub ValidateCustomerData(textBox As TextBox, errorProvider As ErrorProvider)
+
+            '| --------------------------------------------------------------------------------
+            '| * Limpiamos cualquier error previo que se haya establecido en cualquier control.
+            '|
+            '| IF : Comprueba si el contenido del TextBox es NULO, VACÍO (""), o si solo contiene
+            '|      ESPACIOS EN BLANCO (incluyendo tabs o saltos de línea):
+            '|      * Si la validación falla activamos el ErrorProvider y cambiamos el color de
+            '|        fondo del textbox que nos indica un error y requiere atención.
+            '|
+            '| ELSE : Si el campo tiene caracteres:
+            '|      * Quitamos los espacios en blanco iniciales y finales de la cadena.
+            '|
+            '|      WHILE : Comienza un ciclo para eliminar múltiples espacios internos. Se ejecuta
+            '|              MIENTRAS la cadena contenga la secuencia "  " (dos o más espacios).
+            '|              * Reemplaza los DOS espacios consecutivos con UN solo espacio. Esto se
+            '|                repite hasta que no queden más espacios dobles, asegurando un solo
+            '|                espacio entre palabras.
+            '|      ** Para la limpieza de espacios en blanco tambien podemos usar TRIM y luego
+            '|         REGEX [Regex.Replace(cleanText, "\s+", " ")]. Para nuestro caso no sirve
+            '|         porque borra los saltos de línea y concatena la dirección.**
+            '|
+            '|      * Cambiamos el color de fondo del TextBox que indica que el valor es correcto.
+
+            errorProvider.Clear()
+            If String.IsNullOrWhiteSpace(textBox.Text) Then
+                errorProvider.SetError(textBox, "El campo no puede estar vacío.")
+                textBox.BackColor = Color.MistyRose
+
+            Else
+                'textBox.Text = Regex.Replace(textBox.Text.Trim(), "\s+", " ")
+                textBox.Text = Trim(textBox.Text)
+                While textBox.Text.Contains("  ")
+                    textBox.Text = textBox.Text.Replace("  ", " ")
+                End While
+                textBox.BackColor = Color.Azure
+
+            End If
+
+        End Sub
+
+        Sub ValidateCustomerAge(lblLabel As Label, errorProvider As ErrorProvider)
+
+            '| ------------------------------------------------------------------------
+            '| * Limpiamos cualquier error previo.
+            '|
+            '| IF : Si el label está vacio
+            '|      * Activamos el ErrorProvider y cambiamos el color del label que nos
+            '|        indica error.
+            '| ELSE :
+            '|      * Cambiamos el color del label que indica que el valor es correcto.
+
+            errorProvider.Clear()
+
+            If String.IsNullOrWhiteSpace(lblLabel.Text) Or CInt(Val(lblLabel.Text)) < 5 Then
+                errorProvider.SetError(lblLabel, "Verifica la edad del cliente.")
+                lblLabel.BackColor = Color.MistyRose
+            Else
+                lblLabel.BackColor = Color.Azure
+            End If
+
+        End Sub
+
     End Module
 End Namespace

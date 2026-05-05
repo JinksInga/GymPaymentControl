@@ -1,13 +1,16 @@
 ﻿
+Imports System.Runtime.CompilerServices
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 Imports GymPaymentControl.Utils
+Imports Mysqlx.XDevAPI.Common
 
 Public Class FrmNewModifyClient
 
     ' --- Variables de "Herramientas" (Nivel Formulario) ---
     Private ReadOnly _clientManager As New ClientManager()
-    Private _clientPaymentDTO As New ClientPaymentDTO()
+    Private _customerData As New ClientPaymentDTO()
+    Private _originalDataCustomer As New ClientPaymentDTO()
 
     ' --- Variable privada para guardar la "llave" del refresco con parámetro ---
     Private _onSuccessAction As Action(Of Integer)
@@ -21,6 +24,7 @@ Public Class FrmNewModifyClient
     Private _currentGroupMaxMembers As Integer = 0
     Private _strNameGroup As String
     Private _intNumMembers, _intMembersReg As Integer
+
     ''
     ''
     Private Sub FrmNewModifyClient_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -33,39 +37,88 @@ Public Class FrmNewModifyClient
         DtpBirthdate.MinDate = New Date(currentYear - 90, 1, 1)
         DtpBirthdate.MaxDate = today
 
-        ' Si estamos en modo "NUEVO" (Botón guardar visible)
-        If BtnSaveCustomerData.Visible Then
-            ' Formato vacío para que el usuario sepa que debe elegir una fecha
-            DtpBirthdate.Format = DateTimePickerFormat.Custom
-            DtpBirthdate.CustomFormat = " "
+        ' Si estamos en modo "NUEVO/GUARDAR"
+        If BtnSaveCustomerData.Enabled Then
 
             ' Fecha sugerida (25 años atrás)
             DtpBirthdate.Value = New Date(currentYear - 25, 7, 1)
-            TxtCustomerAge.Text = ""
+
+            ' Limpiamos y preparamos para el nuevo registro
+            LblCustomerAge.Text = ""
+            LblCustomerAge.BackColor = Color.Azure
 
             ' Límites para la fecha de registro (2 años atrás, 2 adelante)
             DtpRegistrationDate.MinDate = New Date(currentYear - 2, 1, 1)
             DtpRegistrationDate.MaxDate = New Date(currentYear + 2, 12, 31)
             DtpRegistrationDate.Value = today
-        Else
-            ' Modo edición: Formato descriptivo
-            DtpBirthdate.Format = DateTimePickerFormat.Custom
-            DtpBirthdate.CustomFormat = "dd ' de ' MMMM ' de ' yyyy"
+
         End If
 
+        '
+        SetupTextBoxEvents() ' Activamos las "luces" de los campos
+        ErrorProvider.Clear()
+
     End Sub
-    'Private Sub FrmNewModifyClient_Deactivate(sender As Object, e As EventArgs) Handles Me.Deactivate
-    '    'Close()
-    'End Sub
+    Private Sub FrmNewModifyClient_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
+
+        ' Solo preguntamos si el cierre es por el usuario (X o Me.Close) y hay cambios
+        If e.CloseReason = CloseReason.UserClosing AndAlso HasUnsavedChanges() Then
+
+            ' Construimos el cuerpo del mensaje tal cual tu imagen
+            Dim strMsgbox As String = "                                 ¡ ¡ ¡  ATENCIÓN  ! ! !" & Environment.NewLine & Environment.NewLine &
+                        "     Hay cambios en el formulario que no han sido guardados." & Environment.NewLine &
+                        "     _________________________________________________________" & Environment.NewLine & Environment.NewLine &
+                        "     ¿Realmente deseas salir y descartar la información?" & Environment.NewLine & Environment.NewLine &
+                        "           SI : Cancelar los cambios y cerrar la ventana." & Environment.NewLine & Environment.NewLine &
+                        "           NO : Volver al formulario para guardar."
+
+            Dim result = MessageBox.Show(strMsgbox, "Cambios sin guardar",
+                                         MessageBoxButtons.YesNo,
+                                         MessageBoxIcon.Warning,
+                                         MessageBoxDefaultButton.Button2)
+            If result = DialogResult.No Then
+                ' Si el usuario dice que NO, ¡DETENEMOS el cierre de la ventana!
+                e.Cancel = True
+            End If
+        End If
+        ' Si el usuario dice que SÍ, no hacemos nada extra, 
+        ' dejamos que el evento siga su curso y la ventana se cierre.
+    End Sub
     ''
     ''
     Private Sub TxtFirstName_TextChanged(sender As Object, e As EventArgs) Handles TxtFirstName.TextChanged
-        '1 TxtFirstName_TextChanged
+    End Sub
+    Private Sub TxtFirstName_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TxtFirstName.KeyPress
+
+        '| -----------------------------------------------------------------------------------
+        '| VALIDAR EL INGRESO DE LETRAS Y ESPACIO
+        '| ---------------------------------------
+        '| * Almacenamos en la variable strAllowKey los caracteres que queremos PERMITIR.
+        '| * Almacenamos en la variable strLockKey los caracteres que queremos EXCLUIR.
+        '| * Llamamos a la subrutina Fun_Only_Letters y le pasamos las variables como parámetro.
+
+        Dim strAllowKey As String = " "
+        Dim strLockKey As String = "ºª"
+        ValidateOnlyLetters(strAllowKey, strLockKey, e)
+
     End Sub
     ''
     ''
     Private Sub TxtLastName_TextChanged(sender As Object, e As EventArgs) Handles TxtLastName.TextChanged
-        '2 TxtLastName_TextChanged
+    End Sub
+    Private Sub TxtLastName_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TxtLastName.KeyPress
+
+        '| -----------------------------------------------------------------------------------
+        '| VALIDAR EL INGRESO DE LETRAS Y ESPACIO
+        '| ---------------------------------------
+        '| * Almacenamos en la variable strAllowKey los caracteres que queremos PERMITIR.
+        '| * Almacenamos en la variable strLockKey los caracteres que queremos EXCLUIR.
+        '| * Llamamos a la subrutina Fun_Only_Letters y le pasamos las variables como parámetro.
+
+        Dim strAllowKey As String = " "
+        Dim strLockKey As String = "ºª"
+        ValidateOnlyLetters(strAllowKey, strLockKey, e)
+
     End Sub
     ''
     ''
@@ -77,12 +130,21 @@ Public Class FrmNewModifyClient
         '| ---------------------------------------------------------------------------------------
         '| CALCULAR LA EDAD DEL CLIENTE
         '| ----------------------------
-        '| * Almacenamos en la variable dtDateOfBirth la fecha de nacimiento que se obtiene del DtpFdn
+        '| * Almacenamos en la variable dtDateOfBirth la fecha de nacimiento que se obtiene del DtpBirthdate
         '| * Para calcular los años llamamos a la función Fun_Calculate_Age() y le pasamos la variable _
-        '|   _ dtDateOfBirth, está función nos devuelve un valor entero que lo mostramos en el label TxtEdad.  
+        '|   _ dtDateOfBirth, está función nos devuelve un valor entero que lo mostramos en el label TxtCustomerAge.  
 
         Dim dtDateOfBirth As Date = DtpBirthdate.Value
-        TxtCustomerAge.Text = CalculateClientAge(dtDateOfBirth) & " años"
+        LblCustomerAge.Text = CalculateClientAge(dtDateOfBirth) & " años"
+
+        If CInt(Val(LblCustomerAge.Text)) < 5 Then
+            ErrorProvider.SetError(LblCustomerAge, "La edad del cliente no puede ser inferior a 5 años")
+            LblCustomerAge.BackColor = Color.MistyRose
+
+        Else
+            LblCustomerAge.BackColor = Color.Beige
+            ErrorProvider.Clear()
+        End If
 
     End Sub
     Private Sub DtpBirthdate_GotFocus(sender As Object, e As EventArgs) Handles DtpBirthdate.GotFocus
@@ -91,50 +153,93 @@ Public Class FrmNewModifyClient
         '| CAMBIAR EL COLOR Y DAR FORMATO AL DATETIMEPICKER
         '| ------------------------------------------------
         '| * Al recibir el emfoque cambiammos el color del fondo del Textbox y le damos _
-        '|   _ formato al DtpFdn con una fecha personalizada.
+        '|   _ formato al DtpBirthdate con una fecha personalizada.
 
-        TxtCustomerAge.BackColor = Color.Beige
-        DtpBirthdate.CustomFormat = "' ' dd ' de  ' MMMM ' de  ' yyyy"
+        LblCustomerAge.BackColor = Color.Beige
+        DtpBirthdate.CustomFormat = "'  'dd'  de  'MMMM'  de  'yyyy"
 
     End Sub
     Private Sub DtpBirthdate_LostFocus(sender As Object, e As EventArgs) Handles DtpBirthdate.LostFocus
 
-        '| -----------------------------------------------------------------------------------
+        '| --------------------------------------------------------------------------------------------
         '| VALAIDACIONES AL PERDER EL ENFOQUE
         '| ----------------------------------
-        '| * Llamamos a la subrutina Sub_TxtLost_Focus() y le pasamos como el Label (TxtEdad)
-        Sub_TxtLost_Focus(TxtCustomerAge)
+        '| * Llamamos a la subrutina Sub_TxtLost_Focus() y le pasamos el Label (LblCustomerAge)
+        ValidateCustomerAge(LblCustomerAge, ErrorProvider)
 
     End Sub
     ''
     ''
     Private Sub TxtPhone_TextChanged(sender As Object, e As EventArgs) Handles TxtPhone.TextChanged
-        '4-TxtPhone_TextChanged
+    End Sub
+    Private Sub TxtPhone_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TxtPhone.KeyPress
+
+        '| -----------------------------------------------------------------------------------
+        '| VALIDAR EL INGRESO DE NÚMEROS, PARÉNTESIS, GUION Y ESPACIO
+        '| ----------------------------------------------------------
+        '| * Almacenamos en la variable strAllowKey los caracteres que queremos PERMITIR.
+        '| * Llamamos a la subrutina Sub_Only_Numbers y le pasamos la variable como parámetro.
+
+        Dim strAllowKey As String = "(-) "
+        ValidateIntegerNumbers(strAllowKey, e)
+
     End Sub
     ''
     ''
     Private Sub TxtEmail_TextChanged(sender As Object, e As EventArgs) Handles TxtEmail.TextChanged
-        '5 TxtEmail_TextChanged
+    End Sub
+    Private Sub TxtEmail_KeyUp(sender As Object, e As KeyEventArgs) Handles TxtEmail.KeyUp
+
+        '| -----------------------------------------------------------------------------------
+        '| VALAIDACIONES AL SOLTAR LA TECLA PRESIONADA
+        '| -------------------------------------------
+        '| IF : Comrpobamos si Fun_IsValid_Email no cumple con el formato del E-Mail.
+        '|      * Mostrar el error si el formato es incorrecto.
+        '|      * Cambiamos el color del fondo.
+        '| ELSE : 
+        '|      * Limpiamos el error.
+        '|      * Cambiamos el color del fondo.
+
+        If Not IsValidEmail(TxtEmail.Text) Then
+            ErrorProvider.SetError(TxtEmail, "Ingresa un formato de E-Mail válido (usuario@dominio.com)")
+            TxtEmail.BackColor = Color.MistyRose
+        Else
+            ErrorProvider.Clear()
+            TxtEmail.BackColor = Color.Beige
+        End If
+
+    End Sub
+    Private Sub TxtEmail_LostFocus(sender As Object, e As EventArgs) Handles TxtEmail.LostFocus
+
+        '| -----------------------------------------------------------------------------------
+        '| VALAIDACIONES AL PERDER EL ENFOQUE
+        '| ----------------------------------
+        '| * Llamamos a la subrutina Sub_TxtLost_Focus() y le pasamos como parámetro el TextBox'Sub_TxtLost_Focus(TxtEmail)
+        '| IF : Comrpobamos si el TxtEmail no está vacio Y si Fun_IsValid_Email no cumple con el formato del E-Mail
+        '|      * Mostrar el error si el formato es incorrecto.
+        '|      * Cambiamos el color del fondo.
+
+        If Not String.IsNullOrWhiteSpace(TxtEmail.Text) And Not IsValidEmail(TxtEmail.Text) Then
+            ErrorProvider.SetError(TxtEmail, "Ingresa un formato de E-Mail válido (usuario@dominio.com)")
+            TxtEmail.BackColor = Color.MistyRose
+        End If
+
     End Sub
     ''
     ''
     Private Sub TxtAddress_TextChanged(sender As Object, e As EventArgs) Handles TxtAddress.TextChanged
-        '6 TxtAddress_TextChanged
     End Sub
-    ''
-    ''
-    Private Sub DtpRegistrationDate_ValueChanged(sender As Object, e As EventArgs) Handles DtpRegistrationDate.ValueChanged
-        '7 DtpRegistrationDate_ValueChanged
-    End Sub
-    ''
-    ''
-    Private Sub RbActiveStatus_CheckedChanged(sender As Object, e As EventArgs) Handles RbActiveStatus.CheckedChanged
-        '8 RbActiveStatus_CheckedChanged
-    End Sub
-    ''
-    ''
-    Private Sub RbInactiveState_CheckedChanged(sender As Object, e As EventArgs) Handles RbInactiveState.CheckedChanged
-        '9 RbInactiveState_CheckedChanged
+    Private Sub TxtAddress_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TxtAddress.KeyPress
+
+        '| -----------------------------------------------------------------------------------
+        '| VALIDAR EL INGRESO DE CARACTERES PARA LA DIRECCIÓN
+        '| --------------------------------------------------
+        '| * Almacenamos en la variable strAllowKey los caracteres que queremos PERMITIR.
+        '| * Llamamos a la subrutina Fun_Only_Letters y le pasamos las variables como parámetro.
+
+        Dim strAllowKey As String = "(&'.-/) "
+        ValidateNumbersAndLetters(strAllowKey, e)
+
     End Sub
     ''
     ''
@@ -142,34 +247,16 @@ Public Class FrmNewModifyClient
 
         If RbDailyPayment.Checked Then
             ' 1. Configuramos UI
-            GbListaGrupoFamiliar.Text = "Lista clases sueltas"
+            GbListaGrupoFamiliar.Text = "Lista de pagos diarios:"
+            TxtListGroupsDailyPayment.Clear()
             DgvListGroupsDailyPayment.Enabled = True
-            'strToolTipText = "CLIC PARA SELECCIONAR UN PAGO DIARIO"
 
             ' 2. Cargamos datos con nuestra Función Camaleón
             ConfigureGridColumns("DIARIO")
             DgvListGroupsDailyPayment.DataSource = _clientManager.GetDailyPrice()
+            DgvListGroupsDailyPayment.CurrentCell = Nothing
 
-            ' 3. ¡IMPORTANTE!: Si ya hay algo escrito en el textbox (por ejemplo al editar), 
-            ' actualizamos strMtdPgs de inmediato.
-            'strMtdPgs = TxtListGroupsDailyPayment.Text
         End If
-
-    End Sub
-    Private Sub RbDailyPayment_Click(sender As Object, e As EventArgs) Handles RbDailyPayment.Click
-
-
-        '| ---------------------------------------------------------------------------------------------------------
-        '| LIMPIAR CUADRO DE TEXTO
-        '| -----------------------
-        '| * Al hacer click en el RadioButton 'RbMonthlyPayment' comprobamos el valor de la variable '_isSwitching';
-        '|   la razón de esta comprobación es porque solo se debe limpiar el cuadro de texto si vamos a registrar un
-        '|   nuevo cliente, ya que si estamos actualizando los datos del cliente no podemos cambiar su método de pago
-        '|   si pertenece a un grupo familiar; por esa razon en el evento CheckedChanged del RbGroupPayment cambiamos
-        '|   el valor de la variable '_isSwitching = True' para no borrar el nombre del grupo al que pertenece el
-        '|   cliente en cuestión.
-
-        If Not _isSwitching Then TxtListGroupsDailyPayment.Clear()
 
     End Sub
     ''
@@ -180,9 +267,8 @@ Public Class FrmNewModifyClient
 
             _selectedGroupId = Nothing
             _currentGroupMaxMembers = 0
-            '_strAddMembersAction = ""
 
-            TxtListGroupsDailyPayment.Text = ""
+            TxtListGroupsDailyPayment.Clear()
             GbListaGrupoFamiliar.Text = "Lista vacia"
             DgvListGroupsDailyPayment.Enabled = False
             DgvListGroupsDailyPayment.DataSource = Nothing
@@ -199,7 +285,7 @@ Public Class FrmNewModifyClient
             ' Preparar Interfaz
             TxtListGroupsDailyPayment.Clear()
             LblNumberMembers.Text = ""
-            GbListaGrupoFamiliar.Text = "Lista de grupos familiares"
+            GbListaGrupoFamiliar.Text = "Lista de grupos familiares:"
 
             BtnAddGroup.Enabled = True
             TxtListGroupsDailyPayment.Enabled = True
@@ -208,30 +294,55 @@ Public Class FrmNewModifyClient
             ' Cargar datos
             ConfigureGridColumns("GRUPAL")
             DgvListGroupsDailyPayment.DataSource = _clientManager.GetNameGroupFamily()
+            DgvListGroupsDailyPayment.CurrentCell = Nothing
 
             TxtListGroupsDailyPayment.Focus()
-            'strToolTipText = "DOBLE CLIC PARA SELECCIONAR UN GRUPO"
         Else
-            ' Si estamos editando un cliente grupal, NO dejamos cambiar el método
-            If BtnUpdateCustomerData.Visible Then
-                MessageBox.Show("No se puede cambiar el método de pago de un cliente grupal." & vbCrLf &
-                                "Primero debe eliminar el grupo familiar.", "Restricción", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-
-                _isSwitching = True
-                RbGroupPayment.Checked = True ' Re-marcamos
-                _isSwitching = False
-            Else
-                ' Modo nuevo: simplemente deshabilitamos
+            If BtnSaveCustomerData.Enabled Then
+                ' NUEVO/GUARDAR : Simplemente deshabilitamos
                 BtnAddGroup.Enabled = False
                 TxtListGroupsDailyPayment.Enabled = False
                 LblNumberMembers.Text = ""
+                ResetGroupUI(True)
+
+            Else
+                ' MODIFICAR/ACTUALIZAR
+                ' NO dejamos cambiar el método de pago
+                MessageBox.Show("   No se puede cambiar el MÉTODO de pago de un cliente que" & vbCrLf &
+                                "   pertenece a un grupo familiar." & vbCrLf & vbCrLf &
+                                "   Si quieres cambiar tienes que eliminar el grupo FAMILIAR.",
+                                "Error al cambiar método de pago", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                _isSwitching = True
+                RbGroupPayment.Checked = True
+                _isSwitching = False
+
             End If
         End If
+
     End Sub
     ''
     ''
     Private Sub BtnAddGroup_Click(sender As Object, e As EventArgs) Handles BtnAddGroup.Click
-        '13 BtnAddGroup_Click
+        'FrmFamilyGroup.Show()
+        ' Buscamos si ya está abierto
+        Dim frmGroup = FrmMdiMain.MdiChildren.OfType(Of FrmFamilyGroup)().FirstOrDefault()
+
+        If frmGroup Is Nothing Then
+            ' Si no existe, lo creamos
+            frmGroup = New FrmFamilyGroup()
+            frmGroup.MdiParent = FrmMdiMain
+            frmGroup.Show()
+        Else
+            ' Si ya existe, lo traemos al frente y le damos el foco
+            frmGroup.BringToFront()
+            frmGroup.Activate()
+
+            ' Si la ventana está minimizada, esto la restaura
+            If frmGroup.WindowState = FormWindowState.Minimized Then
+                frmGroup.WindowState = FormWindowState.Normal
+            End If
+        End If
+
     End Sub
     ''
     ''
@@ -245,7 +356,11 @@ Public Class FrmNewModifyClient
         DgvListGroupsDailyPayment.DataSource = _clientManager.SearchFamilyGroup(searchText)
 
         ' 2. Verificación de texto vacío y Limpieza total
-        If String.IsNullOrWhiteSpace(searchText) Then ResetGroupUI(True) : Exit Sub
+        If String.IsNullOrWhiteSpace(searchText) Then
+            ResetGroupUI(True)
+            DgvListGroupsDailyPayment.CurrentCell = Nothing
+            Exit Sub
+        End If
 
         ' 3. Buscar coincidencia exacta en los resultados
         Dim matchRow = DgvListGroupsDailyPayment.Rows.Cast(Of DataGridViewRow)().
@@ -266,7 +381,6 @@ Public Class FrmNewModifyClient
         Else
             ' --- SIN COINCIDENCIA EXACTA ---
             ResetGroupUI(False)
-
         End If
 
         ' Siempre reiniciamos la intención de expandir al cambiar el texto
@@ -279,16 +393,16 @@ Public Class FrmNewModifyClient
 
         ' Preparamos el mensaje usando interpolación de strings (más moderno)
         Dim strMsgBox As String =
-                "    Nombre del grupo  : {nameGroup}{vbCr}" &
-                "    Nº de Integrantes   : {numMembers}{vbCr}{vbCr}" &
-                "    El grupo seleccionado ya tiene los integrantes completos." & vbCr &
-                "    ___________________________________________________________" & vbCr & vbCr &
+                $"    Nombre del grupo  : {_strNameGroup}{vbCrLf}" &
+                $"    Nº de Integrantes   : {_intNumMembers}{vbCrLf}{vbCrLf}" &
+                "    El grupo seleccionado ya tiene los integrantes completos." & vbCrLf &
+                "    ___________________________________________________________" & vbCrLf & vbCrLf &
                 "                        ¿Seguro que quieres añadir otro integrante?"
 
 
         If MsgBox(strMsgBox, vbExclamation + vbYesNo + vbDefaultButton2, "Comprobar datos") = vbYes Then
             'TxtListGroupsDailyPayment.Text = nameGroup
-            _currentGroupMaxMembers += 1 'Preparamos el valor para el DTO
+            _currentGroupMaxMembers += 1
             _shouldExpandGroup = True
 
             ' UI Feedback
@@ -325,15 +439,6 @@ Public Class FrmNewModifyClient
             _intMembersReg = CInt(row.Cells("colMembersReg").Value)
 
             TxtListGroupsDailyPayment.Text = _strNameGroup
-            'LblNumberMembers.Text = $"Registrados {_intMembersReg} de {_intNumMembers}"
-
-            '' Por defecto, al buscar/cargar, asumimos que NO expandimos.
-            '' Lógica de control para el botón de expansión
-            '_currentGroupMaxMembers = _intNumMembers
-
-            'UpdateExpansionUI(_intNumMembers = _intMembersReg)
-
-            '_shouldExpandGroup = False
         End If
 
     End Sub
@@ -342,61 +447,103 @@ Public Class FrmNewModifyClient
     ' Cuando el usuario hace clic en GUARDAR y la DB responde OK:
     Private Sub BtnSaveCustomerData_Click(sender As Object, e As EventArgs) Handles BtnSaveCustomerData.Click
 
-        '| ---------------------------------------------------------------------------------------------
+        '| -----------------------------------------------------------
         '| COMPROBAMOS SI HAY INFORMACION DEL CLIENTE ANTES DE GUARDAR
         '| -----------------------------------------------------------
-        '| * Llamamos a la función FunMsgBox() y le pasamos los parámetros, según sea el caso, para _
-        '|   _ verificar que toda la información del cliente sea correcta antes de guardar el registro.
-        ' --- 1. VALIDACIONES DE INTERFAZ (Fuera del Try) ---
+        '| * Llamamos a la función FunMsgBox() y le pasamos los parámetros, según sea el caso, para verificar que toda la
+        '|   información del cliente sea correcta antes de guardar el registro.
+
         If FunMsgBox(LblNombre.Text, BtnSaveCustomerData.Text, TxtFirstName) Then Exit Sub
         If FunMsgBox(LblApellido.Text, BtnSaveCustomerData.Text, TxtLastName) Then Exit Sub
-        If FunMsgBox(LblFnacimiento.Text, BtnSaveCustomerData.Text, TxtCustomerAge, DtpBirthdate) Then Exit Sub
+        If FunMsgBox(LblFnacimiento.Text, BtnSaveCustomerData.Text, LblCustomerAge, DtpBirthdate) Then Exit Sub
         If FunMsGbox(BtnSaveCustomerData.Text, RbDailyPayment, RbMonthlyPayment, RbGroupPayment) Then Exit Sub
         If FunMsgBox(RbDailyPayment.Text, BtnSaveCustomerData.Text, TxtListGroupsDailyPayment, RbDailyPayment) Then Exit Sub
         If FunMsgBox(RbGroupPayment.Text, BtnSaveCustomerData.Text, TxtListGroupsDailyPayment, RbGroupPayment) Then Exit Sub
+        If FunMsgBox(BtnSaveCustomerData.Text, BtnExpandCapacity) Then Exit Sub
 
+        '| -------------------
+        '| PROCESO DE GUARDADO
+        '| -------------------
 
-        ' --- 2. PROCESO DE GUARDADO ---
         Try
-            ' Creamos el "bolso" con los datos
-            ' Recolectamos los datos usando la función que acabamos de crear
+            ' Creamos el "bolso" con los datos, recolectamos datos usando la función CreateClientPaymentDTO
             Dim data As ClientPaymentDTO = CreateClientPaymentDTO()
 
-            ' Enviamos al Manager (él se encarga de la DB)
+            ' Enviamos al Manager (Se encarga de la BBDD)
             _clientManager.RegisterClientPayment(data)
 
-            ' --- 3. REACCIÓN DE LA INTERFAZ ---
-            ' Mostramos el mensaje chulo de confirmación usando el IdNewClient que el Manager llenó
+            ' Mostramos el mensaje de confirmación usando el IdNewClient
             ShowSuccessMessage(data.IdNewClient)
-            'MessageBox.Show("Cliente registrado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
-            ' ¡MAGIA! En lugar de strFlags, usamos la acción que nos pasaron al abrir el form
-            _onSuccessAction?.Invoke(data.IdNewClient)
-
-            ' Cerramos el formulario ya que la tarea terminó
-            Me.Close()
 
         Catch ex As Exception
-            'MessageBox.Show("Error al registrar el cliente:" & vbCrLf & ex.Message, "Error de Base de Datos",
-            '                MessageBoxButtons.OK, MessageBoxIcon.Error)
-            ' Esto te dirá el mensaje Y el StackTrace (la lista de llamadas y líneas)
-            Dim lineaError As String = ex.StackTrace.ToString()
-
-            MessageBox.Show("Error: " & ex.Message & vbCrLf & vbCrLf &
-                            "Ubicación: " & lineaError,
-                            "Error de Depuración",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Error INSERT cliente:" & vbCrLf & ex.Message, "Error al registrar", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
+
     End Sub
     ''
     ''
     Private Sub BtnUpdateCustomerData_Click(sender As Object, e As EventArgs) Handles BtnUpdateCustomerData.Click
-        'BtnUpdateCustomerData_Click
+
+        '| -------------------------------------------------------------------------------------------------------------------
+        '| COMPROBAMOS SI HAY INFORMACION DEL CLIENTE ANTES DE ACTUALIZAR
+        '| --------------------------------------------------------------
+        '| * Llamamos a la función FunMsgBox() y le pasamos los parámetros, según sea el caso, para verificar que toda la
+        '|   información del cliente sea correcta antes de actualizar el registro.
+
+        If FunMsgBox(LblNombre.Text, BtnUpdateCustomerData.Text, TxtFirstName) Then Exit Sub
+        If FunMsgBox(LblApellido.Text, BtnUpdateCustomerData.Text, TxtLastName) Then Exit Sub
+        If FunMsgBox(LblFnacimiento.Text, BtnUpdateCustomerData.Text, LblCustomerAge, DtpBirthdate) Then Exit Sub
+        If FunMsGbox(BtnUpdateCustomerData.Text, RbDailyPayment, RbMonthlyPayment, RbGroupPayment) Then Exit Sub
+        If FunMsgBox(RbDailyPayment.Text, BtnUpdateCustomerData.Text, TxtListGroupsDailyPayment, RbDailyPayment) Then Exit Sub
+        If FunMsgBox(RbGroupPayment.Text, BtnUpdateCustomerData.Text, TxtListGroupsDailyPayment, RbGroupPayment) Then Exit Sub
+
+        '| -------------------------------------------------------------------------------------------------------------------
+        '| ACTUALIZAR EL REGISTRO EN LA TABLA CLIENTES
+        '| -------------------------------------------
+
+        ' Crear el DTO con los nuevos cambios, recolectamos datos usando la función UpdateClientPaymentDTO
+        Dim data As ClientPaymentDTO = UpdateClientPaymentDTO()
+
+        ' 2. Lógica Refinada: Solo es nueva inscripción si el cliente NO tenía grupo 
+        ' y ahora se le ha asignado uno (data.IdGroup > 0)
+        Dim isNewEnrollment As Boolean = False
+
+        If (_customerData.IdGroup Is Nothing OrElse _customerData.IdGroup = 0) AndAlso
+            (data.IdGroup.HasValue AndAlso data.IdGroup > 0) Then
+            isNewEnrollment = True
+        End If
+
+        ' 3. Si el cliente YA TENÍA el mismo ID de grupo, isNewEnrollment DEBE ser False
+        ' para que el Manager no ejecute la suma +1
+        If _customerData.IdGroup = data.IdGroup Then
+            isNewEnrollment = False
+        End If
+
+        Try
+            ' El método en tu ClientManager se llama UpdateClientProcess
+            Dim success = _clientManager.UpdateClientProcess(data, isNewEnrollment, _shouldExpandGroup)
+
+            If success Then
+                ' Mostramos el mensaje de confirmación usando el IdNewClient
+                ShowSuccessMessage(data.IdNewClient)
+
+            Else
+                MessageBox.Show("Hubo un error al actualizar los datos en la base de datos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End If
+
+        Catch ex As Exception
+            MessageBox.Show("Error UPDATE cliente:" & vbCrLf & ex.Message, "Error al actualizar", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+
     End Sub
     ''
     ''
     Private Sub BtnCancelRegistration_Click(sender As Object, e As EventArgs) Handles BtnCancelRegistration.Click
-        'BtnCancelRegistration_Click
+
+        ' Close disparará el evento FormClosinghaciendo haciendo las comprobaciones necesarias
+        ' para determinar si hay cambios pendientes por guardar o actualizar.
+        Me.Close()
+
     End Sub
     ''
     ''
@@ -404,68 +551,45 @@ Public Class FrmNewModifyClient
     '| ---------->>>>>>>>>> SUBRUTINAS Y FUNCIONES <<<<<<<<<<---------- |'
     '| ---------------------------------------------------------------- |'
 
-    Sub Sub_TxtLost_Focus(lblLabel As Label)
-
-        '| ------------------------------------------------------------------------
-        '| * Limpiamos cualquier error previo.
-        '|
-        '| IF : Si el label está vacio
-        '|      * Activamos el ErrorProvider y cambiamos el color del label que nos
-        '|        indica error.
-        '| ELSE :
-        '|      * Cambiamos el color del label que indica que el valor es correcto.
-
-        ErrorProvider.Clear()
-
-        If String.IsNullOrWhiteSpace(lblLabel.Text) Then
-            ErrorProvider.SetError(lblLabel, "El campo no puede estar vacío.")
-            lblLabel.BackColor = Color.MistyRose
-        Else
-            lblLabel.BackColor = Color.Azure
-        End If
-
-    End Sub
-
-    ' Método que llama el módulo NavigateToForm
     Public Sub PrepareForNewClient()
+
         ' Limpiar cajas de texto
         TxtFirstName.Clear()
         TxtLastName.Clear()
         TxtPhone.Clear()
         ' ... etc ...
 
-        ' Resetear el DTO para que no tenga basura del cliente anterior
-        _clientPaymentDTO = New ClientPaymentDTO()
+        ' Resetear el DTO para que no tenga datos del cliente anterior
+        _customerData = New ClientPaymentDTO()
 
         ' Configurar botones
         BtnSaveCustomerData.Enabled = True
-        BtnUpdateCustomerData.Enabled = False ' El de actualizar datos
+        BtnUpdateCustomerData.Enabled = False
+        BtnUpdateCustomerData.BackColor = Color.Silver
 
         ' Configurar fechas por defecto
         DtpBirthdate.Format = DateTimePickerFormat.Custom
-        DtpBirthdate.CustomFormat = " " ' Lo dejamos "vacío" para obligar a elegir
+        DtpBirthdate.CustomFormat = " "
         DtpRegistrationDate.Value = DateTime.Today
 
-        ' Cambiamos el título de la ventana para que el usuario sepa qué hace
-        'Me.Text = "Registro de Nuevo Cliente"
     End Sub
     ''
     ''
     Private Function CreateClientPaymentDTO() As ClientPaymentDTO
 
-        ' 1. Datos Básicos - Instanciamos tu clase DTO
+        ' 1. Datos Básicos - Instanciamos la clase DTO
         Dim data As New ClientPaymentDTO With
             {
             .FirstName = TxtFirstName.Text.Trim(),
             .LastName = TxtLastName.Text.Trim(),
             .BirthDate = DtpBirthdate.Value,
-            .Age = CInt(Val(TxtCustomerAge.Text)),
+            .Age = CInt(Val(LblCustomerAge.Text)),
             .Phone = TxtPhone.Text.Trim(),
             .Email = TxtEmail.Text.Trim(),
             .Address = TxtAddress.Text.Trim(),
             .RegistrationDate = DtpRegistrationDate.Value,
             .State = If(RbActiveStatus.Checked, "ACTIVO", "INACTIVO")
-        }
+            }
 
         ' 2. Método de Pago y Lógica de Grupo
         If RbMonthlyPayment.Checked Then
@@ -491,11 +615,13 @@ Public Class FrmNewModifyClient
     End Function
     ''
     ''
-    Public Sub PrepareToModifyClient(clientData As ClientPaymentDTO)
-        ' 1. Guardamos el DTO para saber qué ID estamos editando
-        _clientPaymentDTO = clientData
+    Public Sub PrepareToModifyClient(clientData As IndividualPaymentDTO)
 
-        ' 2. Llenamos los campos con la información recibida
+        'Guardamos los datos originales
+        _originalDataCustomer = clientData
+
+        ' 1. Llenamos los campos con la información recibida
+        _customerData.IdNewClient = clientData.IdCli
         TxtFirstName.Text = clientData.FirstName
         TxtLastName.Text = clientData.LastName
         DtpBirthdate.Value = clientData.BirthDate
@@ -503,15 +629,16 @@ Public Class FrmNewModifyClient
         TxtEmail.Text = clientData.Email
         TxtAddress.Text = clientData.Address
         DtpRegistrationDate.Value = clientData.RegistrationDate
+        _customerData.IdGroup = clientData.IdGroup
 
-        ' 3. Estado (Activo/Inactivo)
+        ' 2. Estado (Activo/Inactivo)
         If clientData.State = "ACTIVO" Then
             RbActiveStatus.Checked = True
         Else
             RbInactiveState.Checked = True
         End If
 
-        ' 4. Método de Pago
+        ' 3. Método de Pago
         Select Case clientData.PaymentMethod
             Case "MENSUAL" : RbMonthlyPayment.Checked = True
 
@@ -519,17 +646,52 @@ Public Class FrmNewModifyClient
                 RbGroupPayment.Checked = True
                 TxtListGroupsDailyPayment.Text = clientData.GroupName
 
-            Case "DIARIO"
+            Case Else '"DIARIO"
                 RbDailyPayment.Checked = True
-                ' En caso de tarifa diaria, también usamos el buscador
-                'TxtListGroupsDailyPayment.Text = clientData.PaymentMethodDetail ' O como se llame en tu DTO
+                TxtListGroupsDailyPayment.Text = clientData.PaymentMethod
+                DgvListGroupsDailyPayment.CurrentCell = Nothing
+
         End Select
 
-        ' 5. Ajustes Visuales
+        ' 4. Ajustes Visuales
         BtnSaveCustomerData.Enabled = False
+        BtnSaveCustomerData.BackColor = Color.Silver
         BtnUpdateCustomerData.Enabled = True
-        Me.Text = "Modificando Datos: " & clientData.FirstName & " " & clientData.LastName
+
     End Sub
+    ''
+    ''
+    Private Function UpdateClientPaymentDTO() As ClientPaymentDTO
+
+        ' Instanciamos la clase DTO con los datos Básicos 
+        Dim data As New ClientPaymentDTO With
+           {
+           .IdNewClient = _customerData.IdNewClient,
+           .FirstName = TxtFirstName.Text.Trim(),
+           .LastName = TxtLastName.Text.Trim(),
+           .BirthDate = DtpBirthdate.Value,
+           .Phone = TxtPhone.Text.Trim(),
+           .Email = TxtEmail.Text.Trim(),
+           .Address = TxtAddress.Text.Trim(),
+           .RegistrationDate = DtpRegistrationDate.Value,
+           .State = If(RbActiveStatus.Checked, "ACTIVO", "INACTIVO"),
+           .IdGroup = _selectedGroupId
+           }
+
+        ' Comprobar el método de Pago
+        If RbMonthlyPayment.Checked Then
+            data.PaymentMethod = "MENSUAL"
+
+        ElseIf RbGroupPayment.Checked Then
+            data.PaymentMethod = "GRUPAL"
+
+        ElseIf RbDailyPayment.Checked Then
+            data.PaymentMethod = TxtListGroupsDailyPayment.Text.Trim()
+        End If
+
+        Return data
+
+    End Function
     ''
     ''
     ' Método para recibir la acción desde el módulo
@@ -540,9 +702,38 @@ Public Class FrmNewModifyClient
     ''
     'Función para comprobar si hay información en los cuadros de texto
     Public Function HasUnsavedChanges() As Boolean
-        ' Si el nombre o el apellido no están vacíos, consideramos que hay cambios
-        Return Not String.IsNullOrWhiteSpace(TxtFirstName.Text) OrElse
-               Not String.IsNullOrWhiteSpace(TxtLastName.Text)
+
+        ' CASO NUEVO: Si no hay foto original, usamos la lógica de "campos vacíos"
+        If _originalDataCustomer Is Nothing Then
+            ' Si el nombre o el apellido NO están vacíos, consideramos que hay cambios
+            Return Not String.IsNullOrWhiteSpace(TxtFirstName.Text) OrElse
+                   Not String.IsNullOrWhiteSpace(TxtLastName.Text)
+        End If
+
+        ' CASO EDICIÓN: Comparamos el texto actual vs el original
+        ' Si alguno es diferente, devolvemos TRUE (hay cambios)
+        If TxtFirstName.Text.Trim() <> _originalDataCustomer.FirstName Then Return True
+        If TxtLastName.Text.Trim() <> _originalDataCustomer.LastName Then Return True
+        If TxtPhone.Text.Trim() <> _originalDataCustomer.Phone Then Return True
+        If TxtEmail.Text.Trim() <> _originalDataCustomer.Email Then Return True
+        If TxtAddress.Text.Trim() <> _originalDataCustomer.Address Then Return True
+
+        ' --- Fechas (DTPicker) ---
+        ' Usamos .Date para comparar solo la fecha sin preocuparnos por la hora
+        If DtpBirthdate.Value.Date <> _originalDataCustomer.BirthDate.Date Then Return True
+        If DtpRegistrationDate.Value.Date <> _originalDataCustomer.RegistrationDate.Date Then Return True
+
+        ' --- Estado (RadioButtons / Toggle) ---
+        ' Asumiendo que _originalData.IsActive es un Booleano
+        Dim currentStatus As String = If(RbActiveStatus.Checked, "ACTIVO", "INACTIVO")
+        If currentStatus <> _originalDataCustomer.State Then Return True
+
+        ' --- Método de Pago ---
+        ' Comparas el valor seleccionado dentro de HasUnsavedChanges contra el original
+        If GetCurrentPaymentMethod() <> _originalDataCustomer.PaymentMethod Then Return True
+
+        ' Si llegó hasta aquí, es que todo es idéntico
+        Return False
     End Function
     ''
     ''
@@ -567,6 +758,7 @@ Public Class FrmNewModifyClient
                 .Columns("colMembersReg").DataPropertyName = "intgrntes_reg_grp"
             End With
         End If
+
     End Sub
     ''
     ''
@@ -600,9 +792,48 @@ Public Class FrmNewModifyClient
     End Sub
     ''
     ''
+    Private Function GetCurrentPaymentMethod() As String
+
+        If RbMonthlyPayment.Checked Then
+            Return "MENSUAL"
+
+        ElseIf RbGroupPayment.Checked Then
+            Return "GRUPAL"
+
+        ElseIf RbDailyPayment.Checked Then
+            ' Como el TextBox ya tiene el formato "DIARIO 5", lo usamos tal cual
+            Return TxtListGroupsDailyPayment.Text.Trim()
+        End If
+
+        Return "DESCONOCIDO"
+
+    End Function
+    ''
+    ''
+    Private Sub SetupTextBoxEvents()
+
+        ' Creamos una lista de los TextBox que queremos validar
+        Dim fieldsToValidate As TextBox() = {TxtFirstName, TxtLastName, TxtPhone, TxtEmail, TxtAddress, TxtListGroupsDailyPayment}
+
+        For Each textBox In fieldsToValidate
+            ' Suscribimos el evento GotFocus (Cambio a Beige)
+            AddHandler textBox.GotFocus, Sub(s, e)
+                                             DirectCast(s, TextBox).BackColor = Color.Beige
+                                         End Sub
+
+            ' Suscribimos el evento LostFocus (Validación y Azure)
+            AddHandler textBox.LostFocus, Sub(s, e)
+                                              ValidateCustomerData(DirectCast(s, TextBox), Me.ErrorProvider)
+                                          End Sub
+        Next
+
+    End Sub
+    ''
+    ''
     Private Sub ShowSuccessMessage(idClient As Integer)
+
         ' 1. Preparamos el texto del cuerpo (Guardado vs Actualizado)
-        Dim strActionText As String = If(BtnSaveCustomerData.Visible, "GUARDADOS", "ACTUALIZADOS")
+        Dim strActionText As String = If(BtnSaveCustomerData.Enabled, "GUARDADOS", "ACTUALIZADOS")
         Dim strIdFormatted As String = $"CLI - {idClient:000}"
 
         ' 2. Construimos el "Ticket" de confirmación (usando los datos que ya tenemos en los campos)
@@ -614,12 +845,12 @@ Public Class FrmNewModifyClient
 
         MessageBox.Show(strMsgBox, "Operación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
-        ' 3. ¡LA CLAVE!: Notificamos al formulario de pagos que debe refrescarse
-        ' Esto ejecutará el RefreshPaymentHistory que pasamos por AddressOf
+        ' 3. Notificamos al formulario que debe refrescarse, esto ejecutará la funciónque pasamos por AddressOf
         _onSuccessAction?.Invoke(idClient)
 
-        ' 4. Cerramos
+        ' 4. Cerramos el formulario
         Me.Close()
+
     End Sub
     ''
     ''
@@ -630,7 +861,7 @@ Public Class FrmNewModifyClient
         '|
         '|      * Convertimos el texto de la variable clientData y titleMsgbox en mayúsculsa y minúsculas _
         '|        _ respectivamente usando UCase() y LCase(), también se puede usar ToUpper() y ToLower().
-        '|      * Extraemos el nombre del botón BtnGuardar o BtnActualizar, utilizando Substring() y lo _
+        '|      * Extraemos el nombre del botón BtnGuardar o BtnUpdateCustomerData, utilizando Substring() y lo _
         '|        _ convertimos en minúsculas usando LCase, para mostrarlo en el título de mensaje.
         '|      * Mostramos el mensaje con los datos recibidos por parámetro, enviamos el enfoque al _
         '|        _ textbox que corresponda.
@@ -658,18 +889,19 @@ Public Class FrmNewModifyClient
         '| IF : Comprobamos si el Label está vacío.
         '|      * Convertimos el texto de la variable clientData y titleMsgbox en mayúsculsa y minúsculas respectivamente usando UCase() _
         '|        _ y LCase(), también se puede usar ToUpper() y ToLower().
-        '|      * Extraemos el nombre del botón BtnGuardar o BtnActualizar según sea el caso, utilizando Substring() y lo convertimos en _
+        '|      * Extraemos el nombre del botón BtnGuardar o BtnUpdateCustomerData según sea el caso, utilizando Substring() y lo convertimos en _
         '|        _ minúsculas usando LCase, para mostrarlo en el título de mensaje.
         '|      * Mostramos el mensaje con los datos recibidos por parámetro, enviamos el enfoque al dateTimePicker que corresponda.
         '|      * Return True para salir de la función y no ejecutar el resto del código.
         '| ELSE : Si el TextBox tiene datos
         '|      * Return False para seguir ejecutando el resto del código.
 
-        If String.IsNullOrEmpty(label.Text) Then
+        If String.IsNullOrEmpty(label.Text) Or CInt(Val(label.Text)) < 5 Then
             clientData = UCase(clientData)
             titleMsgbox = LCase(titleMsgbox.Substring(1, titleMsgbox.Length - 1))
-            MsgBox(" Verifica la información del cliente" & vbCr & vbCr &
-                   " El campo " & clientData & " no puede estar vacío.", vbCritical, "Error al " & titleMsgbox)
+            MsgBox(" Verifica la " & clientData & " del cliente :" & vbCrLf & vbCrLf &
+                   " 1. El campo no puede estar vacío." & vbCrLf &
+                   " 2. No puede ser nemor de 5 años.", vbCritical, "Error al " & titleMsgbox)
             dateTimePicker.Focus()
             Return True
         Else
@@ -680,7 +912,7 @@ Public Class FrmNewModifyClient
 
         '| -------------------------------------------------------------------------------------------------------------------
         '| IF : Comprobamos si los RadioButton no están seleccionados.
-        '|      * Extraemos el nombre del botón BtnGuardar o BtnActualizar según sea el caso, utilizando Substring() y lo _
+        '|      * Extraemos el nombre del botón BtnSaveCustomerData o BtnUpdateCustomerData según sea el caso, utilizando Substring() y lo _
         '|        _ convertimos en minúsculas usando LCase, para mostrarlo en el título de mensaje.
         '|      * Mostramos el mensaje con los datos recibidos por parámetro.
         '|      * Return True para salir de la función y no ejecutar el resto del código.
@@ -702,7 +934,7 @@ Public Class FrmNewModifyClient
         '|      * Convertimos el texto de la variable clientData y titleMsgbox en mayúsculsa y minúsculas respectivamente usando UCase() _
         '|        _ y LCase(), también se puede usar ToUpper() y ToLower()
         '|      * Comprobamos si la variable clientData = "DIARIO" para agragar el texto "pago ".
-        '|      * Extraemos el nombre del botón BtnGuardar o BtnActualizar según sea el caso, utilizando Substring() y lo convertimos en _
+        '|      * Extraemos el nombre del botón BtnGuardar o BtnUpdateCustomerData según sea el caso, utilizando Substring() y lo convertimos en _
         '|        _ minúsculas usando LCase, para mostrarlo en el título de mensaje.
         '|      * Mostramos el mensaje con los datos recibidos por parámetro, enviamos el enfoque al textbox que corresponda.
         '|      * Return True para salir de la función y no ejecutar el resto del código.
@@ -716,6 +948,29 @@ Public Class FrmNewModifyClient
             MsgBox(" Verifica la información del cliente" & vbCr & vbCr &
                    " Selecciona un " & clientData & " de la lista.", vbCritical, "Error al " & titleMsgbox)
             textBox.Focus()
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+    Overloads Function FunMsgBox(titleMsgbox As String, button As Button) As Boolean
+
+        '| -------------------------------------------------------------------------------------------------
+        '| IF : Comprobamos si está activado el Button.
+        '|      * Extraemos el nombre del botón BtnSaveCustomerData, utilizando Substring() y lo convertimos
+        '|        en minúsculas usando LCase, para mostrarlo en el título de mensaje.
+        '|      * Mostramos el mensaje con los datos recibidos por parámetro.
+        '|      * Enviamos el enfoque al button.
+        '|      * Return True para salir de la función y no ejecutar el resto del código.
+        '| ELSE : Si el Button está desactivado
+        '|      * Return False para seguir ejecutando el resto del código.
+
+        If button.Enabled = True Then
+            titleMsgbox = LCase(titleMsgbox.Substring(1, titleMsgbox.Length - 1))
+            MsgBox(" No se puede registrar un cliente en un GRUPO FAMILIAR completo." & vbCrLf & vbCrLf &
+                   " Haz clic en el botón [Ampliar cupo] para admitir a un nuevo integrante." _
+                   , vbCritical, "Error al " & titleMsgbox)
+            button.Focus()
             Return True
         Else
             Return False

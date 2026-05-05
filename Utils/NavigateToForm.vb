@@ -68,27 +68,67 @@ Namespace Utils
             form.SetRefreshAction(refreshAction)
             form.Show()
             form.BringToFront()
+
         End Sub
 
 
         ''' <summary>
-        ''' Abre el formulario para registrar un nuevo cliente y ejecuta una acción al finalizar con éxito.
+        ''' Abre el formulario para modificar datos cliente y ejecuta una acción al finalizar con éxito.
         ''' </summary>
         Public Sub OpenFrmModifyClient(clientData As ClientPaymentDTO, refreshAction As Action(Of Integer))
-            ' Buscamos si ya está abierto (reutilizamos la lógica del anterior)
+            '' Buscamos si ya está abierto (reutilizamos la lógica del anterior)
+            'Dim form = FrmMdiMain.MdiChildren.OfType(Of FrmNewModifyClient)().FirstOrDefault()
+
+            'If form Is Nothing Then
+            '    form = New FrmNewModifyClient()
+            '    form.MdiParent = FrmMdiMain
+            'End If
+
+            '' Pasamos la acción de refresco y los datos del cliente
+            'form.SetRefreshAction(refreshAction)
+            'form.PrepareToModifyClient(clientData)
+
+            'form.Show()         ' Por si estaba cerrado
+            'form.BringToFront() ' Para que no se esconda detrás del buscador
+            ''form.Activate()     ' Para que el cursor aparezca listo para escribir en el nombre
+            ' 1. Buscamos si el formulario ya está abierto
             Dim form = FrmMdiMain.MdiChildren.OfType(Of FrmNewModifyClient)().FirstOrDefault()
 
-            If form Is Nothing Then
+            If form IsNot Nothing Then
+                ' 2. Si ya está abierto, comprobamos si tiene cambios pendientes
+                If form.HasUnsavedChanges() Then
+                    Dim strMsgbox As String = "                ¡ ¡ ¡  ATENCIÓN  ! ! !" & Environment.NewLine & Environment.NewLine &
+                        "     Ya tienes una edición abierta con cambios sin guardar." & Environment.NewLine &
+                        "     ___________________________________________________________" & Environment.NewLine & Environment.NewLine &
+                        "     ¿Deseas descartar esos cambios y cargar el nuevo cliente?" & Environment.NewLine & Environment.NewLine &
+                        "            SÍ : Carga al nuevo cliente (se pierden los cambios actuales)." & Environment.NewLine &
+                        "            NO : Seguir editando el cliente actual."
+
+                    Dim result = MessageBox.Show(strMsgbox, "Cambios pendientes",
+                                                 MessageBoxButtons.YesNo,
+                                                 MessageBoxIcon.Warning,
+                                                 MessageBoxDefaultButton.Button2)
+
+                    If result = DialogResult.No Then
+                        ' El usuario quiere terminar lo que estaba haciendo
+                        form.Activate()
+                        Return
+                    End If
+                End If
+                ' Si pulsa SÍ o no había cambios, el código sigue hacia abajo y actualiza los datos
+            Else
+                ' 3. Si no existe, creamos la instancia nueva
                 form = New FrmNewModifyClient()
                 form.MdiParent = FrmMdiMain
             End If
 
-            ' Pasamos la acción de refresco y los datos del cliente
+            ' 4. Carga de datos y visualización (común para nuevo o reutilizado)
             form.SetRefreshAction(refreshAction)
-            form.PrepareToModifyClient(clientData)
+            form.PrepareToModifyClient(clientData) ' Aquí se toma la nueva "foto" original
 
             form.Show()
             form.BringToFront()
+            form.Activate()
         End Sub
         ''
         ''

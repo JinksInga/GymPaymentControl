@@ -36,28 +36,6 @@ Namespace Data
             Return dtTable
 
         End Function
-        'Public Function ExecuteDataTable(sqlQuery As String, parameterList As List(Of MySqlParameter)) As DataTable
 
-        '    Dim dtTable As New DataTable()
-
-        '    Using conString As New MySqlConnection(ConnectionString)
-
-        '        Using sqlCommand As New MySqlCommand(sqlQuery, conString)
-
-        '            If parameterList IsNot Nothing AndAlso parameterList.Count > 0 Then
-        '                sqlCommand.Parameters.AddRange(parameterList.ToArray())
-        '            End If
-
-        '            Using dtAdapter As New MySqlDataAdapter(sqlCommand)
-        '                dtAdapter.Fill(dtTable)
-        '            End Using
-
-        '        End Using
-
-        '    End Using
-
-        '    Return dtTable
-
-        'End Function
     End Class
 End Namespace

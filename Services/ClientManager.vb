@@ -1,4 +1,5 @@
-﻿Imports GymPaymentControl.Data
+﻿Imports System.Transactions
+Imports GymPaymentControl.Data
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Utils
 Imports MySql.Data.MySqlClient
@@ -8,7 +9,6 @@ Namespace Services
 
         ' Al heredar, obtenemos el motor de conexión.
         Inherits BaseRepository
-        'Private ReadOnly _connectionString As String = ConfigurationManager.ConnectionStrings("MyConnectionMySQL").ConnectionString
 
         '|----------------------------------------------------------------------------------------------------
         '| CONSULTA PARA OBTENER EL NOMBRE DE LAS TARIFAS DIARIAS - CLASES SUELTAS
@@ -68,10 +68,10 @@ Namespace Services
                         data.IdNewClient = InsertClient(connection, transaction, data)
 
                         '| * OBTENER TARIFA
-                        Dim tarifa = GetRate(connection, transaction, data)
+                        Dim tariff = GetRate(connection, transaction, data)
 
                         '| * INSERT PAGO
-                        InsertPayment(connection, transaction, data, tarifa)
+                        InsertPayment(connection, transaction, data, tariff)
 
                         '| * UPDATE GRUPO (solo si aplica)
                         If data.IsGroup Then UpdateGroup(connection, transaction, data)
@@ -92,11 +92,11 @@ Namespace Services
         End Sub
 
         '|-------------------------------------------------
-        '| FUNCIÓN PARA INSERTAR UN CLIENTE Y OBTENER SU ID - GEMINI
+        '| FUNCIÓN PARA INSERTAR UN CLIENTE Y OBTENER SU ID
         '|-------------------------------------------------
         Private Function InsertClient(connection As MySqlConnection,
-                                  transaction As MySqlTransaction,
-                                data As ClientPaymentDTO) As Integer
+                                      transaction As MySqlTransaction,
+                                      data As ClientPaymentDTO) As Integer
 
             ' 1. Una sola consulta SQL para ambos casos (Individual o Grupal)
             Dim sqlQuery As String = "INSERT INTO clientes(nom_cli, ape_cli, fdn_cli, tlf_cli, eml_cli, dir_cli, mpg_cli, fdi_cli, std_cli, id_grp)
@@ -105,7 +105,7 @@ Namespace Services
 
             Using command As New MySqlCommand(sqlQuery, connection, transaction)
 
-                ' 2. Añadimos parámetros especificando el tipo de dato (Más seguro para fechas)
+                ' 2. Añadimos parámetros especificando el tipo de dato
                 command.Parameters.Add("@nom", MySqlDbType.VarChar).Value = data.FirstName
                 command.Parameters.Add("@ape", MySqlDbType.VarChar).Value = data.LastName
                 command.Parameters.Add("@fdn", MySqlDbType.Date).Value = data.BirthDate
@@ -128,6 +128,72 @@ Namespace Services
 
             End Using
         End Function
+
+        '|--------------------------------------------
+        '| FUNCIÓN PARA ACTUALIZAR DATOS DE UN CLIENTE
+        '|--------------------------------------------
+        Public Function UpdateClientProcess(data As ClientPaymentDTO,
+                                            isNewEnrollment As Boolean,
+                                            expandGroup As Boolean) As Boolean
+            Using connection = GetConnection()
+                connection.Open()
+                Using transaction = connection.BeginTransaction()
+
+                    Try
+                        UpdateClient(connection, transaction, data)
+
+                        If isNewEnrollment Then
+                            data.ShouldExpandGroup = expandGroup
+                            UpdateGroup(connection, transaction, data)
+                        End If
+
+                        transaction.Commit()
+                        Return True
+
+                    Catch ex As Exception
+                        transaction.Rollback()
+                        Return False
+                    End Try
+
+                End Using
+            End Using
+        End Function
+
+        '|--------------------------------------------
+        '| FUNCIÓN PARA ACTUALIZAR DATOS DE UN CLIENTE
+        '|--------------------------------------------
+        Private Sub UpdateClient(connection As MySqlConnection,
+                                 transaction As MySqlTransaction,
+                                 client As ClientPaymentDTO)
+
+            Dim sqlQuery As String = "UPDATE clientes SET
+                                        nom_cli = @nom, ape_cli = @ape, fdn_cli = @fdn, tlf_cli = @tlf, eml_cli = @eml,
+                                        dir_cli = @dir, mpg_cli = @mpg, fdi_cli = @fdi, std_cli = @std, id_grp = @idgrp
+                                        WHERE id_cli = @id"
+
+            Using command As New MySqlCommand(sqlQuery, connection, transaction)
+                command.Parameters.AddWithValue("@nom", client.FirstName)
+                command.Parameters.AddWithValue("@ape", client.LastName)
+                command.Parameters.AddWithValue("@fdn", client.BirthDate)
+                command.Parameters.AddWithValue("@tlf", client.Phone)
+                command.Parameters.AddWithValue("@eml", client.Email)
+                command.Parameters.AddWithValue("@dir", client.Address)
+                command.Parameters.AddWithValue("@mpg", client.PaymentMethod)
+                command.Parameters.AddWithValue("@fdi", client.RegistrationDate)
+                command.Parameters.AddWithValue("@std", client.State)
+                command.Parameters.AddWithValue("@id", client.IdNewClient)
+
+                ' Lógica de grupo consistente con tu InsertClient
+                If client.PaymentMethod = "GRUPAL" AndAlso client.IdGroup.HasValue Then
+                    command.Parameters.AddWithValue("@idgrp", client.IdGroup.Value)
+                Else
+                    command.Parameters.AddWithValue("@idgrp", DBNull.Value)
+                End If
+
+                command.ExecuteNonQuery()
+            End Using
+
+        End Sub
 
         '|-------------------------------------------------------------------
         '| CONSULTAR LA TARIFA CORRESPONDIENTE AL CLIENTE O AL GRUPO FAMILIAR
@@ -265,15 +331,6 @@ Namespace Services
                                 transaction As MySqlTransaction,
                                 data As ClientPaymentDTO)
 
-            '' Solo incrementamos el contador de los que ya están registrados
-            'Dim sqlQuery As String = "UPDATE grp_familiar SET intgrntes_reg_grp = intgrntes_reg_grp + 1 WHERE id_grp = @idgrp"
-
-            'Using command As New MySqlCommand(sqlQuery, connection, transaction)
-
-            '    command.Parameters.Add("@idgrp", MySqlDbType.Int16).Value = data.IdGroup.Value
-            '    command.ExecuteNonQuery()
-
-            'End Using
             Dim sqlQuery As String
 
             ' SQL Atómico: Sumamos directamente en la DB

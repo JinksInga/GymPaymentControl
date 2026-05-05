@@ -154,10 +154,10 @@ Public Class FrmListDebtors
 
         End If
 
-        ActualizarStatusBar(searchCriteria) ' Actualizar conteo
+        UpdateStatusBar(searchCriteria) ' Actualizar conteo
         '
     End Sub
-    Private Sub ActualizarStatusBar(criterio As String)
+    Private Sub UpdateStatusBar(criterio As String)
 
         '|
         '|
@@ -232,7 +232,7 @@ Public Class FrmListDebtors
             DgvIndividual.CurrentCell = Nothing
             BtnCollectMonth.Enabled = False
 
-            ActualizarStatusBar("")
+            UpdateStatusBar("")
         End If
 
     End Sub
@@ -271,7 +271,7 @@ Public Class FrmListDebtors
             DgvFamilyGroup.CurrentCell = Nothing
             BtnCollectMonth.Enabled = False
 
-            ActualizarStatusBar("")
+            UpdateStatusBar("")
         End If
 
     End Sub
@@ -503,7 +503,7 @@ Public Class FrmListDebtors
                 ' Actualizamos la interfaz
                 RefreshDgvIndividual()
                 RefreshDgvFamilyGroup()
-                ActualizarStatusBar("")
+                UpdateStatusBar("")
             End If
 
         Catch ex As Exception
@@ -537,7 +537,7 @@ Public Class FrmListDebtors
             listIndividualPayment = _paymentManager.GetListIndividualDebtors()
             ConfigureDataGridView(DgvIndividual, "PrcPgs", "DscPgs", "Total", "APagar")
             LoadDataGridView(DgvIndividual, listIndividualPayment)
-            ActualizarStatusBar("")
+            UpdateStatusBar("")
 
         Catch ex As Exception
             MessageBox.Show($"Pagos individuales: {Environment.NewLine}{ex.Message}", "Error al cargar", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -557,7 +557,7 @@ Public Class FrmListDebtors
             listGroupPayment = _paymentManager.GetListGroupDebtors()
             ConfigureDataGridView(DgvFamilyGroup, "PrcPgsGf", "DscPgsGf", "TtlPgsGf", "ApgrGf")
             LoadDataGridView(DgvFamilyGroup, listGroupPayment)
-            ActualizarStatusBar("")
+            UpdateStatusBar("")
 
         Catch ex As Exception
             MessageBox.Show($"Pagos grupales:{Environment.NewLine}{ex.Message}", "Error al cargar", MessageBoxButtons.OK, MessageBoxIcon.Error)

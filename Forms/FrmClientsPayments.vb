@@ -1,7 +1,6 @@
 ﻿Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 Imports GymPaymentControl.Utils
-Imports Mysqlx.XDevAPI
 
 Public Class FrmClientsPayments
 
@@ -170,7 +169,6 @@ Public Class FrmClientsPayments
         CleanControls()
         DisableButtons()
 
-        'NavigateToForm.OpenFrmNewClient(AddressOf RefreshPaymentHistory)
         NavigateToForm.OpenFrmNewClient(AddressOf GlobalRefreshAfterSave)
 
     End Sub
@@ -179,13 +177,43 @@ Public Class FrmClientsPayments
 
         ' Suponiendo que ya tienes cargado tu DTO del cliente seleccionado
         If _selectedClient IsNot Nothing Then
-            NavigateToForm.OpenFrmModifyClient(_selectedClient, AddressOf RefreshPaymentHistory)
+            NavigateToForm.OpenFrmModifyClient(_selectedClient, AddressOf GlobalRefreshAfterUpdate)
         End If
 
     End Sub
 
     Private Sub BtnDeleteClient_Click(sender As Object, e As EventArgs) Handles BtnDeleteClient.Click
-        '10
+
+        '' 1. Validamos que tengamos un cliente cargado (usando el ID)
+        'If String.IsNullOrEmpty(strIdClient) Then
+        '    MessageBox.Show("Por favor, selecciona un cliente de la lista para eliminar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        '    Return
+        'End If
+
+        '' 2. Mensaje de confirmación con estilo profesional
+        'Dim strMsg = $"                ¡ ¡ ¡  ATENCIÓN  ! ! !{vbCrLf}{vbCrLf}" &
+        '             $"     CLIENTE :  {LblNomCli.Text} {LblApeCli.Text}{vbCrLf}" &
+        '             $"     CÓDIGO  :  {strIdClient}{vbCrLf}{vbCrLf}" &
+        '             $"     Si eliminas el registro, se borrará TODO el historial de pagos.{vbCrLf}" &
+        '             $"     Esta acción no se puede deshacer.{vbCrLf}" &
+        '             $"     ___________________________________________________________{vbCrLf}{vbCrLf}" &
+        '             $"     ¿Realmente deseas ELIMINAR permanentemente a este cliente?"
+
+        'If MessageBox.Show(strMsg, "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes Then
+
+        '    ' 3. Ejecución del borrado (Llamada a tu lógica de base de datos)
+        '    Dim sql = "DELETE FROM clientes WHERE id_cli = @id"
+        '    ' Nota: Aquí deberías usar tu método Sub_Crud_Sql pasando el parámetro para evitar SQL Injection
+        '    ExecuteDeleteClient(strIdClient)
+
+        '    ' 4. Post-Borrado: Limpieza y actualización
+        '    Sub_Clean_Controls()      ' Limpia los labels y fotos del cliente borrado
+        '    LoadClientsList()         ' Refresca el buscador/grid para que el cliente ya no aparezca
+        '    Sub_Disable_Buttons()     ' Desactiva Modificar/Eliminar hasta que se seleccione otro
+
+        '    MessageBox.Show("Cliente eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        'End If
+
     End Sub
 
     Private Sub DgvPaymentList_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvPaymentList.CellContentClick
@@ -271,11 +299,28 @@ Public Class FrmClientsPayments
     End Sub
 
     Private Sub BtnNewPayment_Click(sender As Object, e As EventArgs) Handles BtnNewPayment.Click
-        '13
+
+        '' Buscamos si el formulario de pagos ya está abierto
+        'Dim frmPago = FrmMdiMain.MdiChildren.OfType(Of FrmPagoMensual)().FirstOrDefault()
+
+        'If frmPago Is Nothing Then
+        '    frmPago = New FrmPagoMensual()
+        '    frmPago.MdiParent = FrmMdiMain
+        '    ' Aquí podrías pasarle el ID del cliente actual si quieres que cargue directo
+        '    ' frmPago.PrepareNewPayment(strIdClient) 
+        '    frmPago.Show()
+        'Else
+        '    frmPago.BringToFront()
+        '    frmPago.Activate()
+        'End If
+
     End Sub
 
     Private Sub BtnCloseWindow_Click(sender As Object, e As EventArgs) Handles BtnCloseWindow.Click
-        '14
+
+        ' Como este formulario suele ser el "Buscador Principal", Close es directo.
+        Me.Close()
+
     End Sub
 
     '| -------------------------------------------------------------------------- '
@@ -362,8 +407,6 @@ Public Class FrmClientsPayments
     Sub UploadDataAndPayments(Optional client As IndividualPaymentDTO = Nothing)
 
         _isCleaning = True
-        '' 1. Obtenemos el objeto desde el Grid
-        ''_selectedClient = DirectCast(DgvClientList.CurrentRow.DataBoundItem, IndividualPaymentDTO)
 
         ' 1. Decisión inteligente: ¿Me pasaron un cliente o lo busco en el Grid?
         If client IsNot Nothing Then
@@ -422,6 +465,7 @@ Public Class FrmClientsPayments
         BtnFindClient.Enabled = _clientManager.HasClients()
 
         If BtnFindClient.Enabled Then _clientList = _clientManager.GetClientsForSearch()
+        'DgvClientList.DataSource = _clientList ' <--- ¡No olvides refrescar el control visual!
 
     End Sub
     ''
@@ -458,6 +502,22 @@ Public Class FrmClientsPayments
             UploadDataAndPayments(newClient)
         End If
 
+    End Sub
+    ''
+    ''
+    Public Sub GlobalRefreshAfterUpdate(clientId As Integer)
+        ' 1. Actualizamos el DataGridView con la lista fresca de la BBDD
+        RefreshCustomerList()
+        'DgvClientList.DataSource = Nothing
+        'DgvClientList.DataSource = _clientList
+
+        ' 2. Buscamos al cliente que acabamos de modificar
+        Dim updatedClient = _clientList.FirstOrDefault(Function(c) c.IdCli = clientId)
+
+        ' 3. Si lo encontramos, refrescamos los Labels (usando tus piezas existentes)
+        If updatedClient IsNot Nothing Then
+            UploadDataAndPayments(updatedClient)
+        End If
     End Sub
     ''
     ''
