@@ -7,9 +7,9 @@ Namespace Models
     ' dentro de los DataGridView.
     Public Class IndividualPaymentDTO
 
-        ' ======================
+        ' ===========================================================
         ' Datos del cliente - Heredamos todas las propiedades del DTO
-        ' ======================
+        ' ===========================================================
         Inherits ClientPaymentDTO
 
         ' Implementa:
@@ -20,11 +20,18 @@ Namespace Models
         Implements IPaymentSummary
         Implements IPaymentCalculable
 
-        ' ======================
+        ' ===============================================
         ' Creamos una copia superficial del objeto actual
-        ' ======================
-        Public Function Clone() As IPaymentCalculable Implements IPaymentCalculable.Clone
+        ' ===============================================
+        Public Function CloneInterface() As IPaymentCalculable Implements IPaymentCalculable.CloneInterface
             Return DirectCast(Me.MemberwiseClone(), IndividualPaymentDTO)
+        End Function
+
+        ' ===============================================
+        ' Creamos una copia superficial del objeto actual
+        ' ===============================================
+        Public Function Clone() As IndividualPaymentDTO
+            Return CType(Me.MemberwiseClone(), IndividualPaymentDTO)
         End Function
 
         ' ======================
@@ -44,6 +51,7 @@ Namespace Models
         Public Property LongFdiPgs As String ' Reemplaza a LongDate (Fecha Inicio)
         Public Property FdpPgs As Date Implements IPaymentCalculable.FdpPgs ' Fecha de pago
         Public Property LongFdpPgs As String ' Reemplaza a LongDate (Fecha de Pago)
+        Public Property HasDebtCustomer As Boolean = False ' Propiedad simple para transportar el estado de deuda
 
         ' ======================
         ' Valores económicos
@@ -71,8 +79,7 @@ Namespace Models
             End Get
         End Property
 
-        ' Devuelve el identificador de pago de forma genérica
-        ' para selección de filas en DataGridView
+        ' Devuelve el identificador de pago de forma genérica para selección de filas en DataGridView
         Public ReadOnly Property IdPayment As Integer Implements ISelectableRow.IdPayment
             Get
                 Return IdPgs
@@ -98,7 +105,7 @@ Namespace Models
                 End If
             End Get
         End Property
-        ''
-        ''
+
+
     End Class
 End Namespace

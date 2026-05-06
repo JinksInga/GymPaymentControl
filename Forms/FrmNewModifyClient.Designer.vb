@@ -23,8 +23,8 @@ Partial Class FrmNewModifyClient
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Dim DataGridViewCellStyle39 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle40 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.ToolTip = New System.Windows.Forms.ToolTip(Me.components)
         Me.RbInactiveState = New System.Windows.Forms.RadioButton()
         Me.RbActiveStatus = New System.Windows.Forms.RadioButton()
@@ -52,6 +52,7 @@ Partial Class FrmNewModifyClient
         Me.LblEmail = New System.Windows.Forms.Label()
         Me.LblTelefono = New System.Windows.Forms.Label()
         Me.GbDatos = New System.Windows.Forms.GroupBox()
+        Me.ChkRegistrationDate = New System.Windows.Forms.CheckBox()
         Me.DtpBirthdate = New System.Windows.Forms.DateTimePicker()
         Me.LblEdad = New System.Windows.Forms.Label()
         Me.TxtLastName = New System.Windows.Forms.TextBox()
@@ -83,7 +84,7 @@ Partial Class FrmNewModifyClient
         Me.RbInactiveState.Name = "RbInactiveState"
         Me.RbInactiveState.Padding = New System.Windows.Forms.Padding(30, 0, 30, 0)
         Me.RbInactiveState.Size = New System.Drawing.Size(160, 32)
-        Me.RbInactiveState.TabIndex = 8
+        Me.RbInactiveState.TabIndex = 9
         Me.RbInactiveState.Text = "Inactivo"
         Me.RbInactiveState.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         Me.RbInactiveState.UseVisualStyleBackColor = True
@@ -99,7 +100,7 @@ Partial Class FrmNewModifyClient
         Me.RbActiveStatus.Name = "RbActiveStatus"
         Me.RbActiveStatus.Padding = New System.Windows.Forms.Padding(30, 0, 30, 0)
         Me.RbActiveStatus.Size = New System.Drawing.Size(160, 32)
-        Me.RbActiveStatus.TabIndex = 7
+        Me.RbActiveStatus.TabIndex = 8
         Me.RbActiveStatus.TabStop = True
         Me.RbActiveStatus.Text = "Activo"
         Me.RbActiveStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -121,12 +122,13 @@ Partial Class FrmNewModifyClient
         '
         Me.DtpRegistrationDate.CalendarFont = New System.Drawing.Font("Microsoft Sans Serif", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.DtpRegistrationDate.CustomFormat = "' ' dddd ', ' dd ' de ' MMMM ' de ' yyyy"
+        Me.DtpRegistrationDate.Enabled = False
         Me.DtpRegistrationDate.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
         Me.DtpRegistrationDate.Format = System.Windows.Forms.DateTimePickerFormat.Custom
         Me.DtpRegistrationDate.Location = New System.Drawing.Point(146, 299)
-        Me.DtpRegistrationDate.Margin = New System.Windows.Forms.Padding(8, 6, 24, 8)
+        Me.DtpRegistrationDate.Margin = New System.Windows.Forms.Padding(8, 6, 8, 8)
         Me.DtpRegistrationDate.Name = "DtpRegistrationDate"
-        Me.DtpRegistrationDate.Size = New System.Drawing.Size(346, 26)
+        Me.DtpRegistrationDate.Size = New System.Drawing.Size(312, 26)
         Me.DtpRegistrationDate.TabIndex = 6
         '
         'LblFinscripcion
@@ -290,20 +292,20 @@ Partial Class FrmNewModifyClient
         Me.DgvListGroupsDailyPayment.AllowUserToDeleteRows = False
         Me.DgvListGroupsDailyPayment.AllowUserToResizeColumns = False
         Me.DgvListGroupsDailyPayment.AllowUserToResizeRows = False
-        DataGridViewCellStyle39.BackColor = System.Drawing.Color.White
-        Me.DgvListGroupsDailyPayment.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle39
+        DataGridViewCellStyle1.BackColor = System.Drawing.Color.White
+        Me.DgvListGroupsDailyPayment.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle1
         Me.DgvListGroupsDailyPayment.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None
         Me.DgvListGroupsDailyPayment.ColumnHeadersHeight = 4
         Me.DgvListGroupsDailyPayment.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
         Me.DgvListGroupsDailyPayment.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colIdDailyGroup, Me.colNameDailyGroup, Me.colNumMembers, Me.colMembersReg})
-        DataGridViewCellStyle40.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        DataGridViewCellStyle40.BackColor = System.Drawing.Color.PaleTurquoise
-        DataGridViewCellStyle40.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle40.ForeColor = System.Drawing.SystemColors.ControlText
-        DataGridViewCellStyle40.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle40.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        DataGridViewCellStyle40.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.DgvListGroupsDailyPayment.DefaultCellStyle = DataGridViewCellStyle40
+        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle2.BackColor = System.Drawing.Color.PaleTurquoise
+        DataGridViewCellStyle2.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText
+        DataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        DataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.DgvListGroupsDailyPayment.DefaultCellStyle = DataGridViewCellStyle2
         Me.DgvListGroupsDailyPayment.Enabled = False
         Me.DgvListGroupsDailyPayment.Location = New System.Drawing.Point(12, 87)
         Me.DgvListGroupsDailyPayment.Margin = New System.Windows.Forms.Padding(12, 4, 20, 8)
@@ -425,6 +427,7 @@ Partial Class FrmNewModifyClient
         '
         'GbDatos
         '
+        Me.GbDatos.Controls.Add(Me.ChkRegistrationDate)
         Me.GbDatos.Controls.Add(Me.RbInactiveState)
         Me.GbDatos.Controls.Add(Me.TxtAddress)
         Me.GbDatos.Controls.Add(Me.RbActiveStatus)
@@ -453,6 +456,19 @@ Partial Class FrmNewModifyClient
         Me.GbDatos.TabIndex = 0
         Me.GbDatos.TabStop = False
         Me.GbDatos.Text = "Datos del cliente :"
+        '
+        'ChkRegistrationDate
+        '
+        Me.ChkRegistrationDate.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.ChkRegistrationDate.Font = New System.Drawing.Font("Microsoft Sans Serif", 20.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.ChkRegistrationDate.Location = New System.Drawing.Point(466, 299)
+        Me.ChkRegistrationDate.Margin = New System.Windows.Forms.Padding(0)
+        Me.ChkRegistrationDate.Name = "ChkRegistrationDate"
+        Me.ChkRegistrationDate.Size = New System.Drawing.Size(26, 26)
+        Me.ChkRegistrationDate.TabIndex = 7
+        Me.ChkRegistrationDate.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.ToolTip.SetToolTip(Me.ChkRegistrationDate, "Activa la fecha de inscripción.")
+        Me.ChkRegistrationDate.UseVisualStyleBackColor = True
         '
         'DtpBirthdate
         '
@@ -696,4 +712,5 @@ Partial Class FrmNewModifyClient
     Friend WithEvents colMembersReg As DataGridViewTextBoxColumn
     Friend WithEvents BtnExpandCapacity As Button
     Friend WithEvents PnlBotonera As Panel
+    Friend WithEvents ChkRegistrationDate As CheckBox
 End Class

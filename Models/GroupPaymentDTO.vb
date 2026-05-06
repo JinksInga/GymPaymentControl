@@ -16,7 +16,7 @@ Namespace Models
         ' ======================
         ' Creamos una copia superficial del objeto actual
         ' ======================
-        Public Function Clone() As IPaymentCalculable Implements IPaymentCalculable.Clone
+        Public Function CloneInterface() As IPaymentCalculable Implements IPaymentCalculable.CloneInterface
             Return DirectCast(Me.MemberwiseClone(), GroupPaymentDTO)
         End Function
 

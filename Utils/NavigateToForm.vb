@@ -10,7 +10,7 @@ Namespace Utils
         ''' </summary>
         Public Sub OpenFrmCollectMembership(dto As IPaymentCalculable, refreshAction As Action)
             ' Centralizamos el clonado para proteger los datos originales
-            Dim dtoClone = DirectCast(dto.Clone(), IPaymentCalculable)
+            Dim dtoClone = DirectCast(dto.CloneInterface(), IPaymentCalculable)
 
             Using form As New FrmCollectMembership()
                 form.PreparePayment(dtoClone, TransactionMode.UpdatePayment)
@@ -76,21 +76,7 @@ Namespace Utils
         ''' Abre el formulario para modificar datos cliente y ejecuta una acción al finalizar con éxito.
         ''' </summary>
         Public Sub OpenFrmModifyClient(clientData As ClientPaymentDTO, refreshAction As Action(Of Integer))
-            '' Buscamos si ya está abierto (reutilizamos la lógica del anterior)
-            'Dim form = FrmMdiMain.MdiChildren.OfType(Of FrmNewModifyClient)().FirstOrDefault()
 
-            'If form Is Nothing Then
-            '    form = New FrmNewModifyClient()
-            '    form.MdiParent = FrmMdiMain
-            'End If
-
-            '' Pasamos la acción de refresco y los datos del cliente
-            'form.SetRefreshAction(refreshAction)
-            'form.PrepareToModifyClient(clientData)
-
-            'form.Show()         ' Por si estaba cerrado
-            'form.BringToFront() ' Para que no se esconda detrás del buscador
-            ''form.Activate()     ' Para que el cursor aparezca listo para escribir en el nombre
             ' 1. Buscamos si el formulario ya está abierto
             Dim form = FrmMdiMain.MdiChildren.OfType(Of FrmNewModifyClient)().FirstOrDefault()
 
@@ -130,7 +116,7 @@ Namespace Utils
             form.BringToFront()
             form.Activate()
         End Sub
-        ''
-        ''
+
+
     End Module
 End Namespace

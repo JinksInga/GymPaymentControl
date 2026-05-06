@@ -324,8 +324,8 @@ Namespace Services
 
                         While dr.Read()
 
-                            'Dim strFrmPgs As String = If(dr.IsDBNull(dr.GetOrdinal("frm_pgs")), String.Empty, dr.GetString("frm_pgs"))
-                            '.FrmPgs = If(String.IsNullOrWhiteSpace(strFrmPgs), "IMPAGO", strFrmPgs),
+                            Dim strFrmPgs = If(dr.IsDBNull(dr.GetOrdinal("frm_pgs")), "IMPAGO", dr.GetString("frm_pgs"))
+
                             historyList.Add(New IndividualPaymentDTO With
                                             {
                                                 .IdPgs = dr.GetInt32("id_pgs"),
@@ -335,6 +335,7 @@ Namespace Services
                                                 .LongFdpPgs = If(dr.GetDateTime("fdp_pgs") = Date.MinValue, "SIN FECHA", ConvertLongDate(dr.GetDateTime("fdp_pgs"))),
                                                 .MtdPgs = dr.GetString("mtd_pgs"),
                                                 .FrmPgs = If(dr.IsDBNull(dr.GetOrdinal("frm_pgs")), "IMPAGO", dr.GetString("frm_pgs")),
+                                                .HasDebtCustomer = (strFrmPgs = "IMPAGO"),
                                                 .PrcPgs = dr.GetDecimal("prc_pgs"),
                                                 .DscPgs = dr.GetDecimal("dsc_pgs"),
                                                 .NomUser = If(dr.IsDBNull(dr.GetOrdinal("nom_user")), "N/A", dr.GetString("nom_user"))

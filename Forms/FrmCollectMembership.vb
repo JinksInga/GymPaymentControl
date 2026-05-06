@@ -1,8 +1,8 @@
 ﻿Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
+Imports GymPaymentControl.UIHelpers
 Imports GymPaymentControl.Utils.PaymentCalculator
-Imports GymPaymentControl.Utils.Validations
 Imports MySql.Data.MySqlClient
 
 Public Class FrmCollectMembership
@@ -62,7 +62,7 @@ Public Class FrmCollectMembership
         '| * Llamamos a la subrutina Sub_Only_Numbers y le pasamos la variable como parámetro.
         'Dim strAllowKey As String = "(-) "
         'Sub_Only_Numbers(strAllowKey, e
-        ValidateDecimalInput(TxtPrcPgs.Text, e)
+        AllowDecimalInput(TxtPrcPgs.Text, e)
 
     End Sub
     ''
@@ -82,7 +82,7 @@ Public Class FrmCollectMembership
         '| * Llamamos a la subrutina Sub_Only_Numbers y le pasamos la variable como parámetro.
         'Dim strAllowKey As String = "(-) "
         'Sub_Only_Numbers(strAllowKey, e
-        ValidateDecimalInput(TxtDscPgs.Text, e)
+        AllowDecimalInput(TxtDscPgs.Text, e)
 
     End Sub
     ''
@@ -165,14 +165,6 @@ Public Class FrmCollectMembership
         _selectedPayment = payment
         _currentMode = mode
 
-        'If _selectedPayment.MtdPgs.Contains("GRUPAL") AndAlso TypeOf _selectedPayment Is GroupPaymentDTO Then
-        '    ' Solo si es el DTO de Grupo (deudores) mostramos "GRUPO: XXX"
-        '    Dim gName As String = DirectCast(_selectedPayment, GroupPaymentDTO).GroupName
-        '    LblDisplayName.Text = "GRUPO: " & If(Not String.IsNullOrEmpty(gName), gName, "FAMILIAR")
-        'Else
-        '    ' En cualquier otro caso (Individual, Mensual, Diario), mostramos el nombre del Cliente
-        '    LblDisplayName.Text = _selectedPayment.DisplayName
-        'End If
         ' Si es el DTO de Grupo (deudores), priorizamos el nombre del grupo.
         If TypeOf _selectedPayment Is GroupPaymentDTO Then
             Dim gName As String = DirectCast(_selectedPayment, GroupPaymentDTO).GroupName
@@ -208,20 +200,6 @@ Public Class FrmCollectMembership
             Case strMtdPgs.Contains("GRUPAL")
                 CmbMtdPgs.Text = "GRUPO FAMILIAR"
 
-                'If TypeOf payment Is IndividualPaymentDTO Then
-                '    ' El nombre del grupo ya lo inyectamos en el botón del formulario anterior
-                '    ' Caso: Cliente individual con tarifa de grupo (Ficha de Cliente)
-                '    Dim ind = DirectCast(payment, IndividualPaymentDTO)
-                '    Dim strGroupName As String = If(Not String.IsNullOrEmpty(ind.GroupName), ind.GroupName, "un grupo familiar")
-
-                '    'TxtDetailMethod.Text = $"NOTA: Este cobro aplica tarifa reducida por pertenecer a {strGroupName}."
-                '    TxtDetailMethod.Text = $"{strGroupName}{Environment.NewLine}" &
-                '        $"Este cobro aplica tarifa reducida aplicado a los grupos de Nº integrantes."
-                'Else
-                '    ' Caso: Cobro a toda la familia (Desde Deudores)
-                '    ' Si es GroupPaymentDTO (cobro masivo), mostramos integrantes
-                '    TxtDetailMethod.Text = "INTEGRANTES : " & payment.Members
-                'End If
                 ' Lógica de Nota Informativa vs Integrantes
                 If TypeOf _selectedPayment Is IndividualPaymentDTO Then
                     ' Como GroupName ya está en la base, no necesitamos Shadows ni Castings complejos
@@ -353,39 +331,21 @@ Public Class FrmCollectMembership
 
     Private Sub ChkFdiPgs_CheckedChanged(sender As Object, e As EventArgs) Handles ChkFdiPgs.CheckedChanged
 
-        '
-        OnOffCheckBox(DtpFdiPgs, ChkFdiPgs, "Desactiva la fecha de inicio del mes.", "Activa la fecha de inicio del mes.")
+        ToggleControl(DtpFdiPgs, ChkFdiPgs, ToolTip, "Desactiva la fecha de inicio del mes.", "Activa la fecha de inicio del mes.")
 
     End Sub
 
     Private Sub ChkFdpPgs_CheckedChanged(sender As Object, e As EventArgs) Handles ChkFdpPgs.CheckedChanged
 
-        '
-        OnOffCheckBox(DtpFdpPgs, ChkFdpPgs, "Desactiva la fecha de pago.", "Activa la fecha de pago.")
+        ToggleControl(DtpFdpPgs, ChkFdpPgs, ToolTip, "Desactiva la fecha de pago.", "Activa la fecha de pago.")
 
     End Sub
 
     Private Sub ChkMtdPgs_CheckedChanged(sender As Object, e As EventArgs) Handles ChkMtdPgs.CheckedChanged
 
-        '
-        OnOffCheckBox(CmbMtdPgs, ChkMtdPgs, "Desactiva el método de pago", "Activa el método de pago")
+        ToggleControl(CmbMtdPgs, ChkMtdPgs, ToolTip, "Desactiva el método de pago.", "Activa el método de pago.")
 
     End Sub
 
-    Private Sub OnOffCheckBox(control As Control, checkBox As CheckBox,
-                              strDeactivate As String, strActivate As String)
 
-        control.Enabled = checkBox.Checked
-
-        If checkBox.Checked Then
-
-            control.Focus()
-            ToolTip.SetToolTip(checkBox, strDeactivate)
-        Else
-            ToolTip.SetToolTip(checkBox, strActivate)
-        End If
-
-    End Sub
-    ''
-    ''
 End Class

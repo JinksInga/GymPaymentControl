@@ -191,6 +191,8 @@
     <Compile Include="Services\AuthManager.vb" />
     <Compile Include="Services\PaymentGenerator.vb" />
     <Compile Include="Services\PaymentManager.vb" />
+    <Compile Include="UIHelpers\FormHelpers.vb" />
+    <Compile Include="UIHelpers\InputValidators.vb" />
     <Compile Include="Utils\DateUtils.vb" />
     <Compile Include="Utils\NavigateToForm.vb" />
     <Compile Include="Utils\PaymentCalculator.vb" />

@@ -88,6 +88,7 @@ Partial Class FrmCollectMembership
         Me.ChkFdpPgs.Size = New System.Drawing.Size(26, 26)
         Me.ChkFdpPgs.TabIndex = 3
         Me.ChkFdpPgs.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.ToolTip.SetToolTip(Me.ChkFdpPgs, "Activa la fecha de pago.")
         Me.ChkFdpPgs.UseVisualStyleBackColor = True
         '
         'ChkMtdPgs
@@ -100,6 +101,7 @@ Partial Class FrmCollectMembership
         Me.ChkMtdPgs.Size = New System.Drawing.Size(26, 26)
         Me.ChkMtdPgs.TabIndex = 4
         Me.ChkMtdPgs.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.ToolTip.SetToolTip(Me.ChkMtdPgs, "Activa el método de pago.")
         Me.ChkMtdPgs.UseVisualStyleBackColor = True
         '
         'TxtDetailMethod
@@ -153,7 +155,7 @@ Partial Class FrmCollectMembership
         '
         'DtpFdpPgs
         '
-        Me.DtpFdpPgs.CustomFormat = "dd 'de' MMMM 'de' yyyy"
+        Me.DtpFdpPgs.CustomFormat = "'  'dd'  de  'MMMM'  de  'yyyy"
         Me.DtpFdpPgs.Enabled = False
         Me.DtpFdpPgs.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
         Me.DtpFdpPgs.Format = System.Windows.Forms.DateTimePickerFormat.Custom
@@ -230,7 +232,7 @@ Partial Class FrmCollectMembership
         '
         'DtpFdiPgs
         '
-        Me.DtpFdiPgs.CustomFormat = "dd 'de' MMMM 'de' yyyy"
+        Me.DtpFdiPgs.CustomFormat = "'  'dd'  de  'MMMM'  de  'yyyy"
         Me.DtpFdiPgs.Enabled = False
         Me.DtpFdiPgs.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
         Me.DtpFdiPgs.Format = System.Windows.Forms.DateTimePickerFormat.Custom
@@ -346,6 +348,7 @@ Partial Class FrmCollectMembership
         Me.ChkFdiPgs.Size = New System.Drawing.Size(26, 26)
         Me.ChkFdiPgs.TabIndex = 3
         Me.ChkFdiPgs.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.ToolTip.SetToolTip(Me.ChkFdiPgs, "Activa la fecha de inicio del mes.")
         Me.ChkFdiPgs.UseVisualStyleBackColor = True
         '
         'LblPriceDay

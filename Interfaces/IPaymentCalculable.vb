@@ -42,7 +42,7 @@
         Property MtdPgs As String
 
         ' Método para crear una copia exacta del objeto
-        Function Clone() As IPaymentCalculable
+        Function CloneInterface() As IPaymentCalculable
 
         ''
         ''

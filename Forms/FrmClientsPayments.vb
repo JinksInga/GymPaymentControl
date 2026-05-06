@@ -1,5 +1,6 @@
 ﻿Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
+Imports GymPaymentControl.UIHelpers
 Imports GymPaymentControl.Utils
 
 Public Class FrmClientsPayments
@@ -8,6 +9,7 @@ Public Class FrmClientsPayments
     Private ReadOnly _clientManager As New ClientManager()
     Private ReadOnly _paymentManager As New PaymentManager()
     Private _clientList As List(Of IndividualPaymentDTO)
+    Private _historyList As List(Of IndividualPaymentDTO)
     Private _selectedClient As IndividualPaymentDTO
 
     'variables
@@ -91,11 +93,11 @@ Public Class FrmClientsPayments
             Case 1, 2 '"NAME" "LASTNAME"
                 Dim strAllowKey As String = " "
                 Dim strLockKey As String = "ºª"
-                ValidateOnlyLetters(strAllowKey, strLockKey, e)
+                AllowOnlyLetters(e, strAllowKey, strLockKey)
 
             Case 3 '"PHONE"
                 Dim strAllowKey As String = "(-) "
-                ValidateIntegerNumbers(strAllowKey, e)
+                AllowOnlyIntegers(e, strAllowKey)
 
         End Select
 
@@ -177,6 +179,15 @@ Public Class FrmClientsPayments
 
         ' Suponiendo que ya tienes cargado tu DTO del cliente seleccionado
         If _selectedClient IsNot Nothing Then
+
+            ' Verificamos si en el historial que acabamos de cargar hay algún "IMPAGO"
+            ' Nota: Usamos nuestra nueva _historyList
+            Dim hasDebt As Boolean = _historyList.Any(Function(p) p.HasDebtCustomer)
+
+            ' Marcamos la bandera en el objeto que vamos a enviar al formulario de edición
+            _selectedClient.HasDebtCustomer = hasDebt
+
+            ' Abrimos el formulario (usando tu método de navegación)
             NavigateToForm.OpenFrmModifyClient(_selectedClient, AddressOf GlobalRefreshAfterUpdate)
         End If
 
@@ -430,10 +441,10 @@ Public Class FrmClientsPayments
             LblGrpFamCli.Text = ""
         End If
 
-        ' 4. Cargamos el historial de pagos (Usando PaymentManager)
-        ' El DGV de pagos ahora recibe una LISTA de objetos, no un DataTable
-        DgvPaymentList.DataSource = _paymentManager.GetPaymentHistory(_selectedClient.IdCli, _selectedClient.IdGroup)
-        ' Lo ponemos aquí, una sola vez después de cargar
+        ' 4. ** LA CLAVE **: Guardamos el historial en nuestra nueva variable global
+        _historyList = _paymentManager.GetPaymentHistory(_selectedClient.IdCli, _selectedClient.IdGroup)
+        '  Cargamos el grid
+        DgvPaymentList.DataSource = _historyList
         DgvPaymentList.CurrentCell = Nothing
 
         DisableSearchRecord()
