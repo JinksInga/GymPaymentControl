@@ -469,8 +469,8 @@ Public Class FrmClientsPayments
         LblGrpFamCli.Text = client.IdGroup
 
     End Sub
-    ''
-    ''
+
+
     Private Sub RefreshCustomerList()
 
         BtnFindClient.Enabled = _clientManager.HasClients()
@@ -479,59 +479,59 @@ Public Class FrmClientsPayments
         'DgvClientList.DataSource = _clientList ' <--- ¡No olvides refrescar el control visual!
 
     End Sub
-    ''
-    ''
+
+
     Private Sub RefreshPaymentHistory()
-        ' Seguridad ante todo: Si no hay cliente, no hay historial que buscar
-        ' Verificamos que no sea Nothing por seguridad
+
+        ' Verificamos que no sea Nothing por seguridad, si no hay cliente, no hay historial que buscar.
         If _selectedClient IsNot Nothing Then
-            ' Cargamos los datos
-            DgvPaymentList.DataSource = _paymentManager.GetPaymentHistory(_selectedClient.IdCli, _selectedClient.IdGroup)
-            ' Lo ponemos aquí, una sola vez después de cargar
+            ' 1. Traemos la info fresca
+            Dim updatedHistory = _paymentManager.GetPaymentHistory(_selectedClient.IdCli, _selectedClient.IdGroup)
+
+            ' 2. ACTUALIZAMOS LA VARIABLE GLOBAL
+            _historyList = updatedHistory
+
+            ' 3. Refrescamos visualmente el Grid
+            DgvPaymentList.DataSource = _historyList
             DgvPaymentList.CurrentCell = Nothing
 
-            'Else
-            ' Opcional: Si no hay cliente, podemos limpiar el Grid para que no muestre datos viejos
-            'DgvPaymentList.DataSource = Nothing
+            ' 4. Sincronizamos el objeto seleccionado
+            _selectedClient.HasDebtCustomer = _historyList.Any(Function(p) p.HasDebtCustomer)
         End If
 
     End Sub
-    ''
-    ''
+
+
     Public Sub GlobalRefreshAfterSave(newId As Integer)
 
-        ' 1. Refrescamos la lista de clientes en memoria
+        ' 1. Refrescamos el DataGridView con la lista fresca de la BBDD
         RefreshCustomerList()
 
         ' 2. Buscamos el objeto del nuevo cliente dentro de la lista recién cargada
-        ' Usamos LINQ para encontrarlo rápido
+        '    Usamos LINQ para encontrarlo rápido
         Dim newClient = _clientList.FirstOrDefault(Function(c) c.IdCli = newId)
 
-        ' 3. Cargamos sus datos en los Labels y el historial de pagos
-        If newClient IsNot Nothing Then
-            'llama internamente a la carga de pagos
-            UploadDataAndPayments(newClient)
-        End If
+        ' 3. Si lo encontramos, refrescamos los Labels y el historial de pagos
+        If newClient IsNot Nothing Then UploadDataAndPayments(newClient)
 
     End Sub
-    ''
-    ''
-    Public Sub GlobalRefreshAfterUpdate(clientId As Integer)
-        ' 1. Actualizamos el DataGridView con la lista fresca de la BBDD
-        RefreshCustomerList()
-        'DgvClientList.DataSource = Nothing
-        'DgvClientList.DataSource = _clientList
 
-        ' 2. Buscamos al cliente que acabamos de modificar
+
+    Public Sub GlobalRefreshAfterUpdate(clientId As Integer)
+
+        ' 1. Refrescamos el DataGridView con la lista fresca de la BBDD
+        RefreshCustomerList()
+
+        ' 2. Buscamos al cliente que acabamos de modificar dentro de la lista recién cargada
+        '    Usamos LINQ para encontrarlo rápido.
         Dim updatedClient = _clientList.FirstOrDefault(Function(c) c.IdCli = clientId)
 
-        ' 3. Si lo encontramos, refrescamos los Labels (usando tus piezas existentes)
-        If updatedClient IsNot Nothing Then
-            UploadDataAndPayments(updatedClient)
-        End If
+        ' 3. Si lo encontramos, refrescamos los Labels y el historial de pagos
+        If updatedClient IsNot Nothing Then UploadDataAndPayments(updatedClient)
+
     End Sub
-    ''
-    ''
+
+
     Private Sub ActivateButtons()
 
         '| -----------------------------

@@ -75,9 +75,7 @@ Namespace Utils
 
             If String.IsNullOrWhiteSpace(ageText) Then Return False
 
-            Dim age As Integer
-
-            If Not Integer.TryParse(ageText, age) Then Return False
+            Dim age As Integer = CInt(Val(ageText))
 
             Return age >= 5
 
@@ -93,7 +91,7 @@ Namespace Utils
         ''' <returns>True si el formato es válido; False en caso contrario.</returns>
         Public Function IsValidEmail(eMail As String) As Boolean
 
-            If String.IsNullOrWhiteSpace(eMail) Then Return False
+            If String.IsNullOrWhiteSpace(eMail) Then Return False ' True
 
             Dim strRegex As String = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 

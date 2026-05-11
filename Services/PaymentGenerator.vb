@@ -25,8 +25,8 @@ Namespace Services
         ''' 
         ''' Todo el proceso se ejecuta dentro de una transacción.
         ''' </summary>
-        ''' <param name="idUser">Usuario que ejecuta el proceso (auditoría)</param>
         Public Function GenerateNewMonthPayments() As Integer
+            ' <param name="idUser">Usuario que ejecuta el proceso (auditoría)</param>
 
             Dim filasInsertadas As Integer '= 0
 

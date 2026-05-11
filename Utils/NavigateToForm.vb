@@ -1,6 +1,7 @@
 ﻿Imports GymPaymentControl.FrmCollectMembership
 Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
+Imports GymPaymentControl.UIHelpers
 
 Namespace Utils
     Public Module NavigateToForm
@@ -33,28 +34,14 @@ Namespace Utils
                 ' 2. Si existe y tiene datos, preguntamos
                 If form.HasUnsavedChanges() Then
 
-                    ' Construimos el cuerpo del mensaje tal cual tu imagen
-                    Dim strMsgbox As String = "                                   ¡ ¡ ¡  ATENCIÓN  ! ! !" & Environment.NewLine & Environment.NewLine &
-                        "     Tienes un formulario abierto con información del cliente." & Environment.NewLine &
-                        "     ___________________________________________________________" & Environment.NewLine & Environment.NewLine &
-                        "     ¿Deseas continuar con el proceso?" & Environment.NewLine & Environment.NewLine &
-                        "           SI : Muéstrame el formulario con la información." & Environment.NewLine & Environment.NewLine &
-                        "           NO : Quiero empezar un nuevo registro." & Environment.NewLine & Environment.NewLine &
-                        "           CANCELAR : Cierra la ventana y termina con el proceso."
-
-                    Dim result = MessageBox.Show(strMsgbox, "Registro pendiente",
-                                                 MessageBoxButtons.YesNoCancel,
-                                                 MessageBoxIcon.Question)
-
+                    ' Construimos el mensaje
+                    Dim result = MessageBox.Show(UnsavedChangesWarning("guardados", "guardar"), "Registro pendiente",
+                                                 MessageBoxButtons.YesNo, MessageBoxIcon.Question)
                     If result = DialogResult.No Then
-                        ' CASO NO: Limpiar y mostrar vacío
-                        form.PrepareForNewClient()
-
-                    ElseIf result = DialogResult.Cancel Then
-                        ' CASO CANCELAR: Destruir el formulario para que no quede "flotando"
-                        form.Close()
-                        Return ' Salimos de la función por completo
-
+                        ' Destruir el formulario para que no quede "flotando"
+                        ' En lugar de form.Close(), usamos el cierre forzado
+                        form.ForceClose()
+                        Return
                     End If
                 End If
             Else
@@ -68,6 +55,7 @@ Namespace Utils
             form.SetRefreshAction(refreshAction)
             form.Show()
             form.BringToFront()
+            form.Activate()
 
         End Sub
 
@@ -83,21 +71,18 @@ Namespace Utils
             If form IsNot Nothing Then
                 ' 2. Si ya está abierto, comprobamos si tiene cambios pendientes
                 If form.HasUnsavedChanges() Then
-                    Dim strMsgbox As String = "                ¡ ¡ ¡  ATENCIÓN  ! ! !" & Environment.NewLine & Environment.NewLine &
-                        "     Ya tienes una edición abierta con cambios sin guardar." & Environment.NewLine &
-                        "     ___________________________________________________________" & Environment.NewLine & Environment.NewLine &
-                        "     ¿Deseas descartar esos cambios y cargar el nuevo cliente?" & Environment.NewLine & Environment.NewLine &
-                        "            SÍ : Carga al nuevo cliente (se pierden los cambios actuales)." & Environment.NewLine &
-                        "            NO : Seguir editando el cliente actual."
 
-                    Dim result = MessageBox.Show(strMsgbox, "Cambios pendientes",
-                                                 MessageBoxButtons.YesNo,
-                                                 MessageBoxIcon.Warning,
-                                                 MessageBoxDefaultButton.Button2)
-
-                    If result = DialogResult.No Then
-                        ' El usuario quiere terminar lo que estaba haciendo
+                    ' Construimos el mensaje
+                    Dim result = MessageBox.Show(UnsavedChangesWarning("actualizados", "actualizar"), "Cambios pendientes",
+                                                 MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+                    If result = DialogResult.Yes Then
+                        ' CASO SI : Activamos y mostramos el formulario.
                         form.Activate()
+                        Return
+                    Else
+                        ' CASO NO : Destruir el formulario para que no quede "flotando"
+                        ' En lugar de form.Close(), usamos el cierre forzado
+                        form.ForceClose()
                         Return
                     End If
                 End If
