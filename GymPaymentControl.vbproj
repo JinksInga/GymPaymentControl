@@ -193,8 +193,10 @@
     <Compile Include="Services\PaymentManager.vb" />
     <Compile Include="UIHelpers\FormHelpers.vb" />
     <Compile Include="UIHelpers\InputValidators.vb" />
+    <Compile Include="UIHelpers\AppTexts.vb" />
     <Compile Include="UIHelpers\ValidationMessages.vb" />
     <Compile Include="UIHelpers\DialogMessages.vb" />
+    <Compile Include="Utils\BusinessConstants.vb" />
     <Compile Include="Utils\DateUtils.vb" />
     <Compile Include="Utils\NavigateToForm.vb" />
     <Compile Include="Utils\PaymentCalculator.vb" />

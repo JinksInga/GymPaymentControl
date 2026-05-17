@@ -1,6 +1,7 @@
 ﻿Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
+Imports GymPaymentControl.UIHelpers
 Imports GymPaymentControl.Utils
 
 Public Class FrmListDebtors
@@ -311,7 +312,7 @@ Public Class FrmListDebtors
             Case "daysOfMonthInv"
                 Dim amount = row.NumberMonths
 
-                If row.MtdPgs.Contains("MENSUAL") Then
+                If row.MtdPgs.Contains(PaymentMethods.Monthly) Then
                     e.Value = If(amount = 1, "1 MES", $"{amount} MESES")
                 Else
                     e.Value = If(amount = 1, "1 DIA", $"{amount} DIAS")
@@ -345,7 +346,7 @@ Public Class FrmListDebtors
         '|
         ' Si estamos buscando, no queremos que aparezcan iconos de error
         If _isFiltering Then Exit Sub
-        CheckRowDataGridView(DgvIndividual, LblErrorProvider, BtnCollectMonth, ErrorProvider, "Selecciona una fila que contenga un PAGO.")
+        CheckRowDataGridView(DgvIndividual, LblErrorProvider, BtnCollectMonth, ErrorProvider, ValidationMessages.SelectRecord)
 
     End Sub
     ''
@@ -418,7 +419,8 @@ Public Class FrmListDebtors
         '
         ' Si estamos buscando, no queremos que aparezcan iconos de error
         If _isFiltering Then Exit Sub
-        CheckRowDataGridView(DgvFamilyGroup, LblErrorProvider, BtnCollectMonth, ErrorProvider, "Selecciona una fila que contenga un PAGO.")
+
+        CheckRowDataGridView(DgvFamilyGroup, LblErrorProvider, BtnCollectMonth, ErrorProvider, ValidationMessages.SelectRecord)
 
     End Sub
     ''
@@ -437,7 +439,8 @@ Public Class FrmListDebtors
                 ' Aquí le pasamos la función que refresca los deudores individuales
                 OpenFrmCollectMembership(selectedPayment, AddressOf RefreshDgvIndividual)
             Else
-                ShowMessageBox()
+                MessageBox.Show(SelectCorrectRow, "Seleccionar registro",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
 
         End If
@@ -450,7 +453,8 @@ Public Class FrmListDebtors
                 ' Aquí le pasamos la función que refresca los deudores individuales
                 OpenFrmCollectMembership(selectedPayment, AddressOf RefreshDgvFamilyGroup)
             Else
-                ShowMessageBox()
+                MessageBox.Show(SelectCorrectRow, "Seleccionar registro",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
         End If
 
@@ -472,33 +476,23 @@ Public Class FrmListDebtors
             ' Usamos la función de chequeo que no inserta registros
             If Not generator.HasPendingMassivePayments() Then
 
-                MessageBox.Show($"   Las membresías de {newMonth} ya están registradas en" & Environment.NewLine &
-                                "   la base de datos." & Environment.NewLine &
-                                Environment.NewLine &
-                                "   No es posible duplicar pagos existentes." & Environment.NewLine &
-                                "   ________________________________________________________" & Environment.NewLine &
-                                Environment.NewLine &
-                                "                                                          Operación cancelada.",
-                                "Aviso - Registro duplicado", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show(DoNotDuplicatePayments(newMonth), "Aviso - Registro duplicado",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
 
             End If
 
             ' 2. SI HAY PENDIENTES, PEDIMOS PERMISO
-            Dim strMsgBox As String = "                            ¡ ¡ ¡  ATENCIÓN  ! ! !" & Environment.NewLine & Environment.NewLine &
-                                      $"   Se crearán nuevos pagos de {newMonth} para todos los" & Environment.NewLine &
-                                      "   clientes y grupos familiares en actividad." & Environment.NewLine &
-                                      "   __________________________________________________________" & Environment.NewLine & Environment.NewLine &
-                                      "      ¿Desea continuar con la creación masiva de registros?"
+            Dim answer = MessageBox.Show(AskBeforeRegisteringPayments(newMonth), "Registrar pagos nuevos",
+                                         MessageBoxButtons.YesNo, MessageBoxIcon.Question)
 
-            If MessageBox.Show(strMsgBox, "Registrar pagos nuevos", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
-
+            If answer = DialogResult.Yes Then
                 ' 3. SÓLO AQUÍ EJECUTAMOS EL GUARDADO REAL
                 ' Esta es la única vez que llamamos a la función que hace INSERT
-                Dim registrosCreados As Integer = generator.GenerateNewMonthPayments()
+                Dim recordsCreated As Integer = generator.GenerateNewMonthPayments()
 
-                MessageBox.Show($"Se han generado {registrosCreados} nuevos pagos correctamente.",
-                                "Proceso finalizado", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show($"Se han generado {recordsCreated} nuevos pagos correctamente.",
+                                    "Proceso finalizado", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
                 ' Actualizamos la interfaz
                 RefreshDgvIndividual()
@@ -507,7 +501,7 @@ Public Class FrmListDebtors
             End If
 
         Catch ex As Exception
-            MessageBox.Show("Error al generar deudas: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Error al generar deudas : " & ex.Message, "Error")
         End Try
 
     End Sub
@@ -540,7 +534,7 @@ Public Class FrmListDebtors
             UpdateStatusBar("")
 
         Catch ex As Exception
-            MessageBox.Show($"Pagos individuales: {Environment.NewLine}{ex.Message}", "Error al cargar", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show($"Pagos individuales : " & ex.Message, "Error al cargar")
         End Try
 
     End Sub
@@ -560,7 +554,7 @@ Public Class FrmListDebtors
             UpdateStatusBar("")
 
         Catch ex As Exception
-            MessageBox.Show($"Pagos grupales:{Environment.NewLine}{ex.Message}", "Error al cargar", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Pagos grupales : " & ex.Message, "Error al cargar")
         End Try
 
     End Sub
@@ -631,23 +625,5 @@ Public Class FrmListDebtors
 
     End Sub
 
-    Private Sub ShowMessageBox()
 
-        '|
-        '|
-        '|
-
-        Dim strMsgBox As String = "   Para cobrar la cuota mensual a un cliente" & Environment.NewLine &
-                                  Environment.NewLine &
-                                  "   Selecciona un registro válido de la lista de morosos" & Environment.NewLine &
-                                  "   _____________________________________________________" & Environment.NewLine &
-                                  Environment.NewLine &
-                                  "                     La fila RESUMEN no es un registro válido"
-
-        MessageBox.Show(strMsgBox, "Seleccionar registro", MessageBoxButtons.OK, MessageBoxIcon.Error)
-
-    End Sub
-    ''
-    ''
-    ''
 End Class

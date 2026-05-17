@@ -1,4 +1,6 @@
-﻿Imports GymPaymentControl.Models
+﻿Imports GymPaymentControl.FrmCollectMembership
+Imports GymPaymentControl.Interfaces
+Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 Imports GymPaymentControl.UIHelpers
 Imports GymPaymentControl.Utils
@@ -8,6 +10,7 @@ Public Class FrmClientsPayments
     ' Instanciamos los servicios necesarios y acceder a la lógica de negocio.
     Private ReadOnly _clientManager As New ClientManager()
     Private ReadOnly _paymentManager As New PaymentManager()
+
     Private _clientList As List(Of IndividualPaymentDTO)
     Private _historyList As List(Of IndividualPaymentDTO)
     Private _selectedClient As IndividualPaymentDTO
@@ -17,6 +20,7 @@ Public Class FrmClientsPayments
     Private strState As String
 
     Private Sub FrmClientsPayments_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
         Try
             ' 1. Limpieza inicial
             DisableButtons()
@@ -32,7 +36,6 @@ Public Class FrmClientsPayments
 
         Catch ex As Exception
             MessageBox.Show(ex.Message, "Error de Inicio", MessageBoxButtons.OK, MessageBoxIcon.Error)
-
         End Try
 
     End Sub
@@ -61,7 +64,7 @@ Public Class FrmClientsPayments
         If _isCleaning Then Exit Sub
 
         If CmbFilter.SelectedIndex = 0 Then
-            TxtSearch.Text = "SELECCIONA UN FILTRO PARA LA BUSQUEDA"
+            TxtSearch.Text = AppTexts.SelectSearchFilter
         Else
             TxtSearch.Clear()
             TxtSearch.Focus()
@@ -73,7 +76,7 @@ Public Class FrmClientsPayments
         '
         If _isCleaning Then Exit Sub
 
-        If CmbFilter.SelectedIndex = 0 Then TxtSearch.Text = "SELECCIONA UN FILTRO PARA LA BUSQUEDA"
+        If CmbFilter.SelectedIndex = 0 Then TxtSearch.Text = AppTexts.SelectSearchFilter
 
         RefreshDgvClientList()
 
@@ -89,7 +92,7 @@ Public Class FrmClientsPayments
         '| * Llamamos a la subrutina Fun_Only_Letters() y Sub_Only_Numbers () según sea el caso y le 
         '|   pasamos las variables como parámetros.
 
-        Select Case CmbFilter.SelectedIndex  'strFilter
+        Select Case CmbFilter.SelectedIndex
             Case 1, 2 '"NAME" "LASTNAME"
                 Dim strAllowKey As String = " "
                 Dim strLockKey As String = "ºª"
@@ -118,7 +121,7 @@ Public Class FrmClientsPayments
     ''
     Private Sub RbActive_CheckedChanged(sender As Object, e As EventArgs) Handles RbActive.CheckedChanged
         '
-        strState = If(RbActive.Checked, "ACTIVO", "INACTIVO")
+        strState = If(RbActive.Checked, CustomerStates.Active, CustomerStates.Inactive)
 
         If _isCleaning Then Exit Sub
 
@@ -307,23 +310,104 @@ Public Class FrmClientsPayments
             NavigateToForm.OpenFrmCollectMembership(selectedPayment, AddressOf RefreshPaymentHistory)
         End If
 
+        'SOLO PARA PROBAR EL FUNCIONAMIENTO
+        BtnCollectMonth.Enabled = False
+
     End Sub
 
     Private Sub BtnNewPayment_Click(sender As Object, e As EventArgs) Handles BtnNewPayment.Click
+        ' 1. Verificamos que haya un cliente seleccionado
+        ' 1. Defensa silenciosa: Si por un error místico el objeto es Nothing, salimos sin ruido.
+        If _selectedClient Is Nothing Then Exit Sub
 
-        '' Buscamos si el formulario de pagos ya está abierto
-        'Dim frmPago = FrmMdiMain.MdiChildren.OfType(Of FrmPagoMensual)().FirstOrDefault()
+        ' 2. Verificación de Ventana Abierta (Prioridad: No abrir duplicados)
+        Dim frmOpen = FrmMdiMain.MdiChildren.OfType(Of FrmCollectMembership)().FirstOrDefault()
 
-        'If frmPago Is Nothing Then
-        '    frmPago = New FrmPagoMensual()
-        '    frmPago.MdiParent = FrmMdiMain
-        '    ' Aquí podrías pasarle el ID del cliente actual si quieres que cargue directo
-        '    ' frmPago.PrepareNewPayment(strIdClient) 
-        '    frmPago.Show()
-        'Else
-        '    frmPago.BringToFront()
-        '    frmPago.Activate()
-        'End If
+        If frmOpen IsNot Nothing Then
+            frmOpen.BringToFront()
+            frmOpen.Activate()
+            Return
+        End If
+
+        ' 3. Comprobamos deudas pendientes usando nuestra propiedad sincronizada
+        If _selectedClient.HasDebtCustomer Then
+            ' 3. Preparamos el mensaje
+            MessageBox.Show(PendingDebtWarning("Antes de cobrar una nueva mensualidad"),
+                            "Acción denegada", MessageBoxButtons.OK, MessageBoxIcon.Stop)
+            Return
+        End If
+
+        ' 1. Consultar la tarifa actual del cliente
+        ' Asegúrate de que _selectedClient tenga poblada la propiedad GroupMembers si es Grupal
+        Dim rate = _clientManager.GetApplicableRate(_selectedClient)
+
+        If Not rate.Exists Then
+            MessageBox.Show("No se encontró una TARIFA válida en la BBDD.",
+                            "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return
+        End If
+
+        ' 2. Calcular Fecha (Día 1 del mes siguiente o Hoy)
+        Dim fechaPropuesta As Date
+        Dim metodo = _selectedClient.PaymentMethod.ToUpper()
+
+        If metodo.Contains(PaymentMethods.Daily) Then
+            fechaPropuesta = Date.Today
+        Else
+            Dim proximoMes = Date.Today.AddMonths(1)
+            fechaPropuesta = New Date(proximoMes.Year, proximoMes.Month, 1)
+        End If
+
+        ' Determinamos el precio final antes de armar el DTO
+        Dim precioFinal As Decimal = rate.Price
+
+        ' Si el método es GRUPAL y tiene un grupo válido, calculamos el total multiplicando por los integrantes
+        If metodo.Contains(PaymentMethods.Grupal) AndAlso _selectedClient.IdGroup.HasValue Then
+            ' Reutilizamos nuestra nueva función para saber cuántos son
+            Dim miembros As Integer = _clientManager.GetNumberMembers(_selectedClient.IdGroup.Value)
+
+            ' Si la función devolvió integrantes (ej: 3), multiplicamos el precio base (45 * 3 = 135)
+            If miembros > 0 Then
+                precioFinal = rate.Price * miembros
+            End If
+        End If
+
+        ' 2. CREAMOS EL DTO CORRECTO SEGÚN EL CASO
+        ' Declaramos la interfaz común para que sirva para ambos tipos
+        Dim newPayment As IPaymentCalculable
+
+        If metodo.Contains(PaymentMethods.Grupal) AndAlso _selectedClient.IdGroup.HasValue Then
+
+            ' SI ES GRUPAL: Instanciamos el DTO de grupos familiares
+            newPayment = New GroupPaymentDTO With
+                {
+                    .IdGrp = _selectedClient.IdGroup.Value,
+                    .GroupName = _selectedClient.GroupName,
+                    .GroupMembers = _clientManager.GetGroupMembersNames(_selectedClient.IdGroup.Value),'CAPTURAMOS LOS INTEGRANTES
+                    .MtdPgs = metodo,
+                    .FdiPgs = fechaPropuesta,
+                    .PrcPgs = precioFinal,
+                    .DscPgs = rate.Discount
+                }
+        Else
+            ' SI ES INDIVIDUAL (Mensual o Diario): Instanciamos el DTO individual
+            newPayment = New IndividualPaymentDTO With
+                {
+                    .IdCli = _selectedClient.IdCli,
+                    .FirstName = _selectedClient.FirstName,
+                    .LastName = _selectedClient.LastName,
+                    .Age = _selectedClient.Age,
+                    .MtdPgs = metodo,
+                    .FdiPgs = fechaPropuesta,
+                    .PrcPgs = precioFinal,
+                    .DscPgs = rate.Discount
+                }
+        End If
+
+        ' 4. Abrir Formulario
+        NavigateToForm.OpenFrmCollectMembership(newPayment,
+                                                AddressOf RefreshPaymentHistory,
+                                                TransactionMode.NewPayment)
 
     End Sub
 
@@ -374,11 +458,9 @@ Public Class FrmClientsPayments
         TxtSearch.ForeColor = If(listCounter.Count = 0, Color.Red, Color.MediumBlue)
         LblResult.ForeColor = If(listCounter.Count = 0, Color.Red, Color.Gray)
 
-        If listCounter.Count = 1 Then
-            LblResult.Text = $"{listCounter.Count} - Registro que coincide con la búsqueda."
-        Else
-            LblResult.Text = $"{listCounter.Count} - Registros que coinciden con la búsqueda."
-        End If
+        Dim textResult As String = If(listCounter.Count = 1,
+            AppTexts.SearchSingleResult, AppTexts.SearchMultipleResults)
+        LblResult.Text = $"{listCounter.Count} - {textResult}"
 
         DgvClientList.AutoGenerateColumns = False
         DgvClientList.DataSource = Nothing
@@ -443,6 +525,10 @@ Public Class FrmClientsPayments
 
         ' 4. ** LA CLAVE **: Guardamos el historial en nuestra nueva variable global
         _historyList = _paymentManager.GetPaymentHistory(_selectedClient.IdCli, _selectedClient.IdGroup)
+        ' 2. ¡OJO AQUÍ!: Actualizamos la propiedad del objeto que el botón va a revisar
+        ' Si no ponemos esta línea, HasDebtCustomer seguirá siendo False por defecto
+        _selectedClient.HasDebtCustomer = _historyList.Any(Function(p) p.HasDebtCustomer)
+
         '  Cargamos el grid
         DgvPaymentList.DataSource = _historyList
         DgvPaymentList.CurrentCell = Nothing

@@ -1,11 +1,13 @@
 ﻿Namespace Interfaces
-
-    ' Define el contrato para cualquier entidad que pueda ser
-    ' utilizada en cálculos financieros de pagos.
-    '
-    ' Esta interfaz permite aplicar lógica de cálculo genérica
-    ' (por ejemplo, prorrateo mensual) sin conocer el tipo concreto
-    ' del objeto (individual, grupal, etc.).
+    ''' <summary>
+    ''' Define el contrato para cualquier entidad que pueda ser
+    ''' utilizada en cálculos financieros de pagos.
+    ''' </summary>
+    ''' <remarks>
+    ''' Esta interfaz permite aplicar lógica de cálculo genérica
+    ''' (por ejemplo, prorrateo mensual) sin conocer el tipo
+    ''' concreto del objeto (individual, grupal, etc.).
+    ''' </remarks>
     Public Interface IPaymentCalculable
 
         ' Mostrar el nombre completo y la edad del cliente o el nombre del grupo familiar
@@ -44,7 +46,6 @@
         ' Método para crear una copia exacta del objeto
         Function CloneInterface() As IPaymentCalculable
 
-        ''
-        ''
+
     End Interface
 End Namespace

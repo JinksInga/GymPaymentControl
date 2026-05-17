@@ -11,7 +11,7 @@ Namespace Utils
             item.Total = item.PrcPgs - item.DscPgs
 
             ' 2. Aplicamos lógica según el método
-            If item.MtdPgs = "MENSUAL" OrElse item.MtdPgs = "GRUPAL" Then
+            If item.MtdPgs = PaymentMethods.Monthly OrElse item.MtdPgs = PaymentMethods.Grupal Then
                 ' Lógica de Prorrateo
                 Dim daysInMonth = DateTime.DaysInMonth(item.FdiPgs.Year, item.FdiPgs.Month)
                 item.DaysOfMonth = (daysInMonth - item.FdiPgs.Day) + 1

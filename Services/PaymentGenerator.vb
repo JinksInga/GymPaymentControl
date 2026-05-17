@@ -1,4 +1,6 @@
 ﻿Imports GymPaymentControl.Data
+Imports GymPaymentControl.FrmCollectMembership
+Imports GymPaymentControl.Models
 Imports GymPaymentControl.Utils
 Imports MySql.Data.MySqlClient
 
@@ -18,6 +20,9 @@ Namespace Services
         ' Al heredar, obtenemos el motor de conexión.
         Inherits BaseRepository
 
+        ' Declaramos el Manager de Pagos para poder usar el método maestro
+        Private ReadOnly _paymentManager As New PaymentManager()
+
         ''' <summary>
         ''' Genera los pagos correspondientes al mes actual para:
         ''' - Clientes individuales activos con pago mensual
@@ -26,64 +31,50 @@ Namespace Services
         ''' Todo el proceso se ejecuta dentro de una transacción.
         ''' </summary>
         Public Function GenerateNewMonthPayments() As Integer
-            ' <param name="idUser">Usuario que ejecuta el proceso (auditoría)</param>
-
-            Dim filasInsertadas As Integer '= 0
-
-            ' Primer día del mes actual (clave para evitar duplicados)
+            Dim filasInsertadas As Integer = 0
             Dim firstDayOfMonth As New DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)
 
             Using connection = GetConnection()
-
                 connection.Open()
-
-                ' Iniciamos transacción para asegurar consistencia
                 Using transaction As MySqlTransaction = connection.BeginTransaction()
-
                     Try
-                        ' ==========================================================
-                        ' PAGOS INDIVIDUALES
-                        ' ==========================================================
-                        ' Clientes Activos, Mensuales y que no están en un grupo
-                        Dim sqlIndividual As String = "SELECT id_cli, fdn_cli FROM clientes
-                                                    WHERE std_cli = 'ACTIVO'
-                                                    AND mpg_cli = 'MENSUAL'
-                                                    AND (id_grp IS NULL OR id_grp = 0)"
-
+                        ' =====================
+                        ' 1. PAGOS INDIVIDUALES
+                        ' =====================
+                        Dim sqlIndividual As String = "SELECT id_cli, fdn_cli FROM clientes WHERE std_cli = 'ACTIVO' AND mpg_cli = 'MENSUAL' AND (id_grp IS NULL OR id_grp = 0)"
                         Dim dtIndividual As DataTable = GetDataTable(connection, transaction, sqlIndividual)
 
                         For Each row As DataRow In dtIndividual.Rows
-
                             Dim idCli As Integer = Convert.ToInt32(row("id_cli"))
 
-                            ' Evitamos crear pagos duplicados para el mismo mes
                             If Not PaymentExists(connection, transaction, firstDayOfMonth, idCli:=idCli) Then
-
-                                ' Calculamos la edad del cliente
                                 Dim ageClient As Integer = CalculateClientAge(Convert.ToDateTime(row("fdn_cli")))
-
-                                ' Obtenemos la tarifa correspondiente al cliente
                                 Dim individualRate = GetIndividualRate(connection, transaction, ageClient)
 
                                 If individualRate IsNot Nothing Then
-                                    ' Pasamos los valores tal cual están en la tabla.
-                                    InsertPaymentRecord(connection, transaction, firstDayOfMonth,
-                                                         Convert.ToDecimal(individualRate("prcio_trfa")),
-                                                         Convert.ToDecimal(individualRate("dscto_trfa")),
-                                                         idCli:=idCli, mtdPgs:="MENSUAL")
+                                    ' CREAMOS EL DTO AL VUELO PARA EL MAESTRO
+                                    Dim paymentDto As New IndividualPaymentDTO With {
+                                .IdCli = idCli,
+                                .FdiPgs = firstDayOfMonth,
+                                .FdpPgs = Nothing, ' Aún no está pagado, es una deuda generada
+                                .MtdPgs = PaymentMethods.Monthly,
+                                .PrcPgs = Convert.ToDecimal(individualRate("prcio_trfa")),
+                                .DscPgs = Convert.ToDecimal(individualRate("dscto_trfa"))
+                            }
 
-                                    ' SUMAMOS SOLO SI SE INSERTÓ EL REGISTRO
+                                    ' LLAMADA AL MÉTODO MAESTRO (Pasando la conexión y transacción masiva)
+                                    ' Pasamos 0 o Nothing en idUser si el sistema automático no requiere un usuario físico,
+                                    ' o puedes pasar el ID del sistema/usuario actual. Como forma de pago pasamos cadena vacía o "PENDIENTE".
+                                    _paymentManager.SavePaymentTransaction(paymentDto, TransactionMode.NewPayment,
+                                                                           UserSession.IdUser, Nothing, connection, transaction)
                                     filasInsertadas += 1
-
                                 End If
                             End If
                         Next
 
-                        ' ==========================================================
-                        ' PAGOS GRUPALES
-                        ' ==========================================================
-
-                        ' Obtenemos los grupos familiares existentes
+                        ' =================
+                        ' 2. PAGOS GRUPALES
+                        ' =================
                         Dim sqlFamilyGroup As String = "SELECT id_grp, num_intgrntes_grp FROM grp_familiar"
                         Dim dtFamilyGroup As DataTable = GetDataTable(connection, transaction, sqlFamilyGroup)
 
@@ -91,46 +82,39 @@ Namespace Services
                             Dim idGrp As Integer = Convert.ToInt32(row("id_grp"))
                             Dim numberMembers As Integer = Convert.ToInt32(row("num_intgrntes_grp"))
 
-                            ' Comprobar si ya existe el registro de este mes. Evitamos pagos duplicados del mismo mes.
                             If Not PaymentExists(connection, transaction, firstDayOfMonth, idGrp:=idGrp) Then
-
-                                ' Obtenemos la tarifa correspondiente al tamaño del grupo
                                 Dim groupRate = GetGroupRate(connection, transaction, numberMembers)
 
                                 If groupRate IsNot Nothing Then
+                                    ' CREAMOS EL DTO AL VUELO PARA EL GRUPO
+                                    Dim groupPaymentDto As New GroupPaymentDTO With {
+                                .IdGrp = idGrp,
+                                .FdiPgs = firstDayOfMonth,
+                                .FdpPgs = Nothing, ' Es deuda automática
+                                .MtdPgs = PaymentMethods.Grupal,
+                                .PrcPgs = Convert.ToDecimal(groupRate("prcio_trfa")) * numberMembers,
+                                .DscPgs = Convert.ToDecimal(groupRate("dscto_trfa"))
+                            }
 
-                                    ' Pasamos los valores tal cual están en la tabla.
-                                    InsertPaymentRecord(connection, transaction, firstDayOfMonth,
-                                                        Convert.ToDecimal(groupRate("prcio_trfa")) * numberMembers,
-                                                        Convert.ToDecimal(groupRate("dscto_trfa")),
-                                                        idGrp:=idGrp, mtdPgs:="GRUPAL")
-
-                                    ' SUMAMOS AL MISMO CONTADOR PARA TENER EL TOTAL GLOBAL
+                                    ' LLAMADA AL MÉTODO MAESTRO
+                                    _paymentManager.SavePaymentTransaction(groupPaymentDto, TransactionMode.NewPayment,
+                                                                           UserSession.IdUser, Nothing, connection, transaction)
                                     filasInsertadas += 1
-
                                 End If
                             End If
                         Next
 
-                        ' Si todo salió bien, confirmamos la transacción
                         transaction.Commit()
-
-                        Return filasInsertadas ' Devolvemos la suma de ambos bucles
+                        Return filasInsertadas
 
                     Catch ex As Exception
-                        ' Ante cualquier error, deshacemos todos los cambios
                         transaction.Rollback()
                         Throw
                     End Try
-
                 End Using
             End Using
-
         End Function
 
-        ' ==========================================================
-        ' FUNCIONES DE APOYO
-        ' ==========================================================
 
         ''' <summary>
         ''' Verifica si ya existe un pago para un cliente o grupo en una fecha determinada.
@@ -154,6 +138,7 @@ Namespace Services
             End Using
 
         End Function
+
 
         ''' <summary>
         ''' Obtiene la tarifa individual según la edad del cliente.
@@ -184,6 +169,7 @@ Namespace Services
 
         End Function
 
+
         ''' <summary>
         ''' Obtiene la tarifa grupal según el número de integrantes.
         ''' </summary>
@@ -199,36 +185,6 @@ Namespace Services
 
         End Function
 
-        ''' <summary>
-        ''' Inserta un nuevo registro de pago en la base de datos.
-        ''' Soporta pagos individuales o grupales.
-        ''' </summary>
-        Private Sub InsertPaymentRecord(connection As MySqlConnection, transaction As MySqlTransaction,
-                                        dateTime As DateTime,
-                                        price As Decimal, discount As Decimal,
-                                        Optional idCli As Integer? = Nothing,
-                                        Optional idGrp As Integer? = Nothing,
-                                        Optional mtdPgs As String = "")
-
-            Dim sqlQuery As String = "INSERT INTO pagos (fdi_pgs, frm_pgs, mtd_pgs, prc_pgs, dsc_pgs, id_cli, id_grp, id_user)
-                                      VALUES (@fdi, @forma, @metodo, @prc, @dsc, @idCli, @idGrp, @idUser)"
-
-            Using command As New MySqlCommand(sqlQuery, connection, transaction)
-
-                command.Parameters.AddWithValue("@fdi", dateTime.ToString("yyyy-MM-dd"))
-                command.Parameters.AddWithValue("@forma", DBNull.Value)
-                command.Parameters.AddWithValue("@metodo", mtdPgs)
-                command.Parameters.AddWithValue("@prc", price)
-                command.Parameters.AddWithValue("@dsc", discount)
-                command.Parameters.AddWithValue("@idUser", DBNull.Value)
-
-                ' Manejo correcto de nulos para las llaves foráneas
-                command.Parameters.AddWithValue("@idCli", If(idCli.HasValue, idCli.Value, DBNull.Value))
-                command.Parameters.AddWithValue("@idGrp", If(idGrp.HasValue, idGrp.Value, DBNull.Value))
-
-                command.ExecuteNonQuery()
-            End Using
-        End Sub
 
         ''' <summary>
         ''' Ejecuta una consulta SQL y devuelve los resultados en un DataTable.
@@ -248,6 +204,7 @@ Namespace Services
             Return dataTable
 
         End Function
+
 
         ''' <summary>
         ''' Ejecuta una consulta SQL con parámetros y devuelve un DataTable.
@@ -305,8 +262,7 @@ Namespace Services
             Return False ' Si llegamos aquí, es que todo está ya creado
 
         End Function
-        ''
-        ''
-        ''
+
+
     End Class
 End Namespace

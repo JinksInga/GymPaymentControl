@@ -3,6 +3,20 @@
     Public Module DialogMessages
 
         ''' <summary>
+        ''' Genera el mensaje de error cuando el usuario selecciona
+        ''' una fila incorrecta. Ejemplo: Fila Resumen.
+        ''' </summary>
+        Public Function SelectCorrectRow() As String
+
+            Return "   Para cobrar la cuota mensual a un cliente" & Environment.NewLine & Environment.NewLine &
+                   "   Selecciona un registro válido de la lista de morosos" & Environment.NewLine &
+                   "   _____________________________________________________" & Environment.NewLine & Environment.NewLine &
+                   "                     La fila RESUMEN no es un registro válido"
+
+        End Function
+
+
+        ''' <summary>
         ''' Genera el mensaje de confirmación mostrado después de registrar o actualizar un cliente.
         ''' </summary>
         Public Function ClientOperationSuccess(firstName As String,
@@ -22,13 +36,13 @@
         ''' <summary>
         ''' Mensaje mostrado cuando existen cambios pendientes sin guardar en el formulario.
         ''' </summary>
-        Public Function UnsavedChangesWarning(firstString As String, secondString As String) As String
+        Public Function UnsavedChangesWarning(titleText As String, bodyText As String) As String
 
             Return "                              ¡ ¡ ¡  ATENCIÓN  ! ! !" & Environment.NewLine &
-                   "   Hay cambios en el formulario que no han sido " & firstString & "." & Environment.NewLine &
+                   "   Hay cambios en el formulario que no han sido " & titleText & "." & Environment.NewLine &
                    "  ______________________________________________________________" & Environment.NewLine & Environment.NewLine &
                    "   ¿Deseas RECUPERAR la información?" & Environment.NewLine & Environment.NewLine &
-                   "                         Sí : Muestrame el formulario para " & secondString & "." & Environment.NewLine &
+                   "                         Sí : Muestrame el formulario para " & bodyText & "." & Environment.NewLine &
                    "                         No : Descartar los cambios y cerrar la ventana."
 
         End Function
@@ -37,13 +51,47 @@
         ''' <summary>
         ''' Mensaje mostrado para informar al usuario que el cliente tiene una deuda pendiente.
         ''' </summary>
-        Public Function PendingDebtWarning() As String
+        Public Function PendingDebtWarning(actionText As String) As String
 
             Return "                            CONTROL FINANCIERO" & Environment.NewLine &
                    "  ____________________________________________________________" & Environment.NewLine & Environment.NewLine &
                    "   El cliente tiene pagos pendientes :" & Environment.NewLine & Environment.NewLine &
-                   "   * Para hacer el cambio de método de pago primero tiene" & Environment.NewLine &
+                   "   * " & actionText & " primero tiene" & Environment.NewLine &
                    "     que saldar la deuda."
+
+        End Function
+
+
+        ''' <summary>
+        ''' Mensaje mostrado para informar que ya existen pagos antes de crear masivamente para evitar duplicados.
+        ''' </summary>
+        ''' <param name="newMonth">
+        ''' Mes que tiene pagos masivos registrados.
+        ''' </param>
+        Public Function DoNotDuplicatePayments(newMonth As String) As String
+
+            Return $"   Las membresías de {newMonth} ya están registradas en" & Environment.NewLine &
+                   "   la base de datos." & Environment.NewLine & Environment.NewLine &
+                   "   No es posible duplicar pagos existentes." & Environment.NewLine &
+                   "   ________________________________________________________" & Environment.NewLine & Environment.NewLine &
+                   "                                                          Operación cancelada."
+
+        End Function
+
+
+        ''' <summary>
+        ''' Mensaje mostrado para preguntar al usuario si está seguro de crear pagos masivos.
+        ''' </summary>
+        ''' <param name="newMonth">
+        ''' Mes al que corresponde los nuevos pagos masivos.
+        ''' </param>
+        Public Function AskBeforeRegisteringPayments(newMonth As String) As String
+
+            Return "                            ¡ ¡ ¡  ATENCIÓN  ! ! !" & Environment.NewLine & Environment.NewLine &
+                   "   Se crearán nuevos pagos de " & newMonth & " para todos los" & Environment.NewLine &
+                   "   clientes y grupos familiares en actividad." & Environment.NewLine &
+                   "   __________________________________________________________" & Environment.NewLine & Environment.NewLine &
+                   "      ¿Desea continuar con la creación masiva de registros?"
 
         End Function
 
@@ -92,8 +140,11 @@
 
 
         ''' <summary>
-        ''' Mensaje mostrado en el ErrorProvider cuando el grupo familiar esta lleno.
+        ''' Texto mostrado en el ErrorProvider cuando el grupo familiar esta lleno.
         ''' </summary>
+        ''' <param name="groupName">
+        ''' Variable que muestra el nombre del grupo familiar.
+        ''' </param>
         Public Function FullFamilyGroup(groupName As String) As String
 
             Return "El grupo " & groupName & " está lleno." & Environment.NewLine &

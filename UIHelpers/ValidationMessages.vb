@@ -6,6 +6,8 @@
 
         Public Const WrongAge As String = "Verifica la edad del cliente."
 
+        Public Const SelectRecord As String = "Selecciona una fila que contenga un PAGO."
+
     End Module
 
 End Namespace

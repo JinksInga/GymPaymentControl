@@ -1,5 +1,6 @@
-﻿Imports System.Transactions
-Imports GymPaymentControl.Data
+﻿Imports GymPaymentControl.Data
+Imports GymPaymentControl.FrmCollectMembership
+Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Utils
 Imports MySql.Data.MySqlClient
@@ -9,6 +10,9 @@ Namespace Services
 
         ' Al heredar, obtenemos el motor de conexión.
         Inherits BaseRepository
+
+        ' Declaramos el Manager de Pagos para poder usar el método maestro
+        Private ReadOnly _paymentManager As New PaymentManager()
 
         '|----------------------------------------------------------------------------------------------------
         '| CONSULTA PARA OBTENER EL NOMBRE DE LAS TARIFAS DIARIAS - CLASES SUELTAS
@@ -64,32 +68,65 @@ Namespace Services
                 Using transaction = connection.BeginTransaction()
 
                     Try
-                        '| * INSERT CLIENTE
+                        ' 1. INSERTAR EL CLIENTE (Obtenemos su ID recién generado)
                         data.IdNewClient = InsertClient(connection, transaction, data)
 
-                        '| * OBTENER TARIFA
+                        ' 2. OBTENER LA TARIFA (Según edad o número de integrantes)
                         Dim tariff = GetRate(connection, transaction, data)
 
-                        '| * INSERT PAGO
-                        InsertPayment(connection, transaction, data, tariff)
+                        ' 3. PREPARAR EL DTO DE PAGO CORRECTO SEGÚN EL TIPO DE CLIENTE
+                        ' Declaramos la interfaz común para que sirva para ambos casos
+                        Dim paymentDto As IPaymentCalculable
 
-                        '| * UPDATE GRUPO (solo si aplica)
+                        'Dim precioFinal As Decimal = If(data.IsGroup, tariff.Price * data.GroupMembers, tariff.Price)
+
+                        If data.IsGroup Then
+                            ' Si es grupal, usamos el DTO de grupos familiares
+                            paymentDto = New GroupPaymentDTO With
+                                {
+                                .FdiPgs = DateTime.Today,
+                                .MtdPgs = data.PaymentMethod,
+                                .PrcPgs = tariff.Price * data.GroupMembers,
+                                .DscPgs = tariff.Discount,
+                                .IdGrp = data.IdGroup.Value
+                                }
+                        Else
+                            ' Si es individual, usamos el DTO individual vinculando el ID del nuevo cliente
+                            paymentDto = New IndividualPaymentDTO With
+                                {
+                                .FdiPgs = DateTime.Today,
+                                .MtdPgs = data.PaymentMethod,
+                                .PrcPgs = tariff.Price,
+                                .DscPgs = tariff.Discount,
+                                .IdCli = data.IdNewClient
+                                }
+                        End If
+
+                        ' 4. LLAMADA AL MÉTODO MAESTRO UNIFICADO EN PAYMENTMANAGER
+                        ' Ahora le pasamos 'paymentDto' en lugar de 'data'
+                        Dim success = _paymentManager.SavePaymentTransaction(paymentDto, TransactionMode.NewPayment,
+                                                                             UserSession.IdUser, Nothing,
+                                                                             connection, transaction)
+
+                        If Not success Then Throw New Exception("Error al generar el pago del cliente.")
+
+                        ' 5. UPDATE GRUPO (Solo si aplica)
                         If data.IsGroup Then UpdateGroup(connection, transaction, data)
 
+                        ' SI TODO SALIÓ BIEN, GUARDAMOS CAMBIOS
                         transaction.Commit()
 
-                    Catch
-
+                    Catch ex As Exception
+                        ' SI ALGO FALLA (Cliente o Pago), NO SE GUARDA NADA
                         transaction.Rollback()
-                        Throw
+                        Throw ex
 
                     End Try
-
                 End Using
-
             End Using
 
         End Sub
+
 
         '|-------------------------------------------------
         '| FUNCIÓN PARA INSERTAR UN CLIENTE Y OBTENER SU ID
@@ -199,18 +236,18 @@ Namespace Services
         '| CONSULTAR LA TARIFA CORRESPONDIENTE AL CLIENTE O AL GRUPO FAMILIAR
         '|-------------------------------------------------------------------
         Private Function GetRate(connection As MySqlConnection,
-                         transaction As MySqlTransaction,
-                         data As ClientPaymentDTO) As RateResult
+                                 transaction As MySqlTransaction,
+                                 data As ClientPaymentDTO) As RateResult
 
             Dim result As New RateResult With {.Exists = False, .Price = 0, .Discount = 0}
             Dim sqlQuery As String ' = ""
 
             ' 1. Determinar la consulta principal
             Select Case data.PaymentMethod
-                Case "MENSUAL"
+                Case PaymentMethods.Monthly
                     sqlQuery = "SELECT prcio_trfa, dscto_trfa FROM trfa_dscto WHERE emin_trfa <= @val AND emax_trfa >= @val LIMIT 1"
 
-                Case "GRUPAL"
+                Case PaymentMethods.Grupal
                     sqlQuery = "SELECT prcio_trfa, dscto_trfa FROM trfa_dscto WHERE nperson_trfa = @val LIMIT 1"
 
                 Case Else 'DIARIO
@@ -221,10 +258,10 @@ Namespace Services
             ' 2. Ejecutar consulta principal
             Using command As New MySqlCommand(sqlQuery, connection, transaction)
 
-                If data.PaymentMethod = "MENSUAL" Then
+                If data.PaymentMethod = PaymentMethods.Monthly Then
                     command.Parameters.AddWithValue("@val", data.Age)
 
-                ElseIf data.PaymentMethod = "GRUPAL" Then
+                ElseIf data.PaymentMethod = PaymentMethods.Grupal Then
                     command.Parameters.AddWithValue("@val", data.GroupMembers)
 
                 Else
@@ -251,7 +288,7 @@ Namespace Services
             Return result
         End Function
 
-        ' Sub-función auxiliar para no repetir código de lectura
+        ' Función auxiliar para no repetir código de lectura
         Private Sub FillResultFromReader(command As MySqlCommand, ByRef result As RateResult)
 
             Using reader = command.ExecuteReader()
@@ -266,63 +303,37 @@ Namespace Services
 
         End Sub
 
-        '|----------------------------------------------
-        '| INSERTAR PAGO DEL CLIENTE O AL GRUPO FAMILIAR - GEMINI
-        '|----------------------------------------------
-        Private Sub InsertPayment(connection As MySqlConnection,
-                              transaction As MySqlTransaction,
-                              data As ClientPaymentDTO,
-                              tarifa As RateResult)
+        ''' <summary>
+        ''' Consulta la tabla de tarifas basándose en el perfil del cliente (Edad, Método, Integrantes)
+        ''' </summary>
+        Public Function GetApplicableRate(data As ClientPaymentDTO) As RateResult
 
-            ' 1. Si es GRUPAL, verificamos si ya existe una deuda para este grupo en el mes actual
-            If data.IsGroup Then
+            Try
+                Using connection = GetConnection()
 
-                Dim sqlCheck As String = "SELECT COUNT(*) FROM pagos WHERE id_grp = @idGrp
-                                        AND MONTH(fdi_pgs) = MONTH(CURDATE()) AND YEAR(fdi_pgs) = YEAR(CURDATE())"
+                    connection.Open()
 
-                Using cmdCheck As New MySqlCommand(sqlCheck, connection, transaction)
+                    ' Si es un grupo y no sabemos cuántos son, llamamos a nuestra nueva función
+                    If data.PaymentMethod = PaymentMethods.Grupal AndAlso data.GroupMembers <= 0 Then
 
-                    cmdCheck.Parameters.AddWithValue("@idGrp", data.IdGroup.Value)
-                    Dim exists As Integer = Convert.ToInt32(cmdCheck.ExecuteScalar())
+                        If data.IdGroup.HasValue AndAlso data.IdGroup.Value > 0 Then
+                            data.GroupMembers = GetNumberMembers(data.IdGroup.Value)
+                        End If
 
-                    ' Si ya existe el pago del grupo para este mes, salimos de la función sin insertar nada
-                    If exists > 0 Then Exit Sub
+                    End If
+
+                    ' Como es una consulta SELECT simple, no necesitamos Transaction
+                    ' Pasamos Nothing en el parámetro de la transacción
+                    Return GetRate(connection, Nothing, data)
 
                 End Using
 
-            End If
+            Catch ex As Exception
+                Throw New Exception("Error al obtener la tarifa desde la base de datos", ex)
+            End Try
 
-            ' 2. Si llegamos aquí, es porque es un cliente individual O es el primer integrante del grupo
-            Dim sqlQuery As String = "INSERT INTO pagos(fdi_pgs, mtd_pgs, prc_pgs, dsc_pgs, id_cli, id_grp, id_user)
-                                    VALUES(@fdi, @mtd, @prc, @dsc, @idcli, @idgrp, @iduser)"
+        End Function
 
-            Using command As New MySqlCommand(sqlQuery, connection, transaction)
-
-                ' Cálculo del precio (Si es grupo, multiplicamos)
-                Dim finalPrice As Decimal = tarifa.Price
-                If data.IsGroup Then
-                    finalPrice = tarifa.Price * data.GroupMembers
-                End If
-
-                command.Parameters.Add("@fdi", MySqlDbType.Date).Value = DateTime.Today
-                command.Parameters.Add("@mtd", MySqlDbType.VarChar).Value = data.PaymentMethod
-                command.Parameters.Add("@prc", MySqlDbType.Decimal).Value = finalPrice
-                command.Parameters.Add("@dsc", MySqlDbType.Decimal).Value = tarifa.Discount
-
-                ' Asignación de IDs
-                If data.IsGroup Then
-                    command.Parameters.Add("@idcli", MySqlDbType.Int16).Value = DBNull.Value
-                    command.Parameters.Add("@idgrp", MySqlDbType.Int16).Value = data.IdGroup.Value
-                Else
-                    command.Parameters.Add("@idcli", MySqlDbType.Int16).Value = data.IdNewClient
-                    command.Parameters.Add("@idgrp", MySqlDbType.Int16).Value = DBNull.Value
-                End If
-
-                command.Parameters.Add("@iduser", MySqlDbType.Int16).Value = UserSession.IdUser
-
-                command.ExecuteNonQuery()
-            End Using
-        End Sub
 
         '|------------------------------------------------------------------------------------
         '| INSERTAR PAGO DEL CLIENTE O AL GRUPO FAMILIAR
@@ -453,8 +464,65 @@ Namespace Services
             End Try
 
         End Function
-        ''
-        ''
-        ''
+
+
+        Public Function GetNumberMembers(idGroup As Integer) As Integer
+
+            Dim count As Integer = 0
+            Dim sql As String = "SELECT num_intgrntes_grp FROM grp_familiar WHERE id_grp = @idGrp"
+
+            Try
+                Using connection = GetConnection()
+
+                    Using command As New MySqlCommand(sql, connection)
+
+                        command.Parameters.AddWithValue("@idGrp", idGroup)
+                        connection.Open()
+
+                        Dim scalarResult As Object = command.ExecuteScalar()
+
+                        If scalarResult IsNot Nothing AndAlso Not IsDBNull(scalarResult) Then
+                            count = Convert.ToInt32(scalarResult)
+                        End If
+
+                    End Using
+                End Using
+
+            Catch ex As Exception
+                ' Puedes manejar el error o loguearlo según tu sistema
+                Throw New Exception("Error al obtener el número de integrantes del grupo", ex)
+            End Try
+
+            Return count
+
+        End Function
+
+
+        Public Function GetGroupMembersNames(idGroup As Integer) As String
+
+            Dim nombres As String = ""
+            Dim sql As String = "SELECT GROUP_CONCAT(nom_cli SEPARATOR ', ') FROM clientes WHERE id_grp = @idGrp"
+
+            Using connection = GetConnection()
+
+                Using command As New MySqlCommand(sql, connection)
+
+                    command.Parameters.AddWithValue("@idGrp", idGroup)
+                    connection.Open()
+
+                    Dim result = command.ExecuteScalar()
+
+                    If result IsNot Nothing AndAlso Not IsDBNull(result) Then
+                        nombres = result.ToString()
+                    End If
+
+                End Using
+            End Using
+
+            Return nombres
+
+        End Function
+
+
     End Class
 End Namespace

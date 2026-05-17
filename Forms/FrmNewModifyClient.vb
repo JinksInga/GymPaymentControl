@@ -215,7 +215,7 @@ Public Class FrmNewModifyClient
             DgvListGroupsDailyPayment.Enabled = True
 
             ' 2. Cargamos datos con nuestra Función Camaleón
-            ConfigureGridColumns("DIARIO")
+            ConfigureGridColumns(PaymentMethods.Daily)
             DgvListGroupsDailyPayment.DataSource = _clientManager.GetDailyPrice()
 
             ' Si estamos en modo edición y tenemos la "Foto" original
@@ -258,7 +258,8 @@ Public Class FrmNewModifyClient
             ' 2. Verificamos si estamos en edición y si hay deuda
             If _originalDataCustomer IsNot Nothing AndAlso _originalDataCustomer.HasDebtCustomer Then
                 ' 3. Preparamos el mensaje
-                MessageBox.Show(PendingDebtWarning, "Acción denegada", MessageBoxButtons.OK, MessageBoxIcon.Stop)
+                MessageBox.Show(PendingDebtWarning("Para hacer el cambio de método de pago"),
+                                "Acción denegada", MessageBoxButtons.OK, MessageBoxIcon.Stop)
 
                 ' 4. REVERSIÓN: Volvemos al método que tiene el "Clone"
                 RestorePaymentMethod()
@@ -275,7 +276,7 @@ Public Class FrmNewModifyClient
             DgvListGroupsDailyPayment.Enabled = True
 
             ' Cargar datos
-            ConfigureGridColumns("GRUPAL")
+            ConfigureGridColumns(PaymentMethods.Grupal)
             DgvListGroupsDailyPayment.DataSource = _clientManager.GetNameGroupFamily()
             DgvListGroupsDailyPayment.CurrentCell = Nothing
 
@@ -334,7 +335,7 @@ Public Class FrmNewModifyClient
         If Not RbGroupPayment.Checked Then Exit Sub
 
         ' 1. Filtrar el Grid mientras el usuario escribe
-        ConfigureGridColumns("GRUPAL")
+        ConfigureGridColumns(PaymentMethods.Grupal)
         Dim searchText = TxtListGroupsDailyPayment.Text.Trim()
         DgvListGroupsDailyPayment.DataSource = _clientManager.SearchFamilyGroup(searchText)
 
@@ -621,7 +622,7 @@ Public Class FrmNewModifyClient
         _customerData.IdGroup = clientData.IdGroup
 
         ' 2. Estado (Activo/Inactivo)
-        If clientData.State = "ACTIVO" Then
+        If clientData.State = CustomerStates.Active Then
             RbActiveStatus.Checked = True
         Else
             RbInactiveState.Checked = True
@@ -629,9 +630,10 @@ Public Class FrmNewModifyClient
 
         ' 3. Método de Pago
         Select Case clientData.PaymentMethod
-            Case "MENSUAL" : RbMonthlyPayment.Checked = True
+            Case PaymentMethods.Monthly
+                RbMonthlyPayment.Checked = True
 
-            Case "GRUPAL"
+            Case PaymentMethods.Grupal
                 RbGroupPayment.Checked = True
                 TxtListGroupsDailyPayment.Text = clientData.GroupName
 
@@ -686,7 +688,7 @@ Public Class FrmNewModifyClient
                 .Email = TxtEmail.Text.Trim(),
                 .Address = TxtAddress.Text.Trim(),
                 .RegistrationDate = DtpRegistrationDate.Value,
-                .State = If(RbActiveStatus.Checked, "ACTIVO", "INACTIVO"),
+                .State = If(RbActiveStatus.Checked, CustomerStates.Active, CustomerStates.Inactive),
                 .IdGroup = _selectedGroupId ' Lo asignamos siempre, sea 0 o un ID real
             }
 
@@ -695,11 +697,11 @@ Public Class FrmNewModifyClient
 
         ' Lógica de Método de Pago (Unificada)
         If RbMonthlyPayment.Checked Then
-            data.PaymentMethod = "MENSUAL"
+            data.PaymentMethod = PaymentMethods.Monthly
             data.IsGroup = False
 
         ElseIf RbGroupPayment.Checked Then
-            data.PaymentMethod = "GRUPAL"
+            data.PaymentMethod = PaymentMethods.Grupal
             data.IsGroup = True
             data.GroupName = TxtListGroupsDailyPayment.Text.Trim()
             data.GroupMembers = _currentGroupMaxMembers
@@ -748,7 +750,7 @@ Public Class FrmNewModifyClient
 
         ' --- Estado (RadioButtons / Toggle) ---
         ' Asumiendo que _originalData.IsActive es un Booleano
-        Dim currentStatus As String = If(RbActiveStatus.Checked, "ACTIVO", "INACTIVO")
+        Dim currentStatus As String = If(RbActiveStatus.Checked, CustomerStates.Active, CustomerStates.Inactive)
         If currentStatus <> _originalDataCustomer.State Then Return True
 
         ' --- Método de Pago ---
@@ -772,7 +774,7 @@ Public Class FrmNewModifyClient
 
         ' Consultamos nuestro "Clone" para saber qué radio button marcar
         Select Case _originalDataCustomer.PaymentMethod
-            Case "MENSUAL"
+            Case PaymentMethods.Monthly
                 RbMonthlyPayment.Checked = True
 
             Case Else '"DIARIO"
@@ -803,10 +805,10 @@ Public Class FrmNewModifyClient
     Private Function GetCurrentPaymentMethod() As String
 
         If RbMonthlyPayment.Checked Then
-            Return "MENSUAL"
+            Return PaymentMethods.Monthly
 
         ElseIf RbGroupPayment.Checked Then
-            Return "GRUPAL"
+            Return PaymentMethods.Grupal
 
         ElseIf RbDailyPayment.Checked Then
             Return TxtListGroupsDailyPayment.Text.Trim()
@@ -830,14 +832,14 @@ Public Class FrmNewModifyClient
         ' Limpiamos cualquier vinculación previa
         DgvListGroupsDailyPayment.AutoGenerateColumns = False
 
-        If methodPay = "DIARIO" Then
+        If methodPay = PaymentMethods.Daily Then
             ' Configuración para Pagos diarios
             With DgvListGroupsDailyPayment
                 .Columns("colIdDailyGroup").DataPropertyName = "id_trfa"
                 .Columns("colNameDailyGroup").DataPropertyName = "tipo_trfa"
             End With
 
-        ElseIf methodPay = "GRUPAL" Then
+        ElseIf methodPay = PaymentMethods.Grupal Then
             ' Configuración para Grupos Familiares
             With DgvListGroupsDailyPayment
                 .Columns("colIdDailyGroup").DataPropertyName = "id_grp"
@@ -912,11 +914,7 @@ Public Class FrmNewModifyClient
         ErrorProvider.Clear()
 
         LblNumberMembers.ForeColor = Color.FromArgb(0, 64, 0) 'COLOR VERDE
-        If clearLabel Then
-            LblNumberMembers.Text = ""
-        Else
-            LblNumberMembers.Text = "Buscando grupo ..."
-        End If
+        LblNumberMembers.Text = If(clearLabel, "", AppTexts.SearchingGroup)
 
     End Sub
 
@@ -1006,8 +1004,8 @@ Public Class FrmNewModifyClient
         If Not ValidateCustomerAge(actionText, LblCustomerAge, DtpBirthdate) Then Return False
         If Not ValidateEmail(actionText, TxtEmail) Then Return False
         If Not ValidatePaymentMethod(actionText, RbDailyPayment, RbMonthlyPayment, RbGroupPayment) Then Return False
-        If Not ValidateRequiredSelection("DIARIO", actionText, TxtListGroupsDailyPayment, RbDailyPayment) Then Return False
-        If Not ValidateRequiredSelection("GRUPO FAMILIAR", actionText, TxtListGroupsDailyPayment, RbGroupPayment) Then Return False
+        If Not ValidateRequiredSelection(PaymentMethods.Daily, actionText, TxtListGroupsDailyPayment, RbDailyPayment) Then Return False
+        If Not ValidateRequiredSelection(PaymentMethods.FamilyGroup, actionText, TxtListGroupsDailyPayment, RbGroupPayment) Then Return False
         Return True
 
     End Function

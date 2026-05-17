@@ -2,9 +2,12 @@
 
 Namespace Models
 
-    ' DTO que representa un pago grupal (familia).
-    ' Se utiliza tanto para filas de detalle como para filas
-    ' de resumen dentro del DataGridView.
+    ''' <summary>
+    ''' DTO que representa un pago grupal (familia).
+    ''' </summary>
+    ''' <remarks>
+    ''' Se utiliza tanto para filas de detalle como para filas de resumen dentro del DataGridView.
+    ''' </remarks>
     Public Class GroupPaymentDTO
 
         ' Implementa las mismas interfaces que el DTO individual
@@ -13,9 +16,9 @@ Namespace Models
         Implements IPaymentSummary
         Implements IPaymentCalculable
 
-        ' ======================
+        ' ===============================================
         ' Creamos una copia superficial del objeto actual
-        ' ======================
+        ' ===============================================
         Public Function CloneInterface() As IPaymentCalculable Implements IPaymentCalculable.CloneInterface
             Return DirectCast(Me.MemberwiseClone(), GroupPaymentDTO)
         End Function
@@ -79,7 +82,7 @@ Namespace Models
                 Return Me.GroupMembers
             End Get
         End Property
-        ''
-        ''
+
+
     End Class
 End Namespace

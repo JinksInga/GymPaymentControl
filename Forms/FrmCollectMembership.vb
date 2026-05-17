@@ -2,7 +2,7 @@
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 Imports GymPaymentControl.UIHelpers
-Imports GymPaymentControl.Utils.PaymentCalculator
+Imports GymPaymentControl.Utils
 Imports MySql.Data.MySqlClient
 
 Public Class FrmCollectMembership
@@ -103,12 +103,18 @@ Public Class FrmCollectMembership
     ''
     ''
     Private Sub BtnPayMonth_Click(sender As Object, e As EventArgs) Handles BtnConfirmPayment.Click
-        '
+
+        ' paymentMethod (BONO, DIARIO, MENSUAL, GRUPO FAMILIAR)
+        Dim paymentMethod As String = CmbMtdPgs.Text
+        If CmbMtdPgs.Text = PaymentMethods.Daily Then paymentMethod = $"{PaymentMethods.Daily} {CInt(Val(TxtPrcPgs.Text))}"
+        If CmbMtdPgs.Text = PaymentMethods.FamilyGroup Then paymentMethod = PaymentMethods.Grupal
+
         ' 1. Sincronización final: Aseguramos que el clon tenga los valores de la UI
-        _selectedPayment.PrcPgs = ParseMoney(TxtPrcPgs.Text)
-        _selectedPayment.DscPgs = ParseMoney(TxtDscPgs.Text)
-        _selectedPayment.FdiPgs = DtpFdiPgs.Value
-        _selectedPayment.FdpPgs = DtpFdpPgs.Value ' <--- Respetamos tu DTP manual
+        _selectedPayment.PrcPgs = ParseMoney(TxtPrcPgs.Text) 'Precio
+        _selectedPayment.DscPgs = ParseMoney(TxtDscPgs.Text) 'Descuento
+        _selectedPayment.FdiPgs = DtpFdiPgs.Value ' Fecha de inicio de mes
+        _selectedPayment.FdpPgs = DtpFdpPgs.Value ' Fecha de pago
+        _selectedPayment.MtdPgs = paymentMethod ' Método de pago
 
         ' 2. Validación de existencia (Solo para nuevos pagos)
         If _currentMode = TransactionMode.NewPayment Then
@@ -136,13 +142,14 @@ Public Class FrmCollectMembership
         'PaymentCalculator.CalculateProratedPayment(_selectedPayment)
 
         ' 4. Guardar usando tu PaymentManager
-        Dim monthPaid = _paymentManager.SaveTransaction(_selectedPayment, _currentMode,
-                                                        UserSession.IdUser, CmbFrmPgs.Text)
+        'Dim monthPaid = _paymentManager.SaveTransaction(_selectedPayment, _currentMode,UserSession.IdUser, CmbFrmPgs.Text)
+        ' En BtnConfirmPayment
+        Dim monthPaid = _paymentManager.SavePaymentTransaction(_selectedPayment, _currentMode, UserSession.IdUser, CmbFrmPgs.Text)
 
         If monthPaid Then
             MessageBox.Show("Transacción realizada con éxito", "Pago realizado", MessageBoxButtons.OK, MessageBoxIcon.Information)
             ' Al cerrar con OK, el formulario padre refrescará la lista desde la BD
-            Me.DialogResult = DialogResult.OK
+            'Me.DialogResult = DialogResult.OK
             Me.Close()
         End If
 
@@ -167,8 +174,8 @@ Public Class FrmCollectMembership
 
         ' Si es el DTO de Grupo (deudores), priorizamos el nombre del grupo.
         If TypeOf _selectedPayment Is GroupPaymentDTO Then
-            Dim gName As String = DirectCast(_selectedPayment, GroupPaymentDTO).GroupName
-            LblDisplayName.Text = "GRUPO: " & If(Not String.IsNullOrEmpty(gName), gName, "FAMILIAR")
+            Dim grpName As String = DirectCast(_selectedPayment, GroupPaymentDTO).GroupName
+            LblDisplayName.Text = "GRUPO: " & If(Not String.IsNullOrEmpty(grpName), grpName, "FAMILIAR")
         Else
             ' Si es Individual, Mensual o Diario, nombre del cliente normal.
             LblDisplayName.Text = _selectedPayment.DisplayName
@@ -180,16 +187,16 @@ Public Class FrmCollectMembership
         TxtPrcPgs.Text = $"{_selectedPayment.PrcPgs} €"
         TxtDscPgs.Text = $"{_selectedPayment.DscPgs} €"
 
-        Dim strMtdPgs As String = _selectedPayment.MtdPgs
+        Dim paymentMethod As String = _selectedPayment.MtdPgs
 
         Select Case True
-            Case strMtdPgs.Contains("DIARIO")
-                CmbMtdPgs.Text = "DIARIO"
+            Case paymentMethod.Contains(PaymentMethods.Daily)
+                CmbMtdPgs.Text = PaymentMethods.Daily
                 TxtDetailMethod.Text = "CLASES SUELTAS : Pago por jornada individual."
                 TxtDetailMethod.ForeColor = Color.DarkOrange
 
-            Case strMtdPgs.Contains("MENSUAL")
-                CmbMtdPgs.Text = "MENSUAL"
+            Case paymentMethod.Contains(PaymentMethods.Monthly)
+                CmbMtdPgs.Text = PaymentMethods.Monthly
                 If payment.DscPgs = 0 Then
                     TxtDetailMethod.Text = "TARIFA INDIVIDUAL : Sin Descuento."
                 Else
@@ -197,8 +204,8 @@ Public Class FrmCollectMembership
                 End If
                 TxtDetailMethod.ForeColor = Color.RoyalBlue
 
-            Case strMtdPgs.Contains("GRUPAL")
-                CmbMtdPgs.Text = "GRUPO FAMILIAR"
+            Case paymentMethod.Contains(PaymentMethods.Grupal)
+                CmbMtdPgs.Text = PaymentMethods.FamilyGroup
 
                 ' Lógica de Nota Informativa vs Integrantes
                 If TypeOf _selectedPayment Is IndividualPaymentDTO Then

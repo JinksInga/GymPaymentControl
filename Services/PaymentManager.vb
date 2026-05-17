@@ -155,19 +155,19 @@ Namespace Services
 
             Dim listGroupPayment As New List(Of GroupPaymentDTO)
 
-            Dim sql As String = "SELECT GROUP_CONCAT(c.nom_cli SEPARATOR ', ') AS INTEGRANTES,
-                                g.id_grp, g.nom_grp,
-                                p.fdi_pgs, p.mtd_pgs, p.prc_pgs, p.dsc_pgs, p.id_pgs 
-                                FROM clientes c
-                                INNER JOIN grp_familiar g ON c.id_grp = g.id_grp
-                                INNER JOIN pagos p ON g.id_grp = p.id_grp
-                                WHERE p.fdp_pgs IS NULL
-                                GROUP BY p.id_pgs
-                                ORDER BY g.id_grp, p.fdi_pgs ASC"
+            Dim sqlQuery As String = "SELECT GROUP_CONCAT(c.nom_cli SEPARATOR ', ') AS INTEGRANTES,
+                                        g.id_grp, g.nom_grp,
+                                        p.fdi_pgs, p.mtd_pgs, p.prc_pgs, p.dsc_pgs, p.id_pgs 
+                                        FROM clientes c
+                                        INNER JOIN grp_familiar g ON c.id_grp = g.id_grp
+                                        INNER JOIN pagos p ON g.id_grp = p.id_grp
+                                        WHERE (p.frm_pgs IS NULL OR p.frm_pgs = '')
+                                        GROUP BY p.id_pgs
+                                        ORDER BY g.id_grp, p.fdi_pgs ASC"
 
             Using connection = GetConnection()
 
-                Using command As New MySqlCommand(sql, connection)
+                Using command As New MySqlCommand(sqlQuery, connection)
 
                     connection.Open()
 
@@ -237,62 +237,118 @@ Namespace Services
                     .TotalToPay = group.Sum(Function(x) x.TotalToPay)
                 }
         End Function
-        ''
-        ''
-        Public Function SaveTransaction(payment As IPaymentCalculable, mode As TransactionMode,
-                                        idUser As Integer, paymentMethod As String) As Boolean
-            Dim sqlQuery As String
 
-            If mode = TransactionMode.NewPayment Then
-                ' SQL de Inserción: Usamos los campos comunes
-                ' Nota: He añadido @idOwner para que sirva tanto para id_cli como para id_grp
-                sqlQuery = "INSERT INTO pagos (fdi_pgs, fdp_pgs, frm_pgs, prc_pgs, dsc_pgs, id_cli, id_grp, id_user)
-                            VALUES (@fdi, @fdp, @frm, @prc, @dsc, @idCli, @idGrp, @idUser)"
-            Else
-                ' SQL de Actualización para registros que ya existen
-                sqlQuery = "UPDATE pagos
-                            SET fdi_pgs=@fdi,
-                                fdp_pgs=@fdp,
-                                frm_pgs=@frm,
-                                prc_pgs=@prc,
-                                dsc_pgs=@dsc,
-                                id_user=@idUser
-                            WHERE id_pgs=@idPgs"
-            End If
 
-            Using connection = GetConnection()
+        ''' <summary>
+        ''' Punto único de inserción/actualización de pagos para evitar discrepancias.
+        ''' </summary>
+        ''' <remarks>
+        ''' Esta función soporta:
+        ''' - Inserción de nuevos pagos.
+        ''' - Actualización de pagos existentes.
+        ''' - Creación de menbresías masivas.
+        ''' - Uso independiente o dentro de transacciones externas.
+        '''
+        ''' Centralizar esta lógica evita inconsistencias entre
+        ''' distintos procesos de registro y cobro.
+        ''' </remarks>
+        Public Function SavePaymentTransaction(payment As IPaymentCalculable, mode As TransactionMode,
+                                               idUser As Integer, paymentMethod As String,
+                                               Optional externalConn As MySqlConnection = Nothing,
+                                               Optional externalTrans As MySqlTransaction = Nothing) As Boolean
 
-                Dim command As New MySqlCommand(sqlQuery, connection)
+            ' Gestionar conexión dinámica (si viene de una transacción externa como el alta de cliente)
+            Dim conn = If(externalConn, GetConnection())
+            Dim closeConn As Boolean = (externalConn Is Nothing)
 
-                ' Parámetros comunes de la Interfaz
-                command.Parameters.AddWithValue("@fdi", payment.FdiPgs)
-                command.Parameters.AddWithValue("@fdp", payment.FdpPgs)
-                command.Parameters.AddWithValue("@frm", paymentMethod)
-                command.Parameters.AddWithValue("@prc", payment.PrcPgs)
-                command.Parameters.AddWithValue("@dsc", payment.DscPgs)
-                command.Parameters.AddWithValue("@idUser", idUser)
+            Try
+                If conn.State <> ConnectionState.Open Then conn.Open()
 
-                If mode = TransactionMode.UpdatePayment Then
-                    command.Parameters.AddWithValue("@idPgs", payment.IdPgs)
-                Else
-                    ' --- LÓGICA PARA NUEVOS PAGOS (Detección de tipo) ---
-                    If TypeOf payment Is IndividualPaymentDTO Then
-                        command.Parameters.AddWithValue("@idCli", DirectCast(payment, IndividualPaymentDTO).IdCli)
-                        command.Parameters.AddWithValue("@idGrp", DBNull.Value) ' No es un grupo
-                    ElseIf TypeOf payment Is GroupPaymentDTO Then
-                        command.Parameters.AddWithValue("@idCli", DBNull.Value) ' No es un cliente individual
-                        command.Parameters.AddWithValue("@idGrp", DirectCast(payment, GroupPaymentDTO).IdGrp)
-                    End If
+                '| =================================================================
+                '| * CONTROL DE DUPLICADOS PARA GRUPOS (Solo aplica en NUEVOS PAGOS)
+                '| =================================================================
+                If mode = TransactionMode.NewPayment AndAlso TypeOf payment Is GroupPaymentDTO Then
+
+                    Dim groupPayment = DirectCast(payment, GroupPaymentDTO)
+
+                    ' Comprobamos si ya existe una deuda/pago para este ID de grupo en el mes y año de la fecha de inicio (FdiPgs)
+                    ' Usamos MONTH(@fdi) en lugar de CURDATE() para que también funcione correctamente en el generador masivo
+                    Dim sqlCheck As String = "SELECT COUNT(*) FROM pagos WHERE id_grp = @idGrp
+                                              AND MONTH(fdi_pgs) = MONTH(@fdi) AND YEAR(fdi_pgs) = YEAR(@fdi)"
+
+                    Using cmdCheck As New MySqlCommand(sqlCheck, conn, externalTrans)
+
+                        cmdCheck.Parameters.AddWithValue("@idGrp", groupPayment.IdGrp)
+                        cmdCheck.Parameters.AddWithValue("@fdi", groupPayment.FdiPgs)
+
+                        ' Si ya existe el pago del grupo para este periodo, salimos retornando True o False.
+                        ' Retornamos True para que el proceso llamador (bucle) piense que se gestionó
+                        ' correctamente y no lance un error.
+                        Dim exists As Integer = Convert.ToInt32(cmdCheck.ExecuteScalar())
+                        If exists > 0 Then Return True
+
+                    End Using
                 End If
 
-                connection.Open()
-                Return command.ExecuteNonQuery() > 0
+                '| =====================================
+                '| * LÓGICA DE INSERCIÓN / ACTUALIZACIÓN
+                '| =====================================
 
-            End Using
+                Dim sqlQuery As String
+
+                If mode = TransactionMode.NewPayment Then
+                    ' SQL COMPLETO
+                    sqlQuery = "INSERT INTO pagos (fdi_pgs, fdp_pgs, frm_pgs, mtd_pgs,
+                                                   prc_pgs, dsc_pgs, id_cli, id_grp, id_user)
+                                VALUES (@fdi, @fdp, @frm, @mtd, @prc, @dsc, @idCli, @idGrp, @idUser)"
+                Else
+                    ' UPDATE: fdp_pgs y mtd_pgs añadidos por si se corrigen en edición
+                    sqlQuery = "UPDATE pagos SET fdi_pgs=@fdi, fdp_pgs=@fdp, frm_pgs=@frm, mtd_pgs=@mtd,
+                                prc_pgs=@prc, dsc_pgs=@dsc, id_user=@idUser WHERE id_pgs=@idPgs"
+                End If
+
+                Using command As New MySqlCommand(sqlQuery, conn, externalTrans)
+                    ' Parámetros Comunes
+                    command.Parameters.AddWithValue("@fdi", payment.FdiPgs)
+                    command.Parameters.AddWithValue("@fdp", payment.FdpPgs)
+                    command.Parameters.AddWithValue("@frm", paymentMethod)
+                    command.Parameters.AddWithValue("@mtd", payment.MtdPgs)
+                    command.Parameters.AddWithValue("@prc", payment.PrcPgs)
+                    command.Parameters.AddWithValue("@dsc", payment.DscPgs)
+                    command.Parameters.AddWithValue("@idUser", idUser)
+
+                    If mode = TransactionMode.UpdatePayment Then
+                        command.Parameters.AddWithValue("@idPgs", payment.IdPgs)
+                    Else
+                        ' Lógica de IDs para nuevos registros
+                        Dim idCli As Object = DBNull.Value
+                        Dim idGrp As Object = DBNull.Value
+
+                        If TypeOf payment Is IndividualPaymentDTO Then
+                            idCli = DirectCast(payment, IndividualPaymentDTO).IdCli
+                        ElseIf TypeOf payment Is GroupPaymentDTO Then
+                            idGrp = DirectCast(payment, GroupPaymentDTO).IdGrp
+                        End If
+
+                        command.Parameters.AddWithValue("@idCli", idCli)
+                        command.Parameters.AddWithValue("@idGrp", idGrp)
+                    End If
+
+                    Return command.ExecuteNonQuery() > 0
+
+                End Using
+
+            Catch ex As Exception
+                Throw ex
+
+            Finally
+                If closeConn AndAlso conn IsNot Nothing Then conn.Dispose()
+
+            End Try
 
         End Function
-        ''
-        ''
+
+
         Public Function GetPaymentHistory(idClient As Integer, idGroup As Integer?) As List(Of IndividualPaymentDTO)
 
             Dim historyList As New List(Of IndividualPaymentDTO)
@@ -353,8 +409,7 @@ Namespace Services
             Return historyList
 
         End Function
-        ''
-        ''
-        ''
+
+
     End Class
 End Namespace
