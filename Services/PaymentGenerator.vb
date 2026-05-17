@@ -121,23 +121,70 @@ Namespace Services
         ''' (Normalmente el primer día del mes).
         ''' </summary>
         Public Function PaymentExists(connection As MySqlConnection, transaction As MySqlTransaction, dateTime As DateTime,
-                                       Optional idCli As Integer? = Nothing,
-                                       Optional idGrp As Integer? = Nothing) As Boolean
+                                      Optional idCli As Integer? = Nothing,
+                                      Optional idGrp As Integer? = Nothing,
+                                      Optional isDaily As Boolean = False) As Boolean ' 🌟 Añadimos este parámetro opcional
 
-            Dim sqlQuery As String = "SELECT COUNT(*) FROM pagos WHERE MONTH(fdi_pgs) = @month AND YEAR(fdi_pgs) = @year AND "
-            If idCli.HasValue Then sqlQuery &= "id_cli = @id" Else sqlQuery &= "id_grp = @id"
+            Dim sqlQuery As String ' = ""
 
+            ' 1. Decisión inteligente de la Query según el tipo de pago
+            If isDaily Then
+                ' 🔹 CASO DIARIO: Comparación directa y limpia ya que tu campo es de tipo DATE
+                sqlQuery = "SELECT COUNT(*) FROM pagos WHERE fdi_pgs = @fullDate AND "
+            Else
+                ' 🔸 CASO MENSUAL / GRUPAL: Tu filtro tradicional por mes y año
+                sqlQuery = "SELECT COUNT(*) FROM pagos WHERE MONTH(fdi_pgs) = @month AND YEAR(fdi_pgs) = @year AND "
+            End If
+
+            'If isDaily Then
+            '    ' 🔹 USAMOS UN ENFOQUE INFALIBLE: Forzamos el formato de fecha estándar YYYY-MM-DD
+            '    sqlQuery = "SELECT COUNT(*) FROM pagos WHERE DATE(fdi_pgs) = @fullDate AND "
+            'Else
+            '    sqlQuery = "SELECT COUNT(*) FROM pagos WHERE MONTH(fdi_pgs) = @month AND YEAR(fdi_pgs) = @year AND "
+            'End If
+
+            ' 2. Añadimos el filtro por Cliente o por Grupo
+            If idCli.HasValue Then
+                sqlQuery &= "id_cli = @id"
+            Else
+                sqlQuery &= "id_grp = @id"
+            End If
+
+            ' 3. Ejecución de la consulta y mapeo de parámetros
             Using command As New MySqlCommand(sqlQuery, connection, transaction)
 
-                command.Parameters.AddWithValue("@month", dateTime.Month)
-                command.Parameters.AddWithValue("@year", dateTime.Year)
+                If isDaily Then
+                    ' Parámetro para el día exacto (pasa la fecha completa)
+                    command.Parameters.AddWithValue("@fullDate", dateTime.Date)
+                Else
+                    ' Parámetros tradicionales de mes y año
+                    command.Parameters.AddWithValue("@month", dateTime.Month)
+                    command.Parameters.AddWithValue("@year", dateTime.Year)
+                End If
+
                 command.Parameters.AddWithValue("@id", If(idCli, idGrp))
 
                 Return Convert.ToInt32(command.ExecuteScalar()) > 0
-
             End Using
-
         End Function
+        'Public Function PaymentExists(connection As MySqlConnection, transaction As MySqlTransaction, dateTime As DateTime,
+        '                               Optional idCli As Integer? = Nothing,
+        '                               Optional idGrp As Integer? = Nothing) As Boolean
+
+        '    Dim sqlQuery As String = "SELECT COUNT(*) FROM pagos WHERE MONTH(fdi_pgs) = @month AND YEAR(fdi_pgs) = @year AND "
+        '    If idCli.HasValue Then sqlQuery &= "id_cli = @id" Else sqlQuery &= "id_grp = @id"
+
+        '    Using command As New MySqlCommand(sqlQuery, connection, transaction)
+
+        '        command.Parameters.AddWithValue("@month", dateTime.Month)
+        '        command.Parameters.AddWithValue("@year", dateTime.Year)
+        '        command.Parameters.AddWithValue("@id", If(idCli, idGrp))
+
+        '        Return Convert.ToInt32(command.ExecuteScalar()) > 0
+
+        '    End Using
+
+        'End Function
 
 
         ''' <summary>

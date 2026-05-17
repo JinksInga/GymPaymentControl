@@ -125,13 +125,36 @@ Public Class FrmCollectMembership
             Dim idGroup As Integer? = If(TypeOf _selectedPayment Is GroupPaymentDTO,
                 DirectCast(_selectedPayment, GroupPaymentDTO).IdGrp, CType(Nothing, Integer?))
 
+            'Using connection As New MySqlConnection(_paymentManager.ConnectionString)
+
+            '    connection.Open()
+
+            '    Dim generator As New PaymentGenerator()
+            '    If generator.PaymentExists(connection, Nothing, DtpFdiPgs.Value, idClient, idGroup) Then
+            '        MessageBox.Show("Ya existe un pago registrado para este periodo (Mes/Año).", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            '        Exit Sub
+            '    End If
+
+            'End Using
+            ' 1. Capturamos el método de pago del DTO actual
+            Dim metodoPago As String = _selectedPayment.MtdPgs.ToUpper()
+            Dim esDaily As Boolean = metodoPago.Contains(PaymentMethods.Daily)
+            Dim yaExistePago As Boolean '= False
+
             Using connection As New MySqlConnection(_paymentManager.ConnectionString)
-
                 connection.Open()
-
                 Dim generator As New PaymentGenerator()
-                If generator.PaymentExists(connection, Nothing, DtpFdiPgs.Value, idClient, idGroup) Then
-                    MessageBox.Show("Ya existe un pago registrado para este periodo (Mes/Año).", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+
+                ' 2. Consultamos si ya existe el pago en la Base de Datos
+                yaExistePago = generator.PaymentExists(connection, Nothing, DtpFdiPgs.Value, idClient, idGroup, esDaily)
+
+                ' 3. Si el generador dice que ya existe, preparamos el mensaje según el tipo de pago
+                If yaExistePago Then
+                    Dim mensajeError As String = If(esDaily,
+            $"Ya existe un pago diario registrado para este cliente el día {DtpFdiPgs.Value.ToShortDateString()}.",
+            "Ya existe un pago registrado para este periodo (Mes/Año).")
+
+                    MessageBox.Show(mensajeError, "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                     Exit Sub
                 End If
 

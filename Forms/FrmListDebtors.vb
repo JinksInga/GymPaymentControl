@@ -428,9 +428,6 @@ Public Class FrmListDebtors
     ''
     Private Sub BtnCollectMonth_Click(sender As Object, e As EventArgs) Handles BtnCollectMonth.Click
 
-        '|
-        '|
-        '|
         If RbPayIndividual.Checked Then
 
             Dim selectedPayment = TryCast(DgvIndividual.CurrentRow?.DataBoundItem, IndividualPaymentDTO)
@@ -450,7 +447,7 @@ Public Class FrmListDebtors
             Dim selectedPayment = TryCast(DgvFamilyGroup.CurrentRow?.DataBoundItem, GroupPaymentDTO)
 
             If selectedPayment IsNot Nothing AndAlso Not selectedPayment.IsSummaryRow Then
-                ' Aquí le pasamos la función que refresca los deudores individuales
+                ' Aquí le pasamos la función que refresca los deudores grupales
                 OpenFrmCollectMembership(selectedPayment, AddressOf RefreshDgvFamilyGroup)
             Else
                 MessageBox.Show(SelectCorrectRow, "Seleccionar registro",
