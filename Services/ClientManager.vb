@@ -1,4 +1,5 @@
-﻿Imports GymPaymentControl.Data
+﻿Imports GymPaymentControl.Constants
+Imports GymPaymentControl.Data
 Imports GymPaymentControl.FrmCollectMembership
 Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
@@ -231,6 +232,59 @@ Namespace Services
             End Using
 
         End Sub
+
+
+        '|-------------------------------------------------------------------
+        '| 
+        '|-------------------------------------------------------------------
+        Public Function DeleteClientPermanently(idCli As Integer) As Boolean
+
+            Dim sqlDeletePayments As String = "DELETE FROM pagos WHERE id_cli = @id"
+            Dim sqlDeleteClient As String = "DELETE FROM clientes WHERE id_cli = @id"
+
+            Try
+                Using connection As New MySqlConnection(_connectionString)
+                    connection.Open()
+
+                    Using transaction As MySqlTransaction = connection.BeginTransaction()
+                        Try
+                            ' 1. Eliminamos primero los pagos para evitar errores de clave foránea
+                            Using cmdPayments As New MySqlCommand(sqlDeletePayments, connection, transaction)
+                                cmdPayments.Parameters.AddWithValue("@id", idCli)
+                                cmdPayments.ExecuteNonQuery()
+                            End Using
+
+                            ' 2. Eliminamos la ficha del cliente
+                            Dim filasAfectadas As Integer = 0
+                            Using cmdClient As New MySqlCommand(sqlDeleteClient, connection, transaction)
+                                cmdClient.Parameters.AddWithValue("@id", idCli)
+                                filasAfectadas = cmdClient.ExecuteNonQuery()
+                            End Using
+
+                            ' Si el cliente existía y se eliminó, consolidamos la operación
+                            If filasAfectadas > 0 Then
+                                transaction.Commit()
+                                Return True
+                            Else
+                                transaction.Rollback()
+                                Return False
+                            End If
+
+                        Catch ex As Exception
+                            transaction.Rollback()
+                            Throw ex
+                        End Try
+
+                    End Using
+                End Using
+
+            Catch ex As Exception
+                MessageBox.Show($"Error al eliminar el cliente permanentemente: {ex.Message}")
+                Return False
+            End Try
+
+        End Function
+
 
         '|-------------------------------------------------------------------
         '| CONSULTAR LA TARIFA CORRESPONDIENTE AL CLIENTE O AL GRUPO FAMILIAR

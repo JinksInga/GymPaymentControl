@@ -1,6 +1,7 @@
-﻿Imports GymPaymentControl.Interfaces
+﻿Imports GymPaymentControl.Constants
+Imports GymPaymentControl.Interfaces
 
-Namespace Utils
+Namespace Services
     Public Module PaymentCalculator
 
         ''' <summary>

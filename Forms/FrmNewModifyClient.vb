@@ -1,4 +1,5 @@
-﻿Imports GymPaymentControl.Models
+﻿Imports GymPaymentControl.Constants
+Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 Imports GymPaymentControl.UIHelpers
 Imports GymPaymentControl.Utils
@@ -952,21 +953,21 @@ Public Class FrmNewModifyClient
     ''' También notifica al formulario principal para refrescar
     ''' la información y cierra la ventana actual.
     ''' </summary>
-    ''' <param name="idClient">
+    ''' <param name="customerCode">
     ''' Identificador del cliente procesado.
     ''' </param>
-    Private Sub ShowSuccessMessage(idClient As Integer)
+    Private Sub ShowSuccessMessage(customerCode As Integer)
 
         ' 1. Preparamos el texto del cuerpo (Guardado vs Actualizado)
-        Dim idFormatted As String = $"CLI - {idClient:000}"
+        Dim idFormatted As String = $"CLI - {customerCode:000}"
         Dim actionText As String = If(BtnSaveCustomerData.Enabled, "GUARDADOS", "ACTUALIZADOS")
 
         ' 2. Construimos el "Ticket" de confirmación (usando los datos que ya tenemos en los campos)
         MessageBox.Show(ClientOperationSuccess(TxtFirstName.Text, TxtLastName.Text, idFormatted, actionText),
                         "Operación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
-        ' 3. Notificamos al formulario que debe refrescarse, esto ejecutará la funciónque pasamos por AddressOf
-        _onSuccessAction?.Invoke(idClient)
+        ' 3. Notificamos al formulario que debe refrescarse, esto ejecutará la función que pasamos por AddressOf
+        _onSuccessAction?.Invoke(customerCode)
 
         ' 4. Cerramos el formulario
         _isSaving = True

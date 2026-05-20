@@ -1,4 +1,5 @@
-﻿Imports GymPaymentControl.Data
+﻿Imports GymPaymentControl.Constants
+Imports GymPaymentControl.Data
 Imports GymPaymentControl.FrmCollectMembership
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Utils
@@ -121,11 +122,10 @@ Namespace Services
         ''' (Normalmente el primer día del mes).
         ''' </summary>
         Public Function PaymentExists(connection As MySqlConnection, transaction As MySqlTransaction, dateTime As DateTime,
-                                      Optional idCli As Integer? = Nothing,
-                                      Optional idGrp As Integer? = Nothing,
-                                      Optional isDaily As Boolean = False) As Boolean ' 🌟 Añadimos este parámetro opcional
+                                      Optional idCli As Integer? = Nothing, Optional idGrp As Integer? = Nothing,
+                                      Optional isDaily As Boolean = False) As Boolean
 
-            Dim sqlQuery As String ' = ""
+            Dim sqlQuery As String
 
             ' 1. Decisión inteligente de la Query según el tipo de pago
             If isDaily Then
@@ -136,19 +136,8 @@ Namespace Services
                 sqlQuery = "SELECT COUNT(*) FROM pagos WHERE MONTH(fdi_pgs) = @month AND YEAR(fdi_pgs) = @year AND "
             End If
 
-            'If isDaily Then
-            '    ' 🔹 USAMOS UN ENFOQUE INFALIBLE: Forzamos el formato de fecha estándar YYYY-MM-DD
-            '    sqlQuery = "SELECT COUNT(*) FROM pagos WHERE DATE(fdi_pgs) = @fullDate AND "
-            'Else
-            '    sqlQuery = "SELECT COUNT(*) FROM pagos WHERE MONTH(fdi_pgs) = @month AND YEAR(fdi_pgs) = @year AND "
-            'End If
-
             ' 2. Añadimos el filtro por Cliente o por Grupo
-            If idCli.HasValue Then
-                sqlQuery &= "id_cli = @id"
-            Else
-                sqlQuery &= "id_grp = @id"
-            End If
+            sqlQuery &= If(idCli.HasValue, "id_cli = @id", "id_grp = @id")
 
             ' 3. Ejecución de la consulta y mapeo de parámetros
             Using command As New MySqlCommand(sqlQuery, connection, transaction)
@@ -165,26 +154,9 @@ Namespace Services
                 command.Parameters.AddWithValue("@id", If(idCli, idGrp))
 
                 Return Convert.ToInt32(command.ExecuteScalar()) > 0
+
             End Using
         End Function
-        'Public Function PaymentExists(connection As MySqlConnection, transaction As MySqlTransaction, dateTime As DateTime,
-        '                               Optional idCli As Integer? = Nothing,
-        '                               Optional idGrp As Integer? = Nothing) As Boolean
-
-        '    Dim sqlQuery As String = "SELECT COUNT(*) FROM pagos WHERE MONTH(fdi_pgs) = @month AND YEAR(fdi_pgs) = @year AND "
-        '    If idCli.HasValue Then sqlQuery &= "id_cli = @id" Else sqlQuery &= "id_grp = @id"
-
-        '    Using command As New MySqlCommand(sqlQuery, connection, transaction)
-
-        '        command.Parameters.AddWithValue("@month", dateTime.Month)
-        '        command.Parameters.AddWithValue("@year", dateTime.Year)
-        '        command.Parameters.AddWithValue("@id", If(idCli, idGrp))
-
-        '        Return Convert.ToInt32(command.ExecuteScalar()) > 0
-
-        '    End Using
-
-        'End Function
 
 
         ''' <summary>

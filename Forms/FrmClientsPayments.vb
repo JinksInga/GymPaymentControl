@@ -1,4 +1,5 @@
-﻿Imports GymPaymentControl.FrmCollectMembership
+﻿Imports GymPaymentControl.Constants
+Imports GymPaymentControl.FrmCollectMembership
 Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
@@ -16,7 +17,7 @@ Public Class FrmClientsPayments
     Private _selectedClient As IndividualPaymentDTO
 
     'variables
-    Private _isCleaning As Boolean ' = False
+    Private _isCleaning As Boolean
     Private strState As String
 
     Private Sub FrmClientsPayments_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -53,7 +54,7 @@ Public Class FrmClientsPayments
         ActivateSearchRecord()
         DisableButtons()
         CleanControls()
-        RefreshDgvClientList()
+        RefreshClientList()
 
         _isCleaning = False
 
@@ -73,12 +74,12 @@ Public Class FrmClientsPayments
     End Sub
 
     Private Sub TxtSearch_TextChanged(sender As Object, e As EventArgs) Handles TxtSearch.TextChanged
-        '
-        If _isCleaning Then Exit Sub
+
+        If _isCleaning Then  Exit Sub
 
         If CmbFilter.SelectedIndex = 0 Then TxtSearch.Text = AppTexts.SelectSearchFilter
 
-        RefreshDgvClientList()
+        RefreshClientList()
 
     End Sub
 
@@ -109,31 +110,49 @@ Public Class FrmClientsPayments
     Private Sub BtnSelect_Click(sender As Object, e As EventArgs) Handles BtnSelect.Click
         '4
     End Sub
-    ''
-    ''
+
+
     Private Sub DgvClientList_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvClientList.CellContentClick
     End Sub
     Private Sub DgvClientList_DoubleClick(sender As Object, e As EventArgs) Handles DgvClientList.DoubleClick
-        '
-        UploadDataAndPayments()
+
+        ' 1. Cargamos los datos y el historial de pagos
+        LoadClientAndPaymentsData()
+
     End Sub
-    ''
-    ''
+
+
     Private Sub RbActive_CheckedChanged(sender As Object, e As EventArgs) Handles RbActive.CheckedChanged
-        '
+
         strState = If(RbActive.Checked, CustomerStates.Active, CustomerStates.Inactive)
+
+        If RbActive.Checked Then
+
+            PaintLabelsRecursive(PnlDataClient, Color.MediumBlue)
+            DgvClientList.RowsDefaultCellStyle.BackColor = Color.Lavender
+            DgvClientList.Refresh()
+
+        End If
 
         If _isCleaning Then Exit Sub
 
         TxtSearch.Clear()
         TxtSearch.Focus()
 
-        RefreshDgvClientList()
+        RefreshClientList()
 
     End Sub
 
     Private Sub RbInactive_CheckedChanged(sender As Object, e As EventArgs) Handles RbInactive.CheckedChanged
-        '7
+
+        If RbInactive.Checked Then
+
+            PaintLabelsRecursive(PnlDataClient, Color.DarkRed)
+            DgvClientList.RowsDefaultCellStyle.BackColor = Color.MistyRose
+            DgvClientList.Refresh()
+
+        End If
+
     End Sub
 
     Private Sub BtnCancelSearch_Click(sender As Object, e As EventArgs) Handles BtnCancelSearch.Click
@@ -167,16 +186,15 @@ Public Class FrmClientsPayments
         '|
         '| * Desactivamos los botones llamando a la subrutina DisableButtons().
         '|
-        '| * Ocultamos el boton BtnActualizar para mostrar el boton de BtnGuardar.
-        '| * Hacemos al formulario FrmNewModifyClient como hijo del formulario principal.
-        '| * Mostramos el formulario FrmNewModifyClient.
-
+        '| * 
         CleanControls()
         DisableButtons()
 
-        NavigateToForm.OpenFrmNewClient(AddressOf GlobalRefreshAfterSave)
+        NavigateToForm.OpenFrmNewClient(AddressOf GlobalRefresh)
+        'NavigateToForm.OpenFrmNewClient(AddressOf GlobalRefreshAfterSave)
 
     End Sub
+
 
     Private Sub BtnModifyData_Click(sender As Object, e As EventArgs) Handles BtnModifyData.Click
 
@@ -191,44 +209,87 @@ Public Class FrmClientsPayments
             _selectedClient.HasDebtCustomer = hasDebt
 
             ' Abrimos el formulario (usando tu método de navegación)
-            NavigateToForm.OpenFrmModifyClient(_selectedClient, AddressOf GlobalRefreshAfterUpdate)
+            NavigateToForm.OpenFrmModifyClient(_selectedClient, AddressOf GlobalRefresh)
+            'NavigateToForm.OpenFrmModifyClient(_selectedClient, AddressOf GlobalRefreshAfterUpdate)
         End If
 
     End Sub
 
+
     Private Sub BtnDeleteClient_Click(sender As Object, e As EventArgs) Handles BtnDeleteClient.Click
 
-        '' 1. Validamos que tengamos un cliente cargado (usando el ID)
-        'If String.IsNullOrEmpty(strIdClient) Then
-        '    MessageBox.Show("Por favor, selecciona un cliente de la lista para eliminar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information)
-        '    Return
-        'End If
+        ' 1. Filtro de seguridad por si no hay nadie seleccionado en el Grid
+        If _selectedClient Is Nothing Then Exit Sub
 
-        '' 2. Mensaje de confirmación con estilo profesional
-        'Dim strMsg = $"                ¡ ¡ ¡  ATENCIÓN  ! ! !{vbCrLf}{vbCrLf}" &
-        '             $"     CLIENTE :  {LblNomCli.Text} {LblApeCli.Text}{vbCrLf}" &
-        '             $"     CÓDIGO  :  {strIdClient}{vbCrLf}{vbCrLf}" &
-        '             $"     Si eliminas el registro, se borrará TODO el historial de pagos.{vbCrLf}" &
-        '             $"     Esta acción no se puede deshacer.{vbCrLf}" &
-        '             $"     ___________________________________________________________{vbCrLf}{vbCrLf}" &
-        '             $"     ¿Realmente deseas ELIMINAR permanentemente a este cliente?"
+        ' 2. Preparamos los parametros para el mensaje.
+        Dim fullName As String = $"{LblNomCli.Text} {LblApeCli.Text}"
+        Dim customerCode As String = $"CLI - {_selectedClient.IdCli:D3}"
 
-        'If MessageBox.Show(strMsg, "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes Then
+        ' 3. Lanzamos el mensaje personalizado y capturamos la decisión.
+        Dim result = MessageBox.Show(DeleteOrInactivateCustomerWarning(fullName, customerCode), "Eliminar registro",
+                                     MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3)
 
-        '    ' 3. Ejecución del borrado (Llamada a tu lógica de base de datos)
-        '    Dim sql = "DELETE FROM clientes WHERE id_cli = @id"
-        '    ' Nota: Aquí deberías usar tu método Sub_Crud_Sql pasando el parámetro para evitar SQL Injection
-        '    ExecuteDeleteClient(strIdClient)
+        ' 4. Procesamos la acción elegida
+        Select Case result
 
-        '    ' 4. Post-Borrado: Limpieza y actualización
-        '    Sub_Clean_Controls()      ' Limpia los labels y fotos del cliente borrado
-        '    LoadClientsList()         ' Refresca el buscador/grid para que el cliente ya no aparezca
-        '    Sub_Disable_Buttons()     ' Desactiva Modificar/Eliminar hasta que se seleccione otro
+            ' ELIMINACIÓN TOTAL (Hard Delete)
+            Case DialogResult.Yes
 
-        '    MessageBox.Show("Cliente eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information)
-        'End If
+                ' Aquí llamas a tu mánager para borrar físicamente de la base de datos
+                Dim exito As Boolean = _clientManager.DeleteClientPermanently(_selectedClient.IdCli)
+
+                If exito Then
+
+                    ' 1. Limpiamos la pantalla y congelamos botones
+                    CleanControls()
+                    DisableButtons()
+
+                    ' 2. Refrescamos la lista interna y el Grid visual
+                    RefreshCustomerList()
+
+                    MessageBox.Show("Cliente e historial de pagos eliminados correctamente.", "Registro borrado",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Information)
+                End If
+
+            ' PASAR A INACTIVO (Soft Delete)
+            Case DialogResult.No
+
+                ' 1. Copiamos el ID del Grid a la propiedad que usa tu comando SQL
+                _selectedClient.IdNewClient = _selectedClient.IdCli
+
+                ' 2. Modificamos el estado en el DTO que tenemos en memoria
+                _selectedClient.State = CustomerStates.Inactive
+
+                ' 3. Proceso del mánager pasando el DTO actualizado
+                ' Pasamos False porque solo queremos actualizar los datos base
+                Dim exito As Boolean = _clientManager.UpdateClientProcess(_selectedClient, False, False)
+
+                If exito Then
+                    MessageBox.Show("El estado del cliente se ha cambiado a INACTIVO. Ya no generará deudas.",
+                        "Cliente desactivado", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+                    ' 4. Refrescar la lista, 
+                    LoadClientVisualData(_selectedClient)
+
+                    ' 5. Cambiamos el color de los textos
+                    PaintLabelsRecursive(PnlDataClient, Color.DarkRed)
+
+                Else
+                    ' Si falló la BBDD, revertimos el cambio en memoria
+                    _selectedClient.State = CustomerStates.Active
+                    MessageBox.Show("No se pudo actualizar el estado en la base de datos.", "Error",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error)
+                End If
+
+            ' CANCELAR
+            Case DialogResult.Cancel
+                ' El usuario cerró el diálogo o pulsó Cancelar. Salimos sin tocar nada.
+                Exit Sub
+
+        End Select
 
     End Sub
+
 
     Private Sub DgvPaymentList_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvPaymentList.CellContentClick
     End Sub
@@ -291,8 +352,8 @@ Public Class FrmClientsPayments
         '    BtnCollectMonth.Enabled = False
         'End If
     End Sub
-    ''
-    ''
+
+
     Private Sub BtnCollectMonth_Click(sender As Object, e As EventArgs) Handles BtnCollectMonth.Click
         ''
         '' Obtenemos el objeto de la fila actual
@@ -314,6 +375,7 @@ Public Class FrmClientsPayments
         BtnCollectMonth.Enabled = False
 
     End Sub
+
 
     Private Sub BtnNewPayment_Click(sender As Object, e As EventArgs) Handles BtnNewPayment.Click
 
@@ -353,6 +415,7 @@ Public Class FrmClientsPayments
 
     End Sub
 
+
     Private Sub BtnCloseWindow_Click(sender As Object, e As EventArgs) Handles BtnCloseWindow.Click
 
         ' Como este formulario suele ser el "Buscador Principal", Close es directo.
@@ -364,82 +427,137 @@ Public Class FrmClientsPayments
     '| ---------->>>>>>>>>> FUNCIONES - MÉTODOS - SUBRUTINAS <<<<<<<<<<---------- '
     '| -------------------------------------------------------------------------- '
 
-    Private Sub RefreshDgvClientList()
+    ''' <summary>
+    ''' Filtra y actualiza la lista de clientes según el estado
+    ''' seleccionado y el texto de búsqueda ingresado por el usuario.
+    ''' 
+    ''' También:
+    ''' - Actualiza el feedback visual de la búsqueda.
+    ''' - Refresca el DataGridView.
+    ''' - Posiciona la selección en la primera coincidencia.
+    ''' - Devuelve el foco al cuadro de búsqueda.
+    ''' </summary>
+    Private Sub RefreshClientList()
 
-        ' Si la lista maestra está vacía, no hacemos nada
         If _clientList Is Nothing Then Exit Sub
 
-        ' 1. Filtramos primero por el estado (Activo/Inactivo)
+        ' 1. Filtrado inicial por Estado
         Dim filteredList = _clientList.Where(Function(c) c.State = strState)
+        Dim strSearch = TxtSearch.Text.Trim().ToUpper()
 
-        Dim strSearch = TxtSearch.Text.Trim()
+        ' 2. 🚀 CONSUMIMOS TU OBRA DE ARTE
+        ' Obtenemos la configuración del filtro (columna y la función lambda mágica)
+        Dim config = GetFilterConfiguration()
 
+        ' Aplicamos el filtro dinámico solo si el usuario escribió algo
         If Not String.IsNullOrEmpty(strSearch) Then
-
-            Select Case CmbFilter.SelectedIndex 'strFilter
-
-                Case 1 '"NAME"
-                    filteredList = filteredList.Where(Function(c) c.FirstName.StartsWith(strSearch))
-
-                Case 2 '"LASTNAME"
-                    filteredList = filteredList.Where(Function(c) c.LastName.StartsWith(strSearch))
-
-                Case 3 '"PHONE"
-                    filteredList = filteredList.Where(Function(c) c.Phone.StartsWith(strSearch))
-
-                Case Else
-                    filteredList = filteredList.Where(Function(c) c.FirstName.StartsWith(strSearch))
-
-            End Select
-
+            filteredList = filteredList.Where(config.predicate)
         End If
 
+        ' 3. Conversión a lista y feedback visual
         Dim listCounter = filteredList.ToList()
+        UpdateSearchVisualFeedback(listCounter.Count)
 
-        TxtSearch.BackColor = If(listCounter.Count = 0, Color.MistyRose, Color.Snow)
-        TxtSearch.ForeColor = If(listCounter.Count = 0, Color.Red, Color.MediumBlue)
-        LblResult.ForeColor = If(listCounter.Count = 0, Color.Red, Color.Gray)
-
-        Dim textResult As String = If(listCounter.Count = 1,
-            AppTexts.SearchSingleResult, AppTexts.SearchMultipleResults)
-        LblResult.Text = $"{listCounter.Count} - {textResult}"
-
+        ' 4. Enlace de datos al DataGridView
         DgvClientList.AutoGenerateColumns = False
-        DgvClientList.DataSource = Nothing
+        'DgvClientList.DataSource = Nothing
         DgvClientList.DataSource = listCounter
 
-        ' 4. Posicionamos la selección en la columna que se está filtrando
-        If listCounter.Count > 0 Then
-            Try
+        ' 5. Foco quirúrgico en la celda correspondiente gracias a tu tupla
+        ' Si el buscador está vacío, config.columnName será Nothing y saltará limpiamente
+        If listCounter.Count > 0 Then SelectFirstCell(config.columnName)
 
-                Select Case CmbFilter.SelectedIndex 'strFilter
-                    Case 1 '"NAME"
-                        DgvClientList.CurrentCell = DgvClientList.Rows(0).Cells("NomCli")
-
-                    Case 2 '"LASTNAME"
-                        DgvClientList.CurrentCell = DgvClientList.Rows(0).Cells("ApeCli")
-
-                    Case 3 '"PHONE"
-                        DgvClientList.CurrentCell = DgvClientList.Rows(0).Cells("TlfCli")
-
-                    Case Else
-                        DgvClientList.CurrentCell = Nothing
-                End Select
-
-            Catch ex As Exception
-                ' Si algo falla (ej: la columna no existe), el programa no se cierra
-                Debug.WriteLine("Error al posicionar celda: " & ex.Message)
-            End Try
-
-        End If
-
-        ' 5. Devolvemos el foco al buscador para poder seguir escribiendo
+        ' 6. Mantener el cursor listo en el buscador
         TxtSearch.Focus()
         TxtSearch.SelectionStart = TxtSearch.Text.Length
+    End Sub
+
+
+    ''' <summary>
+    ''' Obtiene la configuración del filtro de búsqueda seleccionada
+    ''' por el usuario.
+    ''' 
+    ''' Devuelve:
+    ''' - El nombre de la columna que debe seleccionarse en el DataGridView.
+    ''' - La condición de filtrado que se aplicará sobre la lista de clientes.
+    ''' </summary>
+    Private Function GetFilterConfiguration() As (
+        columnName As String,
+        predicate As Func(Of IndividualPaymentDTO, Boolean))
+
+        Dim searchText = TxtSearch.Text.Trim() '.ToUpper()
+
+        Select Case CmbFilter.Text.Trim
+
+            Case SearchFilters.ByName
+
+                Return ("NomCli", Function(c) c.FirstName.StartsWith(searchText))
+
+            Case SearchFilters.ByLastName
+
+                Return ("ApeCli", Function(c) c.LastName.StartsWith(searchText))
+
+            Case SearchFilters.ByPhone
+
+                Return ("TlfCli", Function(c) c.Phone.StartsWith(searchText))
+
+            Case Else
+                Return (Nothing, Function(c) True)
+
+        End Select
+
+    End Function
+
+
+    ''' <summary>
+    ''' Actualiza los colores y el texto informativo del buscador
+    ''' según la cantidad de registros encontrados.
+    ''' </summary>
+    Private Sub UpdateSearchVisualFeedback(resultCount As Integer)
+
+        Dim hasResults As Boolean = resultCount > 0
+
+        TxtSearch.BackColor = If(hasResults, Color.Snow, Color.MistyRose)
+        TxtSearch.ForeColor = If(hasResults, Color.MediumBlue, Color.Red)
+        LblResult.ForeColor = If(hasResults, Color.Gray, Color.Red)
+
+        Dim resultText As String =
+        If(resultCount = 1,
+           AppTexts.SearchSingleResult,
+           AppTexts.SearchMultipleResults)
+
+        LblResult.Text = $"{resultCount} - {resultText}"
 
     End Sub
 
-    Sub UploadDataAndPayments(Optional client As IndividualPaymentDTO = Nothing)
+
+    ''' <summary>
+    ''' Carga la información visual del cliente seleccionado y, opcionalmente,
+    ''' actualiza su historial de pagos en la interfaz.
+    ''' </summary>
+    ''' <param name="client">
+    ''' Cliente que se utilizará para cargar la información.
+    ''' Si es Nothing, se intentará obtener el cliente seleccionado
+    ''' actualmente en el DataGridView.
+    ''' </param>
+    ''' <param name="refreshPayments">
+    ''' Indica si también debe actualizarse el historial de pagos
+    ''' del cliente seleccionado.
+    ''' </param>
+    ''' <remarks>
+    ''' Esta función centraliza la actualización visual de la pantalla:
+    ''' 
+    ''' 1. Determina el cliente que se debe cargar.
+    ''' 2. Actualiza los datos visuales del cliente.
+    ''' 3. Refresca el historial de pagos si es necesario.
+    ''' 4. Ajusta el estado de los controles y botones de la interfaz.
+    ''' 
+    ''' La variable _isCleaning se utiliza como semáforo para evitar
+    ''' ejecuciones no deseadas de eventos mientras se actualizan
+    ''' los controles del formulario.
+    ''' </remarks>
+    Sub LoadClientAndPaymentsData(Optional client As IndividualPaymentDTO = Nothing,
+                              Optional refreshPayments As Boolean = True)
 
         _isCleaning = True
 
@@ -451,42 +569,79 @@ Public Class FrmClientsPayments
             _selectedClient = DirectCast(DgvClientList.CurrentRow.DataBoundItem, IndividualPaymentDTO)
 
         Else
-            Exit Sub ' Si no hay nada, salimos
+            ' Si no hay nada, salimos
+            Exit Sub
         End If
 
-        ' 2. Llenamos Labels de texto
-        FillLabelsClientData(_selectedClient)
+        ' 2. Actualizamos la información del cliente
+        LoadClientVisualData(_selectedClient)
 
-        ' 3. Lógica de Grupo (Tu código actual)
-        If _selectedClient.IdGroup.HasValue Then
+        ' 3. Solo se refresca el historial de pagos si es un nuevo registro
+        If refreshPayments Then LoadClientPaymentsHistory(_selectedClient)
 
-            Dim strGroupName = _clientManager.GetGroupName(_selectedClient.IdGroup.Value)
-            _selectedClient.GroupName = strGroupName
-            LblGrpFamCli.Text = strGroupName
-
-        Else
-
-            _selectedClient.GroupName = ""
-            LblGrpFamCli.Text = ""
-
-        End If
-
-        ' 4. ** LA CLAVE **: Guardamos el historial en nuestra nueva variable global
-        _historyList = _paymentManager.GetPaymentHistory(_selectedClient.IdCli, _selectedClient.IdGroup)
-        ' 2. ¡OJO AQUÍ!: Actualizamos la propiedad del objeto que el botón va a revisar
-        ' Si no ponemos esta línea, HasDebtCustomer seguirá siendo False por defecto
-        _selectedClient.HasDebtCustomer = _historyList.Any(Function(p) p.HasDebtCustomer)
-
-        '  Cargamos el grid
-        DgvPaymentList.DataSource = _historyList
-        DgvPaymentList.CurrentCell = Nothing
-
+        ' 4. Estados de la interfaz
         DisableSearchRecord()
         ActivateButtons()
+        TxtSearch.Clear()
 
         _isCleaning = False
 
     End Sub
+
+
+    ''' <summary>
+    ''' Selecciona la primera celda visible del DataGridView
+    ''' según el nombre de columna indicado.
+    ''' </summary>
+    Private Sub SelectFirstCell(columnName As String)
+
+        If String.IsNullOrWhiteSpace(columnName) Then Exit Sub
+
+        If DgvClientList.Rows.Count = 0 Then Exit Sub
+
+        Try
+            DgvClientList.CurrentCell =
+            DgvClientList.Rows(0).Cells(columnName)
+
+        Catch ex As Exception
+            Debug.WriteLine($"Error al seleccionar celda: {ex.Message}")
+        End Try
+
+    End Sub
+
+
+    Private Sub LoadClientVisualData(client As IndividualPaymentDTO)
+
+        ' 1. Llenamos Labels de texto principales
+        FillLabelsClientData(client)
+
+        ' 2. Lógica de Grupo
+        If client.IdGroup.HasValue Then
+            Dim groupName = _clientManager.GetGroupName(client.IdGroup.Value)
+            client.GroupName = groupName
+            LblGrpFamCli.Text = groupName
+        Else
+            client.GroupName = ""
+            LblGrpFamCli.Text = ""
+        End If
+
+    End Sub
+
+
+    Private Sub LoadClientPaymentsHistory(client As IndividualPaymentDTO)
+
+        ' 1. Buscamos el historial en la base de datos
+        _historyList = _paymentManager.GetPaymentHistory(client.IdCli, client.IdGroup)
+
+        ' 2. Actualizamos la propiedad de deuda
+        client.HasDebtCustomer = _historyList.Any(Function(p) p.HasDebtCustomer)
+
+        ' 3. Cargamos el Grid de pagos
+        DgvPaymentList.DataSource = _historyList
+        DgvPaymentList.CurrentCell = Nothing
+
+    End Sub
+
 
     Sub FillLabelsClientData(client As IndividualPaymentDTO)
 
@@ -501,16 +656,6 @@ Public Class FrmClientsPayments
         LblFdiCli.Text = ConvertVeryLongDate(client.RegistrationDate)
         LblEstCli.Text = client.State
         LblGrpFamCli.Text = client.IdGroup
-
-    End Sub
-
-
-    Private Sub RefreshCustomerList()
-
-        BtnFindClient.Enabled = _clientManager.HasClients()
-
-        If BtnFindClient.Enabled Then _clientList = _clientManager.GetClientsForSearch()
-        'DgvClientList.DataSource = _clientList ' <--- ¡No olvides refrescar el control visual!
 
     End Sub
 
@@ -536,32 +681,28 @@ Public Class FrmClientsPayments
     End Sub
 
 
-    Public Sub GlobalRefreshAfterSave(newId As Integer)
+    Public Sub GlobalRefresh(clientId As Integer,
+                             Optional refreshPayments As Boolean = True)
 
-        ' 1. Refrescamos el DataGridView con la lista fresca de la BBDD
+        ' 1. Refrescamos la lista general de clientes (esto es obligatorio para ambos casos)
         RefreshCustomerList()
 
-        ' 2. Buscamos el objeto del nuevo cliente dentro de la lista recién cargada
-        '    Usamos LINQ para encontrarlo rápido
-        Dim newClient = _clientList.FirstOrDefault(Function(c) c.IdCli = newId)
+        ' 2. Buscamos el cliente actualizado dentro de la nueva lista
+        Dim client = _clientList.FirstOrDefault(Function(c) c.IdCli = clientId)
 
-        ' 3. Si lo encontramos, refrescamos los Labels y el historial de pagos
-        If newClient IsNot Nothing Then UploadDataAndPayments(newClient)
+        ' 3. Llamamos a nuestra función orquesta pasándole el control de pagos
+        If client IsNot Nothing Then LoadClientAndPaymentsData(client, refreshPayments)
 
     End Sub
 
 
-    Public Sub GlobalRefreshAfterUpdate(clientId As Integer)
+    Private Sub RefreshCustomerList()
 
-        ' 1. Refrescamos el DataGridView con la lista fresca de la BBDD
-        RefreshCustomerList()
+        ' 1. Activar/Desactivar el botón que depende de la comprobación de HasClients()
+        BtnFindClient.Enabled = _clientManager.HasClients()
 
-        ' 2. Buscamos al cliente que acabamos de modificar dentro de la lista recién cargada
-        '    Usamos LINQ para encontrarlo rápido.
-        Dim updatedClient = _clientList.FirstOrDefault(Function(c) c.IdCli = clientId)
-
-        ' 3. Si lo encontramos, refrescamos los Labels y el historial de pagos
-        If updatedClient IsNot Nothing Then UploadDataAndPayments(updatedClient)
+        ' 2. Si el boton está activado llamamos a GetClientsForSearch()
+        If BtnFindClient.Enabled Then _clientList = _clientManager.GetClientsForSearch()
 
     End Sub
 
@@ -658,37 +799,31 @@ Public Class FrmClientsPayments
                 End If
             End If
         Next
-        DgvPaymentList.DataSource = Nothing 'Rows.Clear()
-        'strIdClient = ""
-    End Sub
 
-    Private Sub ChangeBackColorLabel()
-
-        'COMPROBAMOS EL BACKCOLOR
-        If LblNomCli.BackColor = Color.MintCream Then
-            'RECORREMOS TODOS LOS LABEL QUE CUMPLAN LA CONDIÓN PARA CAMBIAR EL COLOR
-            For Each control As Control In GbDataClient.Controls
-                If TypeOf (control) Is Label Then
-                    If control.Name.Contains("Cli") Then
-                        control.BackColor = Color.WhiteSmoke
-                    End If
-                End If
-            Next
-        Else
-            'RECORREMOS TODOS LOS LABEL QUE CUMPLAN LA CONDIÓN PARA CAMBIAR EL COLOR
-            For Each control As Control In GbDataClient.Controls
-                If TypeOf (control) Is Label Then
-                    If control.Name.Contains("Cli") Then
-                        control.BackColor = Color.MintCream
-                    End If
-                End If
-            Next
-        End If
+        DgvPaymentList.DataSource = Nothing
 
     End Sub
-    ''
-    ''
-    ''
+
+
+    ' Función auxiliar recursiva: busca y pinta TODO, sin importar dónde esté escondido
+    Private Sub PaintLabelsRecursive(parent As Control, targetColor As Color)
+
+        For Each ctrl As Control In parent.Controls
+
+            ' Si es un Label y cumple tu excelente regla de nomenclatura "Cli"
+            If TypeOf ctrl Is Label AndAlso ctrl.Name.Contains("Cli") Then
+                ctrl.ForeColor = targetColor
+            End If
+
+            ' Si el control es a su vez un contenedor (un Panel, otro GroupBox, etc.),
+            ' se vuelve a llamar a sí misma para revisar lo que hay dentro.
+            If ctrl.HasChildren Then PaintLabelsRecursive(ctrl, targetColor)
+
+        Next
+
+    End Sub
+
+
     ' 1. Soportes de Validación
     Private Function ValidateClientBeforePayment() As Boolean
 

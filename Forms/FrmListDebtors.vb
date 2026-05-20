@@ -1,4 +1,5 @@
-﻿Imports GymPaymentControl.Interfaces
+﻿Imports GymPaymentControl.Constants
+Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 Imports GymPaymentControl.UIHelpers

@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class FrmCollectMembership
     Inherits System.Windows.Forms.Form
 
     'Form reemplaza a Dispose para limpiar la lista de componentes.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class FrmCollectMembership
     'NOTA: el Diseñador de Windows Forms necesita el siguiente procedimiento
     'Se puede modificar usando el Diseñador de Windows Forms.  
     'No lo modifique con el editor de código.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
@@ -37,26 +37,28 @@ Partial Class FrmCollectMembership
         Me.LblNumber_Of_Days = New System.Windows.Forms.Label()
         Me.LblPrice_Day = New System.Windows.Forms.Label()
         Me.DtpFdiPgs = New System.Windows.Forms.DateTimePicker()
-        Me.LblTotal_ = New System.Windows.Forms.Label()
-        Me.LblTotal = New System.Windows.Forms.Label()
         Me.LblPrcPgs = New System.Windows.Forms.Label()
-        Me.LblTotal_To_Pay = New System.Windows.Forms.Label()
         Me.LblDscPgs = New System.Windows.Forms.Label()
         Me.Panel = New System.Windows.Forms.Panel()
         Me.GroupBox = New System.Windows.Forms.GroupBox()
+        Me.LblTotalToPay = New System.Windows.Forms.Label()
+        Me.LblTotal_To_Pay = New System.Windows.Forms.Label()
+        Me.LblTotal = New System.Windows.Forms.Label()
+        Me.LblTotal_ = New System.Windows.Forms.Label()
         Me.ChkFdiPgs = New System.Windows.Forms.CheckBox()
         Me.LblPriceDay = New System.Windows.Forms.Label()
         Me.TxtDscPgs = New System.Windows.Forms.TextBox()
         Me.LblNumberOfDays = New System.Windows.Forms.Label()
-        Me.LblTotalToPay = New System.Windows.Forms.Label()
         Me.TxtPrcPgs = New System.Windows.Forms.TextBox()
         Me.LblDisplayName = New System.Windows.Forms.Label()
         Me.BtnCancelPayment = New System.Windows.Forms.Button()
         Me.BtnConfirmPayment = New System.Windows.Forms.Button()
         Me.ToolTip = New System.Windows.Forms.ToolTip(Me.components)
+        Me.ErrorProvider = New System.Windows.Forms.ErrorProvider(Me.components)
         Me.GroupBox1.SuspendLayout()
         Me.Panel.SuspendLayout()
         Me.GroupBox.SuspendLayout()
+        CType(Me.ErrorProvider, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'GroupBox1
@@ -74,7 +76,7 @@ Partial Class FrmCollectMembership
         Me.GroupBox1.Margin = New System.Windows.Forms.Padding(24, 16, 24, 20)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Padding = New System.Windows.Forms.Padding(0)
-        Me.GroupBox1.Size = New System.Drawing.Size(287, 285)
+        Me.GroupBox1.Size = New System.Drawing.Size(287, 307)
         Me.GroupBox1.TabIndex = 1
         Me.GroupBox1.TabStop = False
         '
@@ -114,7 +116,7 @@ Partial Class FrmCollectMembership
         Me.TxtDetailMethod.Name = "TxtDetailMethod"
         Me.TxtDetailMethod.ReadOnly = True
         Me.TxtDetailMethod.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
-        Me.TxtDetailMethod.Size = New System.Drawing.Size(224, 64)
+        Me.TxtDetailMethod.Size = New System.Drawing.Size(224, 86)
         Me.TxtDetailMethod.TabIndex = 3
         '
         'LblFdpPgs
@@ -210,7 +212,7 @@ Partial Class FrmCollectMembership
         '
         Me.LblNumber_Of_Days.AutoSize = True
         Me.LblNumber_Of_Days.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblNumber_Of_Days.Location = New System.Drawing.Point(16, 219)
+        Me.LblNumber_Of_Days.Location = New System.Drawing.Point(16, 197)
         Me.LblNumber_Of_Days.Margin = New System.Windows.Forms.Padding(0, 16, 0, 0)
         Me.LblNumber_Of_Days.Name = "LblNumber_Of_Days"
         Me.LblNumber_Of_Days.Size = New System.Drawing.Size(82, 16)
@@ -222,7 +224,7 @@ Partial Class FrmCollectMembership
         '
         Me.LblPrice_Day.AutoSize = True
         Me.LblPrice_Day.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblPrice_Day.Location = New System.Drawing.Point(136, 153)
+        Me.LblPrice_Day.Location = New System.Drawing.Point(136, 197)
         Me.LblPrice_Day.Margin = New System.Windows.Forms.Padding(0, 16, 0, 0)
         Me.LblPrice_Day.Name = "LblPrice_Day"
         Me.LblPrice_Day.Size = New System.Drawing.Size(91, 16)
@@ -242,30 +244,6 @@ Partial Class FrmCollectMembership
         Me.DtpFdiPgs.Size = New System.Drawing.Size(224, 26)
         Me.DtpFdiPgs.TabIndex = 0
         '
-        'LblTotal_
-        '
-        Me.LblTotal_.AutoSize = True
-        Me.LblTotal_.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblTotal_.Location = New System.Drawing.Point(16, 153)
-        Me.LblTotal_.Margin = New System.Windows.Forms.Padding(0, 16, 0, 0)
-        Me.LblTotal_.Name = "LblTotal_"
-        Me.LblTotal_.Size = New System.Drawing.Size(38, 16)
-        Me.LblTotal_.TabIndex = 10
-        Me.LblTotal_.Text = "Total"
-        Me.LblTotal_.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
-        'LblTotal
-        '
-        Me.LblTotal.BackColor = System.Drawing.SystemColors.Window
-        Me.LblTotal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.LblTotal.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblTotal.Location = New System.Drawing.Point(19, 177)
-        Me.LblTotal.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
-        Me.LblTotal.Name = "LblTotal"
-        Me.LblTotal.Size = New System.Drawing.Size(104, 26)
-        Me.LblTotal.TabIndex = 3
-        Me.LblTotal.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        '
         'LblPrcPgs
         '
         Me.LblPrcPgs.AutoSize = True
@@ -277,18 +255,6 @@ Partial Class FrmCollectMembership
         Me.LblPrcPgs.TabIndex = 8
         Me.LblPrcPgs.Text = "Precio"
         Me.LblPrcPgs.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
-        'LblTotal_To_Pay
-        '
-        Me.LblTotal_To_Pay.AutoSize = True
-        Me.LblTotal_To_Pay.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblTotal_To_Pay.Location = New System.Drawing.Point(136, 219)
-        Me.LblTotal_To_Pay.Margin = New System.Windows.Forms.Padding(0, 16, 0, 0)
-        Me.LblTotal_To_Pay.Name = "LblTotal_To_Pay"
-        Me.LblTotal_To_Pay.Size = New System.Drawing.Size(88, 16)
-        Me.LblTotal_To_Pay.TabIndex = 13
-        Me.LblTotal_To_Pay.Text = "Total a pagar"
-        Me.LblTotal_To_Pay.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
         'LblDscPgs
         '
@@ -310,33 +276,87 @@ Partial Class FrmCollectMembership
         Me.Panel.Location = New System.Drawing.Point(33, 59)
         Me.Panel.Margin = New System.Windows.Forms.Padding(24, 20, 16, 32)
         Me.Panel.Name = "Panel"
-        Me.Panel.Size = New System.Drawing.Size(648, 325)
+        Me.Panel.Size = New System.Drawing.Size(648, 347)
         Me.Panel.TabIndex = 0
         '
         'GroupBox
         '
+        Me.GroupBox.Controls.Add(Me.LblTotalToPay)
+        Me.GroupBox.Controls.Add(Me.LblTotal_To_Pay)
+        Me.GroupBox.Controls.Add(Me.LblTotal)
+        Me.GroupBox.Controls.Add(Me.LblTotal_)
         Me.GroupBox.Controls.Add(Me.ChkFdiPgs)
         Me.GroupBox.Controls.Add(Me.LblFdiPgs)
         Me.GroupBox.Controls.Add(Me.LblNumber_Of_Days)
         Me.GroupBox.Controls.Add(Me.LblPrice_Day)
         Me.GroupBox.Controls.Add(Me.DtpFdiPgs)
-        Me.GroupBox.Controls.Add(Me.LblTotal_)
-        Me.GroupBox.Controls.Add(Me.LblTotal)
         Me.GroupBox.Controls.Add(Me.LblPrcPgs)
-        Me.GroupBox.Controls.Add(Me.LblTotal_To_Pay)
         Me.GroupBox.Controls.Add(Me.LblDscPgs)
         Me.GroupBox.Controls.Add(Me.LblPriceDay)
         Me.GroupBox.Controls.Add(Me.TxtDscPgs)
         Me.GroupBox.Controls.Add(Me.LblNumberOfDays)
-        Me.GroupBox.Controls.Add(Me.LblTotalToPay)
         Me.GroupBox.Controls.Add(Me.TxtPrcPgs)
         Me.GroupBox.Location = New System.Drawing.Point(24, 16)
         Me.GroupBox.Margin = New System.Windows.Forms.Padding(24, 16, 0, 20)
         Me.GroupBox.Name = "GroupBox"
         Me.GroupBox.Padding = New System.Windows.Forms.Padding(0)
-        Me.GroupBox.Size = New System.Drawing.Size(285, 285)
+        Me.GroupBox.Size = New System.Drawing.Size(285, 307)
         Me.GroupBox.TabIndex = 0
         Me.GroupBox.TabStop = False
+        '
+        'LblTotalToPay
+        '
+        Me.LblTotalToPay.BackColor = System.Drawing.Color.Gainsboro
+        Me.LblTotalToPay.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
+        Me.LblTotalToPay.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
+        Me.LblTotalToPay.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblTotalToPay.Location = New System.Drawing.Point(127, 264)
+        Me.LblTotalToPay.Margin = New System.Windows.Forms.Padding(0)
+        Me.LblTotalToPay.Name = "LblTotalToPay"
+        Me.LblTotalToPay.Size = New System.Drawing.Size(116, 26)
+        Me.LblTotalToPay.TabIndex = 18
+        Me.LblTotalToPay.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'LblTotal_To_Pay
+        '
+        Me.LblTotal_To_Pay.BackColor = System.Drawing.SystemColors.ButtonFace
+        Me.LblTotal_To_Pay.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.LblTotal_To_Pay.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblTotal_To_Pay.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(64, Byte), Integer))
+        Me.LblTotal_To_Pay.Location = New System.Drawing.Point(19, 263)
+        Me.LblTotal_To_Pay.Margin = New System.Windows.Forms.Padding(0, 16, 0, 16)
+        Me.LblTotal_To_Pay.Name = "LblTotal_To_Pay"
+        Me.LblTotal_To_Pay.Padding = New System.Windows.Forms.Padding(4, 4, 0, 0)
+        Me.LblTotal_To_Pay.Size = New System.Drawing.Size(224, 28)
+        Me.LblTotal_To_Pay.TabIndex = 19
+        Me.LblTotal_To_Pay.Text = "Total a pagar"
+        '
+        'LblTotal
+        '
+        Me.LblTotal.BackColor = System.Drawing.Color.Gainsboro
+        Me.LblTotal.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
+        Me.LblTotal.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
+        Me.LblTotal.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblTotal.Location = New System.Drawing.Point(127, 154)
+        Me.LblTotal.Margin = New System.Windows.Forms.Padding(0)
+        Me.LblTotal.Name = "LblTotal"
+        Me.LblTotal.Size = New System.Drawing.Size(116, 26)
+        Me.LblTotal.TabIndex = 16
+        Me.LblTotal.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'LblTotal_
+        '
+        Me.LblTotal_.BackColor = System.Drawing.SystemColors.ButtonFace
+        Me.LblTotal_.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.LblTotal_.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblTotal_.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(64, Byte), Integer))
+        Me.LblTotal_.Location = New System.Drawing.Point(19, 153)
+        Me.LblTotal_.Margin = New System.Windows.Forms.Padding(0, 16, 0, 0)
+        Me.LblTotal_.Name = "LblTotal_"
+        Me.LblTotal_.Padding = New System.Windows.Forms.Padding(4, 4, 0, 0)
+        Me.LblTotal_.Size = New System.Drawing.Size(224, 28)
+        Me.LblTotal_.TabIndex = 17
+        Me.LblTotal_.Text = "Total"
         '
         'ChkFdiPgs
         '
@@ -356,7 +376,7 @@ Partial Class FrmCollectMembership
         Me.LblPriceDay.BackColor = System.Drawing.SystemColors.Window
         Me.LblPriceDay.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.LblPriceDay.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblPriceDay.Location = New System.Drawing.Point(139, 177)
+        Me.LblPriceDay.Location = New System.Drawing.Point(139, 221)
         Me.LblPriceDay.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
         Me.LblPriceDay.Name = "LblPriceDay"
         Me.LblPriceDay.Size = New System.Drawing.Size(104, 26)
@@ -381,24 +401,12 @@ Partial Class FrmCollectMembership
         Me.LblNumberOfDays.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.LblNumberOfDays.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.LblNumberOfDays.ForeColor = System.Drawing.Color.Green
-        Me.LblNumberOfDays.Location = New System.Drawing.Point(19, 243)
+        Me.LblNumberOfDays.Location = New System.Drawing.Point(19, 221)
         Me.LblNumberOfDays.Margin = New System.Windows.Forms.Padding(0, 8, 0, 16)
         Me.LblNumberOfDays.Name = "LblNumberOfDays"
         Me.LblNumberOfDays.Size = New System.Drawing.Size(104, 26)
         Me.LblNumberOfDays.TabIndex = 5
         Me.LblNumberOfDays.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        '
-        'LblTotalToPay
-        '
-        Me.LblTotalToPay.BackColor = System.Drawing.SystemColors.Window
-        Me.LblTotalToPay.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.LblTotalToPay.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblTotalToPay.Location = New System.Drawing.Point(139, 243)
-        Me.LblTotalToPay.Margin = New System.Windows.Forms.Padding(0, 0, 0, 16)
-        Me.LblTotalToPay.Name = "LblTotalToPay"
-        Me.LblTotalToPay.Size = New System.Drawing.Size(104, 26)
-        Me.LblTotalToPay.TabIndex = 6
-        Me.LblTotalToPay.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'TxtPrcPgs
         '
@@ -435,7 +443,7 @@ Partial Class FrmCollectMembership
         Me.BtnCancelPayment.ForeColor = System.Drawing.Color.Brown
         Me.BtnCancelPayment.Image = Global.GymPaymentControl.My.Resources.Resources.ic_cancel_pay_34x28
         Me.BtnCancelPayment.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnCancelPayment.Location = New System.Drawing.Point(705, 283)
+        Me.BtnCancelPayment.Location = New System.Drawing.Point(705, 297)
         Me.BtnCancelPayment.Margin = New System.Windows.Forms.Padding(0)
         Me.BtnCancelPayment.Name = "BtnCancelPayment"
         Me.BtnCancelPayment.Padding = New System.Windows.Forms.Padding(0, 4, 0, 1)
@@ -472,11 +480,15 @@ Partial Class FrmCollectMembership
         Me.ToolTip.InitialDelay = 300
         Me.ToolTip.ReshowDelay = 100
         '
+        'ErrorProvider
+        '
+        Me.ErrorProvider.ContainerControl = Me
+        '
         'FrmCollectMembership
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(870, 425)
+        Me.ClientSize = New System.Drawing.Size(870, 447)
         Me.Controls.Add(Me.Panel)
         Me.Controls.Add(Me.LblDisplayName)
         Me.Controls.Add(Me.BtnCancelPayment)
@@ -490,6 +502,7 @@ Partial Class FrmCollectMembership
         Me.Panel.ResumeLayout(False)
         Me.GroupBox.ResumeLayout(False)
         Me.GroupBox.PerformLayout()
+        CType(Me.ErrorProvider, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
     End Sub
@@ -506,17 +519,13 @@ Partial Class FrmCollectMembership
     Friend WithEvents LblNumber_Of_Days As Label
     Friend WithEvents LblPrice_Day As Label
     Friend WithEvents DtpFdiPgs As DateTimePicker
-    Friend WithEvents LblTotal_ As Label
-    Friend WithEvents LblTotal As Label
     Friend WithEvents LblPrcPgs As Label
-    Friend WithEvents LblTotal_To_Pay As Label
     Friend WithEvents LblDscPgs As Label
     Friend WithEvents Panel As Panel
     Friend WithEvents GroupBox As GroupBox
     Friend WithEvents LblPriceDay As Label
     Friend WithEvents TxtDscPgs As TextBox
     Friend WithEvents LblNumberOfDays As Label
-    Friend WithEvents LblTotalToPay As Label
     Friend WithEvents TxtPrcPgs As TextBox
     Friend WithEvents BtnCancelPayment As Button
     Friend WithEvents BtnConfirmPayment As Button
@@ -525,4 +534,9 @@ Partial Class FrmCollectMembership
     Friend WithEvents ChkFdpPgs As CheckBox
     Friend WithEvents ChkMtdPgs As CheckBox
     Friend WithEvents ToolTip As ToolTip
+    Friend WithEvents LblTotal As Label
+    Friend WithEvents LblTotal_ As Label
+    Friend WithEvents LblTotalToPay As Label
+    Friend WithEvents LblTotal_To_Pay As Label
+    Friend WithEvents ErrorProvider As ErrorProvider
 End Class

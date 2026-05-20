@@ -153,5 +153,44 @@
         End Function
 
 
+        ''' <summary>
+        ''' Genera un mensaje de advertencia antes de eliminar un cliente
+        ''' o cambiar su estado a INACTIVO.
+        ''' </summary>
+        ''' <param name="fullName">
+        ''' Nombre completo del cliente que se mostrará en el mensaje.
+        ''' </param>
+        ''' <param name="customerCode">
+        ''' Código identificador del cliente que se mostrará en el mensaje.
+        ''' </param>
+        ''' <returns>
+        ''' Texto formateado para mostrar en un MessageBox de confirmación.
+        ''' </returns>
+        ''' <remarks>
+        ''' Este mensaje informa que eliminar un cliente también eliminará
+        ''' todo su historial de pagos registrado.
+        '''
+        ''' Opciones disponibles:
+        ''' Sí: Eliminar permanentemente el cliente y sus pagos.
+        ''' No: Cambiar el estado del cliente a INACTIVO.
+        ''' Cancelar: No realizar ninguna acción.
+        ''' </remarks>
+        Public Function DeleteOrInactivateCustomerWarning(fullName As String, customerCode As String) As String
+
+            Return "                              ¡¡¡ ADVERTENCIA !!!" & Environment.NewLine &
+                   "   __________________________________________________________" & Environment.NewLine & Environment.NewLine &
+                   "   Eliminar este cliente también eliminará todo su historial" & Environment.NewLine &
+                   "   de pagos registrado." & Environment.NewLine & Environment.NewLine &
+                   $"     NOMBRE  :  {fullName}" & Environment.NewLine &
+                   $"     CÓDIGO   :  {customerCode}" & Environment.NewLine &
+                   "   __________________________________________________________" & Environment.NewLine & Environment.NewLine &
+                   "                  ¿Qué deseas hacer con el cliente?" & Environment.NewLine & Environment.NewLine &
+                   "                  Sí   : Eliminar cliente e historial de pagos." & Environment.NewLine &
+                   "                  No : Cambiar el estado del cliente a INACTIVO." & Environment.NewLine & Environment.NewLine &
+                   "                  Cancelar : No realizar ninguna acción."
+
+        End Function
+
+
     End Module
 End Namespace

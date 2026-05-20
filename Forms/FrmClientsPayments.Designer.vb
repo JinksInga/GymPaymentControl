@@ -68,13 +68,17 @@ Partial Class FrmClientsPayments
         Me.LblFechaNacimiento = New System.Windows.Forms.Label()
         Me.LblApellido = New System.Windows.Forms.Label()
         Me.DgvClientList = New System.Windows.Forms.DataGridView()
+        Me.NomCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.ApeCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.FdnCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.TlfCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.EmlCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.GbState = New System.Windows.Forms.GroupBox()
         Me.RbActive = New System.Windows.Forms.RadioButton()
         Me.RbInactive = New System.Windows.Forms.RadioButton()
         Me.CmbFilter = New System.Windows.Forms.ComboBox()
         Me.TxtSearch = New System.Windows.Forms.TextBox()
         Me.LblFilter = New System.Windows.Forms.Label()
-        Me.Panel2 = New System.Windows.Forms.Panel()
         Me.PnlBuscar = New System.Windows.Forms.Panel()
         Me.BtnSelect = New System.Windows.Forms.Button()
         Me.GbDataClient = New System.Windows.Forms.GroupBox()
@@ -101,11 +105,6 @@ Partial Class FrmClientsPayments
         Me.tap_pgs = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.nom_user = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.PictureBox = New System.Windows.Forms.PictureBox()
-        Me.NomCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.ApeCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.FdnCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.TlfCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.EmlCli = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.PnlDataClient.SuspendLayout()
         CType(Me.DgvClientList, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GbState.SuspendLayout()
@@ -136,7 +135,7 @@ Partial Class FrmClientsPayments
         Me.LblDirCli.BackColor = System.Drawing.Color.Gainsboro
         Me.LblDirCli.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblDirCli.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.LblDirCli.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblDirCli.ForeColor = System.Drawing.SystemColors.ControlText
         Me.LblDirCli.Location = New System.Drawing.Point(580, 111)
         Me.LblDirCli.Margin = New System.Windows.Forms.Padding(0)
         Me.LblDirCli.Name = "LblDirCli"
@@ -150,7 +149,7 @@ Partial Class FrmClientsPayments
         Me.LblNomCli.BackColor = System.Drawing.Color.Gainsboro
         Me.LblNomCli.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblNomCli.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.LblNomCli.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblNomCli.ForeColor = System.Drawing.SystemColors.ControlText
         Me.LblNomCli.Location = New System.Drawing.Point(147, 17)
         Me.LblNomCli.Margin = New System.Windows.Forms.Padding(0)
         Me.LblNomCli.Name = "LblNomCli"
@@ -164,7 +163,7 @@ Partial Class FrmClientsPayments
         Me.LblEstCli.BackColor = System.Drawing.Color.Gainsboro
         Me.LblEstCli.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblEstCli.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.LblEstCli.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblEstCli.ForeColor = System.Drawing.SystemColors.ControlText
         Me.LblEstCli.Location = New System.Drawing.Point(581, 241)
         Me.LblEstCli.Margin = New System.Windows.Forms.Padding(0)
         Me.LblEstCli.Name = "LblEstCli"
@@ -178,7 +177,7 @@ Partial Class FrmClientsPayments
         Me.LblFdiCli.BackColor = System.Drawing.Color.Gainsboro
         Me.LblFdiCli.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblFdiCli.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.LblFdiCli.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblFdiCli.ForeColor = System.Drawing.SystemColors.ControlText
         Me.LblFdiCli.Location = New System.Drawing.Point(580, 205)
         Me.LblFdiCli.Margin = New System.Windows.Forms.Padding(0)
         Me.LblFdiCli.Name = "LblFdiCli"
@@ -192,7 +191,7 @@ Partial Class FrmClientsPayments
         Me.LblGrpFamCli.BackColor = System.Drawing.Color.Gainsboro
         Me.LblGrpFamCli.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblGrpFamCli.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.LblGrpFamCli.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblGrpFamCli.ForeColor = System.Drawing.SystemColors.ControlText
         Me.LblGrpFamCli.Location = New System.Drawing.Point(147, 241)
         Me.LblGrpFamCli.Margin = New System.Windows.Forms.Padding(0)
         Me.LblGrpFamCli.Name = "LblGrpFamCli"
@@ -206,7 +205,7 @@ Partial Class FrmClientsPayments
         Me.LblEmlCli.BackColor = System.Drawing.Color.Gainsboro
         Me.LblEmlCli.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblEmlCli.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.LblEmlCli.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblEmlCli.ForeColor = System.Drawing.SystemColors.ControlText
         Me.LblEmlCli.Location = New System.Drawing.Point(147, 147)
         Me.LblEmlCli.Margin = New System.Windows.Forms.Padding(0)
         Me.LblEmlCli.Name = "LblEmlCli"
@@ -234,7 +233,7 @@ Partial Class FrmClientsPayments
         Me.LblMtdPgoCli.BackColor = System.Drawing.Color.Gainsboro
         Me.LblMtdPgoCli.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblMtdPgoCli.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.LblMtdPgoCli.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblMtdPgoCli.ForeColor = System.Drawing.SystemColors.ControlText
         Me.LblMtdPgoCli.Location = New System.Drawing.Point(147, 205)
         Me.LblMtdPgoCli.Margin = New System.Windows.Forms.Padding(0)
         Me.LblMtdPgoCli.Name = "LblMtdPgoCli"
@@ -248,7 +247,7 @@ Partial Class FrmClientsPayments
         Me.LblFdnCli.BackColor = System.Drawing.Color.Gainsboro
         Me.LblFdnCli.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblFdnCli.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.LblFdnCli.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblFdnCli.ForeColor = System.Drawing.SystemColors.ControlText
         Me.LblFdnCli.Location = New System.Drawing.Point(580, 17)
         Me.LblFdnCli.Margin = New System.Windows.Forms.Padding(0)
         Me.LblFdnCli.Name = "LblFdnCli"
@@ -262,7 +261,7 @@ Partial Class FrmClientsPayments
         Me.LblTlfCli.BackColor = System.Drawing.Color.Gainsboro
         Me.LblTlfCli.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblTlfCli.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.LblTlfCli.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblTlfCli.ForeColor = System.Drawing.SystemColors.ControlText
         Me.LblTlfCli.Location = New System.Drawing.Point(147, 111)
         Me.LblTlfCli.Margin = New System.Windows.Forms.Padding(0)
         Me.LblTlfCli.Name = "LblTlfCli"
@@ -276,7 +275,7 @@ Partial Class FrmClientsPayments
         Me.LblEdadCli.BackColor = System.Drawing.Color.Gainsboro
         Me.LblEdadCli.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblEdadCli.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.LblEdadCli.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblEdadCli.ForeColor = System.Drawing.SystemColors.ControlText
         Me.LblEdadCli.Location = New System.Drawing.Point(581, 53)
         Me.LblEdadCli.Margin = New System.Windows.Forms.Padding(0)
         Me.LblEdadCli.Name = "LblEdadCli"
@@ -345,7 +344,7 @@ Partial Class FrmClientsPayments
         Me.LblApeCli.BackColor = System.Drawing.Color.Gainsboro
         Me.LblApeCli.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblApeCli.Font = New System.Drawing.Font("Linux Libertine Display G", 12.0!)
-        Me.LblApeCli.ForeColor = System.Drawing.Color.MediumBlue
+        Me.LblApeCli.ForeColor = System.Drawing.SystemColors.ControlText
         Me.LblApeCli.Location = New System.Drawing.Point(147, 53)
         Me.LblApeCli.Margin = New System.Windows.Forms.Padding(0)
         Me.LblApeCli.Name = "LblApeCli"
@@ -532,6 +531,63 @@ Partial Class FrmClientsPayments
         Me.ToolTip.SetToolTip(Me.DgvClientList, "DOBLE CLIC PARA SELECCIONAR UN CLIENTE")
         Me.DgvClientList.Visible = False
         '
+        'NomCli
+        '
+        Me.NomCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.NomCli.DataPropertyName = "FirstName"
+        Me.NomCli.HeaderText = "Nombre"
+        Me.NomCli.MinimumWidth = 6
+        Me.NomCli.Name = "NomCli"
+        Me.NomCli.ReadOnly = True
+        Me.NomCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.NomCli.Width = 192
+        '
+        'ApeCli
+        '
+        Me.ApeCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.ApeCli.DataPropertyName = "LastName"
+        Me.ApeCli.HeaderText = "Apellido"
+        Me.ApeCli.MinimumWidth = 6
+        Me.ApeCli.Name = "ApeCli"
+        Me.ApeCli.ReadOnly = True
+        Me.ApeCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.ApeCli.Width = 192
+        '
+        'FdnCli
+        '
+        Me.FdnCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.FdnCli.DataPropertyName = "AgeText"
+        Me.FdnCli.HeaderText = "Edad"
+        Me.FdnCli.MinimumWidth = 6
+        Me.FdnCli.Name = "FdnCli"
+        Me.FdnCli.ReadOnly = True
+        Me.FdnCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.FdnCli.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.FdnCli.Width = 120
+        '
+        'TlfCli
+        '
+        Me.TlfCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.TlfCli.DataPropertyName = "Phone"
+        Me.TlfCli.HeaderText = "Telefóno"
+        Me.TlfCli.MinimumWidth = 6
+        Me.TlfCli.Name = "TlfCli"
+        Me.TlfCli.ReadOnly = True
+        Me.TlfCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.TlfCli.Width = 144
+        '
+        'EmlCli
+        '
+        Me.EmlCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.EmlCli.DataPropertyName = "Email"
+        Me.EmlCli.HeaderText = "E-mail"
+        Me.EmlCli.MinimumWidth = 6
+        Me.EmlCli.Name = "EmlCli"
+        Me.EmlCli.ReadOnly = True
+        Me.EmlCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.EmlCli.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.EmlCli.Width = 216
+        '
         'GbState
         '
         Me.GbState.Controls.Add(Me.RbActive)
@@ -591,7 +647,7 @@ Partial Class FrmClientsPayments
         Me.CmbFilter.ForeColor = System.Drawing.Color.MediumBlue
         Me.CmbFilter.FormattingEnabled = True
         Me.CmbFilter.IntegralHeight = False
-        Me.CmbFilter.Items.AddRange(New Object() {"", "   NOMBRE", "   APELLIDO", "   TELEFONO"})
+        Me.CmbFilter.Items.AddRange(New Object() {"", "   NOMBRE", "   APELLIDO", "   TELÉFONO"})
         Me.CmbFilter.Location = New System.Drawing.Point(100, 7)
         Me.CmbFilter.Margin = New System.Windows.Forms.Padding(4, 0, 0, 0)
         Me.CmbFilter.Name = "CmbFilter"
@@ -626,13 +682,6 @@ Partial Class FrmClientsPayments
         Me.LblFilter.Text = "  Filtrar por"
         Me.LblFilter.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
-        'Panel2
-        '
-        Me.Panel2.Location = New System.Drawing.Point(445, 467)
-        Me.Panel2.Name = "Panel2"
-        Me.Panel2.Size = New System.Drawing.Size(10, 26)
-        Me.Panel2.TabIndex = 85
-        '
         'PnlBuscar
         '
         Me.PnlBuscar.AutoSize = True
@@ -666,7 +715,6 @@ Partial Class FrmClientsPayments
         'GbDataClient
         '
         Me.GbDataClient.Controls.Add(Me.PnlDataClient)
-        Me.GbDataClient.Controls.Add(Me.Panel2)
         Me.GbDataClient.Controls.Add(Me.PnlBuscar)
         Me.GbDataClient.Controls.Add(Me.GbState)
         Me.GbDataClient.Controls.Add(Me.BtnFindClient)
@@ -1054,63 +1102,6 @@ Partial Class FrmClientsPayments
         Me.PictureBox.TabIndex = 91
         Me.PictureBox.TabStop = False
         '
-        'NomCli
-        '
-        Me.NomCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.NomCli.DataPropertyName = "FirstName"
-        Me.NomCli.HeaderText = "Nombre"
-        Me.NomCli.MinimumWidth = 6
-        Me.NomCli.Name = "NomCli"
-        Me.NomCli.ReadOnly = True
-        Me.NomCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.NomCli.Width = 192
-        '
-        'ApeCli
-        '
-        Me.ApeCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.ApeCli.DataPropertyName = "LastName"
-        Me.ApeCli.HeaderText = "Apellido"
-        Me.ApeCli.MinimumWidth = 6
-        Me.ApeCli.Name = "ApeCli"
-        Me.ApeCli.ReadOnly = True
-        Me.ApeCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.ApeCli.Width = 192
-        '
-        'FdnCli
-        '
-        Me.FdnCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.FdnCli.DataPropertyName = "AgeText"
-        Me.FdnCli.HeaderText = "Edad"
-        Me.FdnCli.MinimumWidth = 6
-        Me.FdnCli.Name = "FdnCli"
-        Me.FdnCli.ReadOnly = True
-        Me.FdnCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.FdnCli.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.FdnCli.Width = 120
-        '
-        'TlfCli
-        '
-        Me.TlfCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.TlfCli.DataPropertyName = "Phone"
-        Me.TlfCli.HeaderText = "Telefóno"
-        Me.TlfCli.MinimumWidth = 6
-        Me.TlfCli.Name = "TlfCli"
-        Me.TlfCli.ReadOnly = True
-        Me.TlfCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.TlfCli.Width = 144
-        '
-        'EmlCli
-        '
-        Me.EmlCli.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.EmlCli.DataPropertyName = "Email"
-        Me.EmlCli.HeaderText = "E-mail"
-        Me.EmlCli.MinimumWidth = 6
-        Me.EmlCli.Name = "EmlCli"
-        Me.EmlCli.ReadOnly = True
-        Me.EmlCli.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.EmlCli.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.EmlCli.Width = 216
-        '
         'FrmClientsPayments
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -1177,7 +1168,6 @@ Partial Class FrmClientsPayments
     Friend WithEvents CmbFilter As ComboBox
     Friend WithEvents TxtSearch As TextBox
     Friend WithEvents LblFilter As Label
-    Friend WithEvents Panel2 As Panel
     Friend WithEvents PnlBuscar As Panel
     Friend WithEvents BtnSelect As Button
     Friend WithEvents GbDataClient As GroupBox

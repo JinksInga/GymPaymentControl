@@ -122,6 +122,9 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants\CustomerStates.vb" />
+    <Compile Include="Constants\PaymentMethods.vb" />
+    <Compile Include="Constants\SearchFilters.vb" />
     <Compile Include="Data\BaseRepository.vb" />
     <Compile Include="Data\SqlRepository.vb" />
     <Compile Include="Forms\FrmCollectMembership.Designer.vb">
@@ -196,10 +199,9 @@
     <Compile Include="UIHelpers\AppTexts.vb" />
     <Compile Include="UIHelpers\ValidationMessages.vb" />
     <Compile Include="UIHelpers\DialogMessages.vb" />
-    <Compile Include="Utils\BusinessConstants.vb" />
     <Compile Include="Utils\DateUtils.vb" />
     <Compile Include="Utils\NavigateToForm.vb" />
-    <Compile Include="Utils\PaymentCalculator.vb" />
+    <Compile Include="Services\PaymentCalculator.vb" />
     <Compile Include="Utils\Validations.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">

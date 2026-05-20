@@ -1,4 +1,5 @@
-﻿Imports GymPaymentControl.Interfaces
+﻿Imports GymPaymentControl.Constants
+Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 Imports GymPaymentControl.UIHelpers
@@ -125,17 +126,6 @@ Public Class FrmCollectMembership
             Dim idGroup As Integer? = If(TypeOf _selectedPayment Is GroupPaymentDTO,
                 DirectCast(_selectedPayment, GroupPaymentDTO).IdGrp, CType(Nothing, Integer?))
 
-            'Using connection As New MySqlConnection(_paymentManager.ConnectionString)
-
-            '    connection.Open()
-
-            '    Dim generator As New PaymentGenerator()
-            '    If generator.PaymentExists(connection, Nothing, DtpFdiPgs.Value, idClient, idGroup) Then
-            '        MessageBox.Show("Ya existe un pago registrado para este periodo (Mes/Año).", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-            '        Exit Sub
-            '    End If
-
-            'End Using
             ' 1. Capturamos el método de pago del DTO actual
             Dim metodoPago As String = _selectedPayment.MtdPgs.ToUpper()
             Dim esDaily As Boolean = metodoPago.Contains(PaymentMethods.Daily)
@@ -161,18 +151,11 @@ Public Class FrmCollectMembership
             End Using
         End If
 
-        ' 3. Recalcular totales finales antes de guardar para asegurar coherencia
-        'PaymentCalculator.CalculateProratedPayment(_selectedPayment)
-
         ' 4. Guardar usando tu PaymentManager
-        'Dim monthPaid = _paymentManager.SaveTransaction(_selectedPayment, _currentMode,UserSession.IdUser, CmbFrmPgs.Text)
-        ' En BtnConfirmPayment
         Dim monthPaid = _paymentManager.SavePaymentTransaction(_selectedPayment, _currentMode, UserSession.IdUser, CmbFrmPgs.Text)
 
         If monthPaid Then
             MessageBox.Show("Transacción realizada con éxito", "Pago realizado", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            ' Al cerrar con OK, el formulario padre refrescará la lista desde la BD
-            'Me.DialogResult = DialogResult.OK
             Me.Close()
         End If
 
@@ -376,6 +359,5 @@ Public Class FrmCollectMembership
         ToggleControl(CmbMtdPgs, ChkMtdPgs, ToolTip, "Desactiva el método de pago.", "Activa el método de pago.")
 
     End Sub
-
 
 End Class
