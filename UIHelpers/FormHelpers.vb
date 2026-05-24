@@ -1,12 +1,56 @@
 ﻿Imports GymPaymentControl.Utils.Validations
 
 Namespace UIHelpers
+
     ''' <summary>
     ''' Proporciona métodos auxiliares para manipular controles de formularios (UI),
     ''' como activación/desactivación de controles y validación visual de datos.
     ''' Estos métodos combinan lógica de negocio básica con representación visual.
     ''' </summary>
     Public Module FormHelpers
+
+
+        ''' <summary>
+        ''' Recorre recursivamente todos los controles hijos de un contenedor y ejecuta una acción
+        ''' sobre los Label cuyo nombre contiene el filtro especificado.
+        ''' </summary>
+        ''' <param name="parent">
+        ''' Contenedor principal desde donde comenzará la búsqueda recursiva.
+        ''' </param>
+        ''' <param name="filter">
+        ''' Texto que debe contener el nombre del Label para ser modificado.
+        ''' </param>
+        ''' <param name="action">
+        ''' Acción que se ejecutará sobre cada Label que cumpla el filtro indicado.
+        ''' </param>
+        Public Sub ProcessLabelsRecursive(parent As Control,
+                                          filter As String,
+                                          action As Action(Of Label))
+
+            For Each ctrl As Control In parent.Controls
+
+                If TypeOf ctrl Is Label AndAlso ctrl.Name.Contains(filter) Then
+                    action(DirectCast(ctrl, Label))
+                End If
+
+                If ctrl.HasChildren Then
+                    ProcessLabelsRecursive(ctrl, filter, action)
+                End If
+
+            Next
+
+        End Sub
+        '|* HEMOS DEJADO COMENTADO PARA QUE NOS SIRVA DE EJEMPLO POR SI HACE FALTA PARA OTROS CONTROLES *|'
+        'Public Sub UpdateLabelColorsRecursive(parent As Control, targetColor As Color, filter As String)
+        '    For Each ctrl As Control In parent.Controls
+        '        If TypeOf ctrl Is Label AndAlso ctrl.Name.Contains(filter) Then
+        '            ctrl.ForeColor = targetColor
+        '        End If
+        '        If ctrl.HasChildren Then
+        '            UpdateLabelColorsRecursive(ctrl, targetColor, filter)
+        '        End If
+        '    Next
+        'End Sub
 
 
         ''' <summary>
