@@ -28,33 +28,21 @@ Namespace Utils
             Dim form As New FrmCollectMembership()
 
             ' 3. Configuración MDI
-            form.MdiParent = FrmMdiMain ' IMPORTANTE: Asignamos el padre
+            form.MdiParent = FrmMdiMain
             form.PreparePayment(dtoClone, mode)
 
             ' 4. Manejo del Refresco
-            ' Como ya no es modal, usamos el evento FormClosed para ejecutar el refresco
+            ' Usamos el evento FormClosed para ejecutar el refresco
             If refreshAction IsNot Nothing Then
 
-                ' Solo refrescamos si el formulario se cerró con éxito (puedes añadir lógica aquí)
+                ' Solo refrescamos si el formulario se cerró con éxito
                 AddHandler form.FormClosed, Sub(s, e)
                                                 refreshAction.Invoke()
                                             End Sub
 
             End If
 
-            form.Show() ' Ahora es no bloqueante
-
-            '' Centralizamos el clonado para proteger los datos originales
-            'Dim dtoClone = DirectCast(dto.CloneInterface(), IPaymentCalculable)
-
-            'Using form As New FrmCollectMembership()
-            '    form.PreparePayment(dtoClone, mode) 'TransactionMode.UpdatePayment)
-
-            '    If form.ShowDialog() = DialogResult.OK Then
-            '        ' El operador ?. asegura que si no pasamos acción, no explote
-            '        refreshAction?.Invoke()
-            '    End If
-            'End Using
+            form.Show()
 
         End Sub
 

@@ -123,6 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants\CustomerStates.vb" />
+    <Compile Include="Constants\PaymentForms.vb" />
     <Compile Include="Constants\PaymentMethods.vb" />
     <Compile Include="Constants\SearchFilters.vb" />
     <Compile Include="Data\BaseRepository.vb" />

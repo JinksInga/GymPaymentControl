@@ -329,25 +329,6 @@ Public Class FrmClientsPayments
 
     Private Sub DgvPaymentList_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvPaymentList.CellContentClick
     End Sub
-    Private Sub DgvPaymentList_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvPaymentList.CellClick
-
-        '| ---------------------------------------
-        '| | ACTIVAR O DESACTIVAR BOTON DE COBRO |
-        '| ---------------------------------------
-        '| Solo se permite cobrar pagos pendientes.
-
-        If e.RowIndex < 0 Then Exit Sub
-
-        Dim payment = DirectCast(DgvPaymentList.Rows(e.RowIndex).DataBoundItem, IndividualPaymentDTO)
-
-        If IsDateNotAssigned(payment.FdpPgs) Then
-            BtnCollectMonth.Enabled = True
-        Else
-            BtnCollectMonth.Enabled = False
-            DgvPaymentList.CurrentCell = Nothing
-        End If
-
-    End Sub
     Private Sub DgvPaymentList_CellFormatting(sender As Object, e As DataGridViewCellFormattingEventArgs) Handles DgvPaymentList.CellFormatting
 
         '| ----------------------------------------
@@ -372,17 +353,28 @@ Public Class FrmClientsPayments
 
     End Sub
     Private Sub DgvPaymentList_SelectionChanged(sender As Object, e As EventArgs) Handles DgvPaymentList.SelectionChanged
-        ' ESTE BLOQUE DE CÓDIGO CUANDO SE USA EL TECLADO PARA CONSEGUIR ACTIVAR O DESACTIVAR EL BOTON DE PAGO
-        '' 1. Intentamos obtener el pago de la fila actual de forma segura
-        'Dim payment = TryCast(DgvPaymentList.CurrentRow?.DataBoundItem, IndividualPaymentDTO)
 
-        'If payment IsNot Nothing Then
-        '    ' 2. El botón solo se activa si NO tiene startDate asignada (es un impago)
-        '    BtnCollectMonth.Enabled = IsDateNotAssigned(payment.FdpPgs)
-        'Else
-        '    ' 3. Si no hay selección válida, desactivamos
-        '    BtnCollectMonth.Enabled = False
-        'End If
+        '| ---------------------------------------
+        '| | ACTIVAR O DESACTIVAR BOTON DE COBRO |
+        '| ---------------------------------------
+        '| Solo se permite seleccionar pagos pendientes.
+
+        Dim payment = TryCast(DgvPaymentList.CurrentRow?.DataBoundItem, IndividualPaymentDTO)
+
+        If payment Is Nothing Then
+            BtnCollectMonth.Enabled = False
+            Exit Sub
+        End If
+
+        Dim hasDebt As Boolean = IsDateNotAssigned(payment.FdpPgs)
+
+        BtnCollectMonth.Enabled = hasDebt
+
+        If Not hasDebt Then
+            DgvPaymentList.ClearSelection()
+            DgvPaymentList.CurrentCell = Nothing
+        End If
+
     End Sub
 
 
@@ -422,12 +414,11 @@ Public Class FrmClientsPayments
 
         '| Obtener tarifa base correspondiente.
         Dim rate = _clientManager.GetApplicableRate(_selectedClient)
-        If Not rate.Exists Then
 
+        If Not rate.Exists Then
             MessageBox.Show("No se encontró una TARIFA válida en la BBDD.", "Error",
                             MessageBoxButtons.OK, MessageBoxIcon.Error)
             Exit Sub
-
         End If
 
         '| Preparación de variables de cálculo.

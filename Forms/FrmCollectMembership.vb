@@ -3,7 +3,6 @@ Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 Imports GymPaymentControl.UIHelpers
-Imports GymPaymentControl.Utils
 Imports MySql.Data.MySqlClient
 
 Public Class FrmCollectMembership
@@ -12,6 +11,9 @@ Public Class FrmCollectMembership
 
     ' Propiedad privada del objeto completo
     Private _selectedPayment As IPaymentCalculable
+
+    Private _isUpdatedText As Boolean = False
+    Private _isLoading As Boolean = False
 
     ' Variable para guardar el modo actual
     Private _currentMode As TransactionMode
@@ -22,72 +24,58 @@ Public Class FrmCollectMembership
         UpdatePayment
     End Enum
 
-    Private _isUpdatedText As Boolean = False
-    Private _isLoading As Boolean = False
+    '
+    Private _originalPrice As Decimal
+    Private _originalDiscount As Decimal
 
-    ''
-    ''
+    Private Const MARGIN_DAILY As Decimal = 2D
+    Private Const MARGIN_MONTHLY_GRUPAL As Decimal = 5D
+
+
     Private Sub FrmCollectMembership_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        'SELECCIONA LA PRIMA OPCIÓN DEL COMBOBOX
-        CmbFrmPgs.SelectedIndex = 0
+        CmbFrmPgs.Text = PaymentForms.Cash
     End Sub
     Private Sub FrmCollectMembership_Deactivate(sender As Object, e As EventArgs) Handles Me.Deactivate
-
-        '| --------------------------------------------------------------------------------------------
-        '| CERRAMOS LA VENTANA AL DESACTIVAR EL FORMULARIO 
-        '| ------------------------------------------------
-        '| * Si se desactiva el Form o se hace clic fuera del Form cerramos el FrmCollectMembership para
-        '|   evitar hacer otras acciones con el form ejecutado (no visible).
         Me.Close()
+    End Sub
+
+
+    Private Sub DtpFdiPgs_ValueChanged(sender As Object, e As EventArgs) Handles DtpFdiPgs.ValueChanged
+
+        ' Filtro de seguridad: si estamos cargando el form o no hay objeto, no hacemos nada
+        If _isLoading OrElse _selectedPayment Is Nothing Then Exit Sub
+
+        ' 1. Sincronizamos la nueva fecha del calendario al objeto de negocio
+        _selectedPayment.FdiPgs = DtpFdiPgs.Value
+
+        ' Forzamos el recálculo
+        ' Esto llamará a tu módulo, recalculará los días restantes del mes, el total prorrateado
+        ' y refrescará todas las etiquetas de la pantalla al instante.
+        CalculatePrice()
 
     End Sub
-    ''
-    ''
-    Private Sub DtpFdiPgs_ValueChanged(sender As Object, e As EventArgs) Handles DtpFdiPgs.ValueChanged
-        '
-    End Sub
-    ''
-    ''
+
+
     Private Sub TxtPrcPgs_TextChanged(sender As Object, e As EventArgs) Handles TxtPrcPgs.TextChanged
     End Sub
     Private Sub TxtPrcPgs_GotFocus(sender As Object, e As EventArgs) Handles TxtPrcPgs.GotFocus
-        'SELECCIONA TODO EL TEXTO
         TxtPrcPgs.SelectAll()
     End Sub
     Private Sub TxtPrcPgs_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TxtPrcPgs.KeyPress
-
-        '| --------------------------------------------------------------------------------------------
-        '| VALIDAR EL INGRESO DE NÚMEROS DECIMALES CON FORMATO MONEDA
-        '| ----------------------------------------------------------
-        '| * Almacenamos en la variable strAllowKey los caracteres que queremos PERMITIR.
-        '| * Llamamos a la subrutina Sub_Only_Numbers y le pasamos la variable como parámetro.
-        'Dim strAllowKey As String = "(-) "
-        'Sub_Only_Numbers(strAllowKey, e
         AllowDecimalInput(TxtPrcPgs.Text, e)
-
     End Sub
-    ''
-    ''
+
+
     Private Sub TxtDscPgs_TextChanged(sender As Object, e As EventArgs) Handles TxtDscPgs.TextChanged
     End Sub
     Private Sub TxtDscPgs_GotFocus(sender As Object, e As EventArgs) Handles TxtDscPgs.GotFocus
-        'SELECCIONA TODO EL TEXTO
         TxtDscPgs.SelectAll()
     End Sub
     Private Sub TxtDscPgs_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TxtDscPgs.KeyPress
-
-        '| --------------------------------------------------------------------------------------------
-        '| VALIDAR EL INGRESO DE NÚMEROS DECIMALES CON FORMATO MONEDA
-        '| ----------------------------------------------------------
-        '| * Almacenamos en la variable strAllowKey los caracteres que queremos PERMITIR.
-        '| * Llamamos a la subrutina Sub_Only_Numbers y le pasamos la variable como parámetro.
-        'Dim strAllowKey As String = "(-) "
-        'Sub_Only_Numbers(strAllowKey, e
         AllowDecimalInput(TxtDscPgs.Text, e)
-
     End Sub
-    ''
-    ''
+
+
     Private Sub DtpFdpPgs_ValueChanged(sender As Object, e As EventArgs) Handles DtpFdpPgs.ValueChanged
         '
     End Sub
@@ -103,6 +91,25 @@ Public Class FrmCollectMembership
     End Sub
     ''
     ''
+
+
+    Private Sub ChkFdiPgs_CheckedChanged(sender As Object, e As EventArgs) Handles ChkFdiPgs.CheckedChanged
+
+        ToggleControl(DtpFdiPgs, ChkFdiPgs, ToolTip, "Desactiva la fecha de inicio del mes.", "Activa la fecha de inicio del mes.")
+
+    End Sub
+    Private Sub ChkFdpPgs_CheckedChanged(sender As Object, e As EventArgs) Handles ChkFdpPgs.CheckedChanged
+
+        ToggleControl(DtpFdpPgs, ChkFdpPgs, ToolTip, "Desactiva la fecha de pago.", "Activa la fecha de pago.")
+
+    End Sub
+    Private Sub ChkMtdPgs_CheckedChanged(sender As Object, e As EventArgs) Handles ChkMtdPgs.CheckedChanged
+
+        ToggleControl(CmbMtdPgs, ChkMtdPgs, ToolTip, "Desactiva el método de pago.", "Activa el método de pago.")
+
+    End Sub
+
+
     Private Sub BtnPayMonth_Click(sender As Object, e As EventArgs) Handles BtnConfirmPayment.Click
 
         ' paymentMethod (BONO, DIARIO, MENSUAL, GRUPO FAMILIAR)
@@ -141,8 +148,8 @@ Public Class FrmCollectMembership
                 ' 3. Si el generador dice que ya existe, preparamos el mensaje según el tipo de pago
                 If yaExistePago Then
                     Dim mensajeError As String = If(esDaily,
-            $"Ya existe un pago diario registrado para este cliente el día {DtpFdiPgs.Value.ToShortDateString()}.",
-            "Ya existe un pago registrado para este periodo (Mes/Año).")
+                        $"Ya existe un pago diario registrado para este cliente el día {DtpFdiPgs.Value.ToShortDateString()}.",
+                        "Ya existe un pago registrado para este periodo (Mes/Año).")
 
                     MessageBox.Show(mensajeError, "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                     Exit Sub
@@ -160,23 +167,23 @@ Public Class FrmCollectMembership
         End If
 
     End Sub
-    ''
-    ''
+
+
     Private Sub BtnCancelPayment_Click(sender As Object, e As EventArgs) Handles BtnCancelPayment.Click
         ' Forzamos el resultado a Cancel y cerramos
         Me.DialogResult = DialogResult.Cancel
-        Me.Close() 'CERRAR FORM
-
+        Me.Close()
     End Sub
-    ''
-    ''
+
+
     'Creamos un método para "Cargar" el formulario con los datos
     ' Cambiamos el parámetro a la Interfaz
     Public Sub PreparePayment(payment As IPaymentCalculable, mode As TransactionMode)
 
-        _isLoading = True ' <-- BLOQUEO
-        _selectedPayment = payment
+        _isLoading = True
+
         _currentMode = mode
+        _selectedPayment = payment
 
         ' Si es el DTO de Grupo (deudores), priorizamos el nombre del grupo.
         If TypeOf _selectedPayment Is GroupPaymentDTO Then
@@ -189,19 +196,24 @@ Public Class FrmCollectMembership
 
         ' --- Asignación de Controles ---
         DtpFdiPgs.Value = _selectedPayment.FdiPgs
-        ' Usamos los valores numéricos; el TextChanged se encargará del " €"
         TxtPrcPgs.Text = $"{_selectedPayment.PrcPgs} €"
         TxtDscPgs.Text = $"{_selectedPayment.DscPgs} €"
+
+        ' Al cargar los datos del pago en la pantalla:
+        _originalPrice = _selectedPayment.PrcPgs
+        _originalDiscount = _selectedPayment.DscPgs
 
         Dim paymentMethod As String = _selectedPayment.MtdPgs
 
         Select Case True
             Case paymentMethod.Contains(PaymentMethods.Daily)
+
                 CmbMtdPgs.Text = PaymentMethods.Daily
                 TxtDetailMethod.Text = "CLASES SUELTAS : Pago por jornada individual."
                 TxtDetailMethod.ForeColor = Color.DarkOrange
 
             Case paymentMethod.Contains(PaymentMethods.Monthly)
+
                 CmbMtdPgs.Text = PaymentMethods.Monthly
                 If payment.DscPgs = 0 Then
                     TxtDetailMethod.Text = "TARIFA INDIVIDUAL : Sin Descuento."
@@ -211,16 +223,13 @@ Public Class FrmCollectMembership
                 TxtDetailMethod.ForeColor = Color.RoyalBlue
 
             Case paymentMethod.Contains(PaymentMethods.Grupal)
-                CmbMtdPgs.Text = PaymentMethods.FamilyGroup
 
-                ' Lógica de Nota Informativa vs Integrantes
+                CmbMtdPgs.Text = PaymentMethods.FamilyGroup
                 If TypeOf _selectedPayment Is IndividualPaymentDTO Then
-                    ' Como GroupName ya está en la base, no necesitamos Shadows ni Castings complejos
                     Dim ind = DirectCast(_selectedPayment, IndividualPaymentDTO)
                     Dim nGrupo = If(Not String.IsNullOrEmpty(ind.GroupName), ind.GroupName, "un grupo familiar")
                     TxtDetailMethod.Text = $"NOTA: Este cobro aplica tarifa reducida por pertenecer a: {nGrupo}."
                 Else
-                    ' Si es GroupPaymentDTO, mostramos la lista de miembros
                     TxtDetailMethod.Text = "INTEGRANTES : " & _selectedPayment.Members
                 End If
 
@@ -228,36 +237,22 @@ Public Class FrmCollectMembership
 
             Case Else
                 CmbMtdPgs.SelectedIndex = -1
+
         End Select
 
-        _isLoading = False ' <-- LIBERACIÓN
+        _isLoading = False
+
         CalculatePrice()
 
     End Sub
-    ''
-    ''
-    Private Sub ChangeFontError()
-        '
-        LblTotal.Text = "ERROR"
-        LblTotal.ForeColor = Color.Red
-        LblPriceDay.Text = "ERROR"
-        LblPriceDay.ForeColor = Color.Red
-        LblTotalToPay.Text = "ERROR"
-        LblTotalToPay.ForeColor = Color.Red
 
-    End Sub
-
-    Private Sub ChangeFontOk()
-        '
-        LblTotal.ForeColor = Color.Green
-        LblPriceDay.ForeColor = Color.Green
-        LblTotalToPay.ForeColor = Color.Black
-
-    End Sub
 
     Private Sub CalculatePrice()
 
-        'If _selectedPayment Is Nothing Then Exit Sub
+        ' Si alguna de las cajas está en rojo por error de rango,
+        ' abortamos el cálculo para no mostrar datos inconsistentes.
+        If TxtPrcPgs.ForeColor = Color.Red OrElse TxtDscPgs.ForeColor = Color.Red Then Exit Sub
+
         ' Si estamos cargando datos o no hay objeto, NO calcular nada
         If _isLoading OrElse _selectedPayment Is Nothing Then Exit Sub
 
@@ -267,6 +262,9 @@ Public Class FrmCollectMembership
 
             .PrcPgs = ParseMoney(TxtPrcPgs.Text)
             .DscPgs = ParseMoney(TxtDscPgs.Text)
+
+            ' Así el objeto siempre tiene la fecha fresca del calendario
+            .FdiPgs = DtpFdiPgs.Value
 
             ' 2. Usamos tu nuevo módulo de utilidad
             CalculatePaymentAmount(_selectedPayment)
@@ -283,19 +281,43 @@ Public Class FrmCollectMembership
 
     End Sub
 
-    Private Function ParseMoney(text As String) As Decimal
-        Dim clean = text.Replace("€", "").Trim()
 
-        Dim value As Decimal
-        If Decimal.TryParse(clean, value) Then
-            Return value
+    Private Sub TxtMoney_TextChanged(sender As Object, e As EventArgs) _
+        Handles TxtPrcPgs.TextChanged, TxtDscPgs.TextChanged
+
+        '  Filtro de seguridad
+        If _isLoading OrElse _selectedPayment Is Nothing Then Exit Sub
+
+        If sender Is TxtPrcPgs Then
+            ' 1. Configuración de márgenes para el PRECIO
+            Dim margin As Decimal = MARGIN_MONTHLY_GRUPAL
+            'If _selectedPayment.MtdPgs = PaymentMethods.Daily Then
+            If _selectedPayment.MtdPgs.Contains(PaymentMethods.Daily) Then
+                margin = MARGIN_DAILY
+            End If
+
+            ' 2. Usamos la variable fija e inmutable 🎯
+            Dim minAllowed As Decimal = Math.Max(0D, _originalPrice - margin)
+            Dim maxAllowed As Decimal = _originalPrice + margin
+
+            FormatMoneyTextChanged(TxtPrcPgs, minAllowed, maxAllowed, Color.DarkOrange)
+
+        ElseIf sender Is TxtDscPgs Then
+            ' 3. Configuración de márgenes para el DESCUENTO usando su variable fija 🎯
+            ' Por ejemplo, permitimos que el descuento varíe un máximo de 5€ arriba o abajo del original, sin bajar de 0
+            Dim marginDsc As Decimal = 5D
+            Dim minAllowedDsc As Decimal = Math.Max(0D, _originalDiscount - marginDsc)
+            Dim maxAllowedDsc As Decimal = _originalDiscount + marginDsc
+
+            FormatMoneyTextChanged(TxtDscPgs, minAllowedDsc, maxAllowedDsc, Color.DarkOrange)
         End If
 
-        Return 0D
-    End Function
+    End Sub
+
 
     Private Sub FormatMoneyTextChanged(textBox As TextBox, minValue As Decimal, maxValue As Decimal, zeroColor As Color)
 
+        ' Desactivamos temporalmente el evento para evitar bucles infinitos al formatear el texto
         RemoveHandler textBox.TextChanged, AddressOf TxtMoney_TextChanged
 
         Dim cursorPos = textBox.SelectionStart
@@ -310,7 +332,7 @@ Public Class FrmCollectMembership
 
         If Not isValid OrElse value < minValue OrElse value > maxValue Then
             textBox.ForeColor = Color.Red
-            ChangeFontError()
+            UpdateLabelsState({LblTotal, LblPriceDay, LblTotalToPay}, Color.Red, "ERROR")
         Else
 
             If value = 0D Then
@@ -319,7 +341,9 @@ Public Class FrmCollectMembership
                 textBox.ForeColor = Color.Green
             End If
 
-            ChangeFontOk()
+            UpdateLabelsState({LblTotal, LblPriceDay}, Color.Green)
+            UpdateLabelsState({LblTotalToPay}, Color.Black)
+
             CalculatePrice()
 
         End If
@@ -328,36 +352,5 @@ Public Class FrmCollectMembership
 
     End Sub
 
-
-    Private Sub TxtMoney_TextChanged(sender As Object, e As EventArgs) _
-        Handles TxtPrcPgs.TextChanged, TxtDscPgs.TextChanged
-
-        If sender Is TxtPrcPgs Then
-            FormatMoneyTextChanged(TxtPrcPgs, 30D, 90D, Color.DarkOrange)
-
-        ElseIf sender Is TxtDscPgs Then
-            FormatMoneyTextChanged(TxtDscPgs, 0D, 25D, Color.DarkOrange)
-
-        End If
-
-    End Sub
-
-    Private Sub ChkFdiPgs_CheckedChanged(sender As Object, e As EventArgs) Handles ChkFdiPgs.CheckedChanged
-
-        ToggleControl(DtpFdiPgs, ChkFdiPgs, ToolTip, "Desactiva la fecha de inicio del mes.", "Activa la fecha de inicio del mes.")
-
-    End Sub
-
-    Private Sub ChkFdpPgs_CheckedChanged(sender As Object, e As EventArgs) Handles ChkFdpPgs.CheckedChanged
-
-        ToggleControl(DtpFdpPgs, ChkFdpPgs, ToolTip, "Desactiva la fecha de pago.", "Activa la fecha de pago.")
-
-    End Sub
-
-    Private Sub ChkMtdPgs_CheckedChanged(sender As Object, e As EventArgs) Handles ChkMtdPgs.CheckedChanged
-
-        ToggleControl(CmbMtdPgs, ChkMtdPgs, ToolTip, "Desactiva el método de pago.", "Activa el método de pago.")
-
-    End Sub
 
 End Class

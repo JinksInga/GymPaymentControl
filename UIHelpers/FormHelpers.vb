@@ -11,6 +11,71 @@ Namespace UIHelpers
 
 
         ''' <summary>
+        ''' Convierte un texto con formato monetario a Decimal.
+        ''' </summary>
+        ''' <param name="text">
+        ''' Texto que contiene un valor monetario.
+        ''' Puede incluir símbolos de moneda y espacios.
+        ''' </param>
+        ''' <returns>
+        ''' Valor decimal convertido.
+        ''' Devuelve 0 si la conversión falla.
+        ''' </returns>
+        Public Function ParseMoney(text As String) As Decimal
+
+            If String.IsNullOrWhiteSpace(text) Then Return 0D
+
+            Dim clean = text.Replace("€", "").Trim()
+
+            Dim value As Decimal
+
+            If Decimal.TryParse(clean, value) Then
+                Return value
+            End If
+
+            Return 0D
+
+        End Function
+
+
+        ''' <summary>
+        ''' Actualiza el color y, opcionalmente, el texto de una colección de Labels.
+        ''' </summary>
+        ''' <param name="labels">
+        ''' Colección de controles Label que serán modificados.
+        ''' </param>
+        ''' <param name="foreColor">
+        ''' Color que se aplicará al texto de los Labels.
+        ''' </param>
+        ''' <param name="text">
+        ''' Texto opcional que se asignará a todos los Labels.
+        ''' Si es Nothing, el texto actual no se modifica.
+        ''' </param>
+        ''' <remarks>
+        ''' Esta función permite centralizar cambios visuales repetitivos
+        ''' en múltiples Labels, evitando duplicación de código en formularios.
+        ''' 
+        ''' Casos de uso:
+        ''' - Mostrar estados de ERROR.
+        ''' - Restaurar colores por defecto.
+        ''' - Actualizar mensajes visuales masivos.
+        ''' </remarks>
+        Public Sub UpdateLabelsState(labels As IEnumerable(Of Label),
+                                     foreColor As Color,
+                                     Optional text As String = Nothing)
+
+            For Each label In labels
+
+                label.ForeColor = foreColor
+
+                If text IsNot Nothing Then label.Text = text
+
+            Next
+
+        End Sub
+
+
+        ''' <summary>
         ''' Recorre recursivamente todos los controles hijos de un contenedor y ejecuta una acción
         ''' sobre los Label cuyo nombre contiene el filtro especificado.
         ''' </summary>
