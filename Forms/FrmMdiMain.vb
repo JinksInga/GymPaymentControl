@@ -155,7 +155,7 @@ Public Class FrmMdiMain
         '| * Llamamos a la función 'ShowFormChild' y le pasamos como parámetro el
         '|   formulario hijo 'FrmDiscountTable'
 
-        ShowFormChild(FrmDiscountTable)
+        ShowFormChild(FrmPricesAndDiscounts)
 
     End Sub
     ''

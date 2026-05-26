@@ -8,27 +8,26 @@ Imports GymPaymentControl.Utils
 
 Public Class FrmClientsPayments
 
-    '| ---------------------
-    '| | SERVICIOS Y DATOS |
-    '| ---------------------
+#Region " VARIABLES DE ESTADO Y CONSTANTES "
 
+    ' --- Servicios de Negocio (Managers) ---
     Private ReadOnly _clientManager As New ClientManager()
     Private ReadOnly _paymentManager As New PaymentManager()
 
+    ' --- Colecciones de Datos en Memoria (Listas) ---
     Private _clientList As List(Of IndividualPaymentDTO)
     Private _historyList As List(Of IndividualPaymentDTO)
+
+    ' --- Contexto del Cliente Seleccionado ---
     Private _selectedClient As IndividualPaymentDTO
+    Private _currentState As String
 
-
-    '| -------------------------
-    '| | ESTADO DEL FORMULARIO |
-    '| -------------------------
-
+    ' --- Banderas de Control de Flujo (UI Flags) ---
     Private _isCleaning As Boolean
-    Private strState As String
 
+#End Region
 
-#Region "EVENTOS"
+#Region " EVENTOS DEL FORMULARIO (Handlers) "
     Private Sub FrmClientsPayments_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         '| -------------------------
@@ -40,7 +39,7 @@ Public Class FrmClientsPayments
             ProcessLabelsRecursive(PnlDataClient, "Cli",
                                    Sub(label) label.Text = "")
             DgvPaymentList.DataSource = Nothing
-            RefreshCustomerList()
+            FetchClientsFromDatabase()
 
             DgvPaymentList.AutoGenerateColumns = False
 
@@ -64,7 +63,7 @@ Public Class FrmClientsPayments
         ProcessLabelsRecursive(PnlDataClient, "Cli",
                                    Sub(label) label.Text = "")
         DgvPaymentList.DataSource = Nothing
-        RefreshClientList()
+        FilterAndRenderClientGridUI()
 
         _isCleaning = False
 
@@ -111,7 +110,7 @@ Public Class FrmClientsPayments
 
             UpdateSearchVisualFeedback(0)
         Else
-            RefreshClientList()
+            FilterAndRenderClientGridUI()
         End If
 
     End Sub
@@ -163,7 +162,7 @@ Public Class FrmClientsPayments
         '| | MOSTRAR CLIENTES ACTIVOS / INACTIVOS |
         '| ----------------------------------------
 
-        strState = If(RbActive.Checked, CustomerStates.Active, CustomerStates.Inactive)
+        _currentState = If(RbActive.Checked, CustomerStates.Active, CustomerStates.Inactive)
 
         If RbActive.Checked Then
 
@@ -179,7 +178,7 @@ Public Class FrmClientsPayments
         TxtSearch.Clear()
         TxtSearch.Focus()
 
-        RefreshClientList()
+        FilterAndRenderClientGridUI()
 
     End Sub
 
@@ -288,7 +287,7 @@ Public Class FrmClientsPayments
                                    Sub(label) label.Text = "")
                     DgvPaymentList.DataSource = Nothing
                     DisableButtons()
-                    RefreshCustomerList()
+                    FetchClientsFromDatabase()
                     MessageBox.Show("Cliente e historial de pagos eliminados correctamente.", "Registro borrado",
                                     MessageBoxButtons.OK, MessageBoxIcon.Information)
                 End If
@@ -448,13 +447,38 @@ Public Class FrmClientsPayments
     Private Sub BtnCloseWindow_Click(sender As Object, e As EventArgs) Handles BtnCloseWindow.Click
         Me.Close()
     End Sub
+
 #End Region
 
-    '| ====================================================================== |'
-    '|                     FUNCIONES Y MÉTODOS AUXILIARES                     |'
-    '| ====================================================================== |'
+    '| ============================================================ |'
+    '|                FUNCIONES Y MÉTODOS AUXILIARES                |'
+    '| ============================================================ |'
 
-#Region "CARGA DE DATOS"
+#Region " 1. PUNTOS DE ENTRADA Y ORQUESTACIÓN DE CARGA "
+    ' Métodos públicos o mayores encargados de coordinar
+    ' las cargas masivas coordinando datos e interfaz.
+
+    ''' <summary>
+    ''' Refresca la lista general de clientes y vuelve a cargar
+    ''' la información visual del cliente especificado.
+    ''' </summary>
+    ''' <param name="clientId">
+    ''' Identificador del cliente que debe localizarse y recargarse.
+    ''' </param>
+    ''' <param name="refreshPayments">
+    ''' Indica si también debe refrescarse el historial de pagos.
+    ''' </param>
+    Public Sub GlobalRefresh(clientId As Integer,
+                             Optional refreshPayments As Boolean = True)
+
+        FetchClientsFromDatabase()
+
+        Dim client = _clientList.FirstOrDefault(Function(c) c.IdCli = clientId)
+
+        If client IsNot Nothing Then LoadClientAndPaymentsData(client, refreshPayments)
+
+    End Sub
+
 
     ''' <summary>
     ''' Carga la información visual del cliente seleccionado y, opcionalmente,
@@ -504,6 +528,27 @@ Public Class FrmClientsPayments
 
 
     ''' <summary>
+    ''' Actualiza la lista general de clientes disponible
+    ''' para búsquedas y operaciones del formulario.
+    ''' </summary>
+    ''' <remarks>
+    ''' También habilita o deshabilita el botón de búsqueda
+    ''' dependiendo de si existen clientes registrados.
+    ''' </remarks>
+    Private Sub FetchClientsFromDatabase()
+
+        BtnFindClient.Enabled = _clientManager.HasClients()
+
+        If BtnFindClient.Enabled Then _clientList = _clientManager.GetClientsForSearch()
+
+    End Sub
+
+#End Region
+
+#Region " 2. CARGA DE DATOS Y ESTADO VISUAL DEL CLIENTE "
+    ' Métodos expertos en tomar un cliente específico y volcar su información tanto en el historial como en las etiquetas.
+
+    ''' <summary>
     ''' Actualiza los controles visuales del formulario con la información
     ''' principal del cliente seleccionado.
     ''' </summary>
@@ -549,6 +594,136 @@ Public Class FrmClientsPayments
 
 
     ''' <summary>
+    ''' Muestra en los Labels del formulario la información
+    ''' básica del cliente seleccionado.
+    ''' </summary>
+    ''' <param name="client">
+    ''' Cliente cuyos datos serán asignados a los controles visuales.
+    ''' </param>
+    Sub FillLabelsClientData(client As IndividualPaymentDTO)
+
+        LblNomCli.Text = client.FirstName
+        LblApeCli.Text = client.LastName
+        LblFdnCli.Text = ConvertVeryLongDate(client.BirthDate)
+        LblEdadCli.Text = client.AgeText
+        LblTlfCli.Text = client.Phone
+        LblEmlCli.Text = client.Email
+        LblDirCli.Text = client.Address
+        LblMtdPgoCli.Text = client.PaymentMethod
+        LblFdiCli.Text = ConvertVeryLongDate(client.RegistrationDate)
+        LblEstCli.Text = client.State
+        LblGrpFamCli.Text = client.IdGroup
+
+    End Sub
+
+#End Region
+
+#Region " 3. COSMÉTICA, HELPERS VISUALES Y CONTROL DE COMPONENTES UI "
+    ' Métodos dedicados al control fino de la interfaz: activar o desactivar botones,
+    ' cajas de búsqueda y dar retroalimentación visual al usuario en tiempo real.
+
+    ''' <summary>
+    ''' Habilita los controles principales para operar
+    ''' con el cliente seleccionado.
+    ''' </summary>
+    Private Sub ActivateButtons()
+
+        BtnFindClient.Enabled = True
+        BtnModifyData.Enabled = True
+        BtnDeleteClient.Enabled = True
+        BtnNewPayment.Enabled = True
+        DgvPaymentList.Enabled = True
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Deshabilita los controles que requieren
+    ''' un cliente seleccionado.
+    ''' </summary>
+    Private Sub DisableButtons()
+
+        BtnModifyData.Enabled = False
+        BtnDeleteClient.Enabled = False
+        BtnCollectMonth.Enabled = False
+        BtnNewPayment.Enabled = False
+        DgvPaymentList.Enabled = False
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Activa el modo búsqueda y prepara los controles
+    ''' visuales necesarios para filtrar clientes.
+    ''' </summary>
+    Private Sub ActivateSearchRecord()
+
+        BtnNewClient.Enabled = False
+        BtnFindClient.Visible = False
+        BtnCancelSearch.Visible = True
+        PnlBuscar.Enabled = True
+        GbState.Enabled = True
+        CmbFilter.SelectedIndex = 1
+        RbActive.Checked = True
+        DgvClientList.Visible = True
+        LblResult.Visible = True
+        DgvClientList.BringToFront()
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Restaura el formulario al estado normal,
+    ''' desactivando el modo búsqueda.
+    ''' </summary>
+    ''' <remarks>
+    ''' Esta función:
+    ''' - Oculta controles de búsqueda.
+    ''' - Restablece filtros.
+    ''' - Deshabilita opciones visuales relacionadas.
+    ''' </remarks>
+    Private Sub DisableSearchRecord()
+
+        BtnNewClient.Enabled = True
+        BtnFindClient.Visible = True
+        BtnCancelSearch.Visible = False
+        PnlBuscar.Enabled = False
+        CmbFilter.SelectedIndex = 0
+        RbActive.Checked = False
+        DgvClientList.Visible = False
+        LblResult.Visible = False
+        GbState.Enabled = False
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Actualiza los colores y el texto informativo del buscador
+    ''' según la cantidad de registros encontrados.
+    ''' </summary>
+    Private Sub UpdateSearchVisualFeedback(resultCount As Integer)
+
+        Dim hasResults As Boolean = resultCount > 0
+
+        TxtSearch.BackColor = If(hasResults, Color.Snow, Color.MistyRose)
+        TxtSearch.ForeColor = If(hasResults, Color.MediumBlue, Color.Red)
+        LblResult.ForeColor = If(hasResults, Color.Gray, Color.Red)
+
+        Dim resultText As String = If(resultCount = 1,
+                                        AppTexts.SearchSingleResult,
+                                        AppTexts.SearchMultipleResults)
+
+        LblResult.Text = $"{resultCount} - {resultText}"
+
+    End Sub
+
+#End Region
+
+#Region " 4. REFRESCO DE LISTAS Y GRIDS (Renderizado de Tablas) "
+    ' Métodos encargados de sincronizar las colecciones de la base de datos
+    ' con los controles visuales de la interfaz.
+
+    ''' <summary>
     ''' Filtra y actualiza la lista de clientes según el estado
     ''' seleccionado y el texto de búsqueda ingresado por el usuario.
     ''' 
@@ -558,12 +733,12 @@ Public Class FrmClientsPayments
     ''' - Posiciona la selección en la primera coincidencia.
     ''' - Devuelve el foco al cuadro de búsqueda.
     ''' </summary>
-    Private Sub RefreshClientList()
+    Private Sub FilterAndRenderClientGridUI()
 
         If _clientList Is Nothing Then Exit Sub
 
         ' 1. Filtrado inicial por Estado
-        Dim filteredList = _clientList.Where(Function(c) c.State = strState)
+        Dim filteredList = _clientList.Where(Function(c) c.State = _currentState)
         Dim strSearch = TxtSearch.Text.Trim().ToUpper()
 
         ' 2. Obtenemos la configuración del filtro (columna y la función lambda)
@@ -590,6 +765,7 @@ Public Class FrmClientsPayments
         TxtSearch.SelectionStart = TxtSearch.Text.Length
 
     End Sub
+
 
 
     ''' <summary>
@@ -620,70 +796,29 @@ Public Class FrmClientsPayments
 
 
     ''' <summary>
-    ''' Refresca la lista general de clientes y vuelve a cargar
-    ''' la información visual del cliente especificado.
+    ''' Selecciona la primera celda visible del DataGridView
+    ''' según el nombre de columna indicado.
     ''' </summary>
-    ''' <param name="clientId">
-    ''' Identificador del cliente que debe localizarse y recargarse.
-    ''' </param>
-    ''' <param name="refreshPayments">
-    ''' Indica si también debe refrescarse el historial de pagos.
-    ''' </param>
-    Public Sub GlobalRefresh(clientId As Integer,
-                             Optional refreshPayments As Boolean = True)
+    Private Sub SelectFirstCell(columnName As String)
 
-        RefreshCustomerList()
+        If String.IsNullOrWhiteSpace(columnName) Then Exit Sub
 
-        Dim client = _clientList.FirstOrDefault(Function(c) c.IdCli = clientId)
+        If DgvClientList.Rows.Count = 0 Then Exit Sub
 
-        If client IsNot Nothing Then LoadClientAndPaymentsData(client, refreshPayments)
+        Try
+            DgvClientList.CurrentCell = DgvClientList.Rows(0).Cells(columnName)
 
-    End Sub
-
-
-    ''' <summary>
-    ''' Actualiza la lista general de clientes disponible
-    ''' para búsquedas y operaciones del formulario.
-    ''' </summary>
-    ''' <remarks>
-    ''' También habilita o deshabilita el botón de búsqueda
-    ''' dependiendo de si existen clientes registrados.
-    ''' </remarks>
-    Private Sub RefreshCustomerList()
-
-        BtnFindClient.Enabled = _clientManager.HasClients()
-
-        If BtnFindClient.Enabled Then _clientList = _clientManager.GetClientsForSearch()
-
-    End Sub
-
-
-    ''' <summary>
-    ''' Muestra en los Labels del formulario la información
-    ''' básica del cliente seleccionado.
-    ''' </summary>
-    ''' <param name="client">
-    ''' Cliente cuyos datos serán asignados a los controles visuales.
-    ''' </param>
-    Sub FillLabelsClientData(client As IndividualPaymentDTO)
-
-        LblNomCli.Text = client.FirstName
-        LblApeCli.Text = client.LastName
-        LblFdnCli.Text = ConvertVeryLongDate(client.BirthDate)
-        LblEdadCli.Text = client.AgeText
-        LblTlfCli.Text = client.Phone
-        LblEmlCli.Text = client.Email
-        LblDirCli.Text = client.Address
-        LblMtdPgoCli.Text = client.PaymentMethod
-        LblFdiCli.Text = ConvertVeryLongDate(client.RegistrationDate)
-        LblEstCli.Text = client.State
-        LblGrpFamCli.Text = client.IdGroup
+        Catch ex As Exception
+            Debug.WriteLine($"Error al seleccionar celda: {ex.Message}")
+        End Try
 
     End Sub
 
 #End Region
 
-#Region "VALIDACIONES"
+#Region " 5. CONFIGURACIÓN DE FILTROS Y VALIDACIONES "
+    ' La capa de seguridad que decide si las acciones son permitidas
+    ' y cómo se debe filtrar la información.
 
     ''' <summary>
     ''' Valida si el cliente seleccionado puede registrar
@@ -723,108 +858,6 @@ Public Class FrmClientsPayments
 
     End Function
 
-#End Region
-
-#Region "HELPERS VISUALES"
-
-    ''' <summary>
-    ''' Habilita los controles principales para operar
-    ''' con el cliente seleccionado.
-    ''' </summary>
-    Private Sub ActivateButtons()
-
-        BtnFindClient.Enabled = True
-        BtnModifyData.Enabled = True
-        BtnDeleteClient.Enabled = True
-        BtnNewPayment.Enabled = True
-        DgvPaymentList.Enabled = True
-
-    End Sub
-
-
-    ''' <summary>
-    ''' Deshabilita los controles que requieren
-    ''' un cliente seleccionado.
-    ''' </summary>
-    Private Sub DisableButtons()
-
-        BtnModifyData.Enabled = False
-        BtnDeleteClient.Enabled = False
-        BtnCollectMonth.Enabled = False
-        BtnNewPayment.Enabled = False
-        DgvPaymentList.Enabled = False
-
-    End Sub
-
-
-    ''' <summary>
-    ''' Restaura el formulario al estado normal,
-    ''' desactivando el modo búsqueda.
-    ''' </summary>
-    ''' <remarks>
-    ''' Esta función:
-    ''' - Oculta controles de búsqueda.
-    ''' - Restablece filtros.
-    ''' - Deshabilita opciones visuales relacionadas.
-    ''' </remarks>
-    Private Sub DisableSearchRecord()
-
-        BtnNewClient.Enabled = True
-        BtnFindClient.Visible = True
-        BtnCancelSearch.Visible = False
-        PnlBuscar.Enabled = False
-        CmbFilter.SelectedIndex = 0
-        RbActive.Checked = False
-        DgvClientList.Visible = False
-        LblResult.Visible = False
-        GbState.Enabled = False
-
-    End Sub
-
-
-    ''' <summary>
-    ''' Activa el modo búsqueda y prepara los controles
-    ''' visuales necesarios para filtrar clientes.
-    ''' </summary>
-    Private Sub ActivateSearchRecord()
-
-        BtnNewClient.Enabled = False
-        BtnFindClient.Visible = False
-        BtnCancelSearch.Visible = True
-        PnlBuscar.Enabled = True
-        GbState.Enabled = True
-        CmbFilter.SelectedIndex = 1
-        RbActive.Checked = True
-        DgvClientList.Visible = True
-        LblResult.Visible = True
-        DgvClientList.BringToFront()
-
-    End Sub
-
-
-    ''' <summary>
-    ''' Actualiza los colores y el texto informativo del buscador
-    ''' según la cantidad de registros encontrados.
-    ''' </summary>
-    Private Sub UpdateSearchVisualFeedback(resultCount As Integer)
-
-        Dim hasResults As Boolean = resultCount > 0
-
-        TxtSearch.BackColor = If(hasResults, Color.Snow, Color.MistyRose)
-        TxtSearch.ForeColor = If(hasResults, Color.MediumBlue, Color.Red)
-        LblResult.ForeColor = If(hasResults, Color.Gray, Color.Red)
-
-        Dim resultText As String = If(resultCount = 1,
-                                        AppTexts.SearchSingleResult,
-                                        AppTexts.SearchMultipleResults)
-
-        LblResult.Text = $"{resultCount} - {resultText}"
-
-    End Sub
-
-#End Region
-
-
 
     ''' <summary>
     ''' Obtiene la configuración del filtro de búsqueda seleccionada
@@ -861,25 +894,11 @@ Public Class FrmClientsPayments
 
     End Function
 
-    ''' <summary>
-    ''' Selecciona la primera celda visible del DataGridView
-    ''' según el nombre de columna indicado.
-    ''' </summary>
-    Private Sub SelectFirstCell(columnName As String)
+#End Region
 
-        If String.IsNullOrWhiteSpace(columnName) Then Exit Sub
-
-        If DgvClientList.Rows.Count = 0 Then Exit Sub
-
-        Try
-            DgvClientList.CurrentCell = DgvClientList.Rows(0).Cells(columnName)
-
-        Catch ex As Exception
-            Debug.WriteLine($"Error al seleccionar celda: {ex.Message}")
-        End Try
-
-    End Sub
-
+#Region " 6. FÁBRICA DE DATOS Y CÁLCULOS DE NEGOCIO (Factory) "
+    ' Funciones puras que procesan fechas, calculan períodos
+    ' o construyen nuevas instancias de objetos de pago.
 
     ''' <summary>
     ''' Calcula la fecha sugerida para registrar
@@ -903,7 +922,6 @@ Public Class FrmClientsPayments
         End If
 
     End Function
-
 
     ''' <summary>
     ''' Fabrica el DTO correspondiente según el tipo
@@ -960,5 +978,6 @@ Public Class FrmClientsPayments
         End If
     End Function
 
+#End Region
 
 End Class

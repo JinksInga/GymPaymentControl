@@ -159,10 +159,10 @@
       <DependentUpon>FrmNewModifyClient.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\FrmDiscountTable.Designer.vb">
-      <DependentUpon>FrmDiscountTable.vb</DependentUpon>
+    <Compile Include="Forms\FrmPricesAndDiscounts.Designer.vb">
+      <DependentUpon>FrmPricesAndDiscounts.vb</DependentUpon>
     </Compile>
-    <Compile Include="Forms\FrmDiscountTable.vb">
+    <Compile Include="Forms\FrmPricesAndDiscounts.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\FrmFamilyGroup.Designer.vb">
@@ -190,11 +190,13 @@
     <Compile Include="Models\GroupPaymentDTO.vb" />
     <Compile Include="Models\IndividualPaymentDTO.vb" />
     <Compile Include="Models\RateResult.vb" />
+    <Compile Include="Models\TariffDTO.vb" />
     <Compile Include="Models\UserDTO.vb" />
     <Compile Include="Models\UserSession.vb" />
     <Compile Include="Services\AuthManager.vb" />
     <Compile Include="Services\PaymentGenerator.vb" />
     <Compile Include="Services\PaymentManager.vb" />
+    <Compile Include="Services\TariffManager.vb" />
     <Compile Include="UIHelpers\FormHelpers.vb" />
     <Compile Include="UIHelpers\InputValidators.vb" />
     <Compile Include="UIHelpers\AppTexts.vb" />
@@ -238,8 +240,8 @@
     <EmbeddedResource Include="Forms\FrmNewModifyClient.resx">
       <DependentUpon>FrmNewModifyClient.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\FrmDiscountTable.resx">
-      <DependentUpon>FrmDiscountTable.vb</DependentUpon>
+    <EmbeddedResource Include="Forms\FrmPricesAndDiscounts.resx">
+      <DependentUpon>FrmPricesAndDiscounts.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FrmFamilyGroup.resx">
       <DependentUpon>FrmFamilyGroup.vb</DependentUpon>
