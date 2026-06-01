@@ -16,6 +16,34 @@ Namespace Utils
 
 
         ''' <summary>
+        ''' Convierte un texto con formato monetario a Decimal.
+        ''' </summary>
+        ''' <param name="text">
+        ''' Texto que contiene un valor monetario.
+        ''' Puede incluir símbolos de moneda y espacios.
+        ''' </param>
+        ''' <returns>
+        ''' Valor decimal convertido.
+        ''' Devuelve 0 si la conversión falla.
+        ''' </returns>
+        Public Function ParseMoney(text As String) As Decimal
+
+            If String.IsNullOrWhiteSpace(text) Then Return 0D
+
+            Dim clean = text.Replace("€", "").Trim()
+
+            Dim value As Decimal
+
+            If Decimal.TryParse(clean, value) Then
+                Return value
+            End If
+
+            Return 0D
+
+        End Function
+
+
+        ''' <summary>
         ''' Devuelve una cadena segura eliminando espacios al inicio y al final.
         ''' Si el valor es Nothing, retorna una cadena vacía.
         ''' Útil para comparaciones y para evitar errores por referencias nulas.
@@ -60,6 +88,24 @@ Namespace Utils
             End While
 
             Return result
+
+        End Function
+
+
+        ''' <summary>
+        ''' Normaliza una cadena monetaria eliminando símbolos, espacios
+        ''' y unificando el separador decimal para facilitar su conversión numérica.
+        ''' </summary>
+        ''' <param name="text">
+        ''' Texto monetario ingresado por el usuario.
+        ''' Puede contener el símbolo € y espacios adicionales.
+        ''' </param>
+        ''' <returns>
+        ''' Cadena limpia y preparada para procesos de parseo decimal.
+        ''' </returns>
+        Public Function NormalizeMoneyText(text As String) As String
+
+            Return text.Replace("€", "").Trim().Replace(".", ",")
 
         End Function
 

@@ -9,33 +9,52 @@ Namespace UIHelpers
     ''' </summary>
     Public Module FormHelpers
 
+        Public Function EvaluateNumericRangeLimits(textBox As TextBox, valor As Decimal,
+                                                   minimo As Decimal, maximo As Decimal) As Boolean
 
-        ''' <summary>
-        ''' Convierte un texto con formato monetario a Decimal.
-        ''' </summary>
-        ''' <param name="text">
-        ''' Texto que contiene un valor monetario.
-        ''' Puede incluir símbolos de moneda y espacios.
-        ''' </param>
-        ''' <returns>
-        ''' Valor decimal convertido.
-        ''' Devuelve 0 si la conversión falla.
-        ''' </returns>
-        Public Function ParseMoney(text As String) As Decimal
+            Dim isFormatValid As Boolean = True
 
-            If String.IsNullOrWhiteSpace(text) Then Return 0D
-
-            Dim clean = text.Replace("€", "").Trim()
-
-            Dim value As Decimal
-
-            If Decimal.TryParse(clean, value) Then
-                Return value
+            ' (Tu lógica de la coma y los decimales...)
+            If textBox.Text.Contains(",") Then
+                Dim intDec() As String = textBox.Text.Split(","c)
+                If intDec(1).Length = 2 OrElse intDec(1).Length > 4 Then
+                    isFormatValid = False
+                End If
             End If
 
-            Return 0D
+            ' Condición de rango
+            If Not isFormatValid OrElse (valor < minimo OrElse valor > maximo) Then
+
+                textBox.ForeColor = Color.Red
+                textBox.Font = New System.Drawing.Font(textBox.Font, FontStyle.Bold)
+
+                Return False
+
+            Else
+                textBox.ForeColor = Color.Green
+                textBox.Font = New System.Drawing.Font(textBox.Font, textBox.Font.Style And Not FontStyle.Bold)
+
+                Return True
+
+            End If
 
         End Function
+
+
+        ''' <summary>
+        ''' Aplica el formato visual de moneda (€) al TextBox
+        ''' manteniendo la posición del cursor.
+        ''' </summary>
+        Public Sub ApplyMoneyTextboxFormat(textBox As TextBox)
+
+            Dim cursorPos As Integer = textBox.SelectionStart
+
+            Dim priceWithoutFormat As String = NormalizeMoneyText(textBox.Text)
+
+            textBox.Text = $"{priceWithoutFormat} €"
+            textBox.SelectionStart = Math.Min(cursorPos, textBox.Text.Length)
+
+        End Sub
 
 
         ''' <summary>

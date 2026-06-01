@@ -357,7 +357,7 @@ Partial Class FrmPricesAndDiscounts
         Me.CmbPaymentMethod.ForeColor = System.Drawing.Color.MediumBlue
         Me.CmbPaymentMethod.FormattingEnabled = True
         Me.CmbPaymentMethod.IntegralHeight = False
-        Me.CmbPaymentMethod.Items.AddRange(New Object() {"", "CLASES SUELTAS", "DESCUENTO POR EDAD", "GRUPO FAMILIAR", "MENSUALIDAD + IMPLEMENTOS"})
+        Me.CmbPaymentMethod.Items.AddRange(New Object() {"", "   CLASES SUELTAS", "   DESCUENTO POR EDAD", "   GRUPO FAMILIAR", "   MENSUALIDAD + IMPLEMENTOS"})
         Me.CmbPaymentMethod.Location = New System.Drawing.Point(140, 24)
         Me.CmbPaymentMethod.Name = "CmbPaymentMethod"
         Me.CmbPaymentMethod.Size = New System.Drawing.Size(500, 24)
@@ -600,9 +600,9 @@ Partial Class FrmPricesAndDiscounts
         Me.Controls.Add(Me.BtnModifyRate)
         Me.Controls.Add(Me.BtnCancelRegistration)
         Me.Controls.Add(Me.BtnDeleteRate)
-        Me.Controls.Add(Me.BtnNewRate)
         Me.Controls.Add(Me.BtnSaveRate)
         Me.Controls.Add(Me.BtnUpdateRate)
+        Me.Controls.Add(Me.BtnNewRate)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.MaximizeBox = False
         Me.Name = "FrmPricesAndDiscounts"

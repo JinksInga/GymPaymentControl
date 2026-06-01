@@ -3,6 +3,7 @@ Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 Imports GymPaymentControl.UIHelpers
+Imports GymPaymentControl.Utils
 Imports MySql.Data.MySqlClient
 
 Public Class FrmCollectMembership
@@ -48,29 +49,42 @@ Public Class FrmCollectMembership
         _selectedPayment.FdiPgs = DtpFdiPgs.Value
 
         ' Forzamos el recálculo
-        HandleMoneyInputChanged(TxtPrcPgs, EventArgs.Empty)
-        HandleMoneyInputChanged(TxtDscPgs, EventArgs.Empty)
+        RefreshPaymentInputState(TxtPrcPgs)
+        RefreshPaymentInputState(TxtDscPgs)
 
     End Sub
 
 
     Private Sub TxtPrcPgs_TextChanged(sender As Object, e As EventArgs) Handles TxtPrcPgs.TextChanged
+        RefreshPaymentInputState(TxtPrcPgs)
     End Sub
     Private Sub TxtPrcPgs_GotFocus(sender As Object, e As EventArgs) Handles TxtPrcPgs.GotFocus
         TxtPrcPgs.SelectAll()
     End Sub
     Private Sub TxtPrcPgs_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TxtPrcPgs.KeyPress
-        AllowDecimalInput(TxtPrcPgs.Text, e)
+        AllowDecimalInput(TxtPrcPgs, e)
     End Sub
 
 
     Private Sub TxtDscPgs_TextChanged(sender As Object, e As EventArgs) Handles TxtDscPgs.TextChanged
+        RefreshPaymentInputState(TxtDscPgs)
     End Sub
     Private Sub TxtDscPgs_GotFocus(sender As Object, e As EventArgs) Handles TxtDscPgs.GotFocus
         TxtDscPgs.SelectAll()
     End Sub
     Private Sub TxtDscPgs_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TxtDscPgs.KeyPress
-        AllowDecimalInput(TxtDscPgs.Text, e)
+        AllowDecimalInput(TxtDscPgs, e)
+    End Sub
+    Private Sub TxtDscPgs_Leave(sender As Object, e As EventArgs) Handles TxtDscPgs.Leave
+
+        ' Normalizamos el contenido para detectar el símbolo de "€"
+        Dim cleanText As String = NormalizeMoneyText(TxtDscPgs.Text)
+
+        ' Restauramos un valor monetario válido si el usuario dejó la caja vacía o la coma
+        If String.IsNullOrWhiteSpace(cleanText) OrElse cleanText = "," Then
+            TxtDscPgs.Text = "0,00 €"
+        End If
+
     End Sub
 
 
@@ -167,8 +181,8 @@ Public Class FrmCollectMembership
     '| ============================================================ |'
 
 #Region " 1. CICLO DE VIDA E INICIALIZACIÓN "
-    ' Son los métodos que "despiertan" la pantalla
-    ' y preparan el escenario al cargar.
+    ' Son los métodos que "despiertan" la pantalla y preparan el escenario al cargar.
+
 
     ''' <summary>
     ''' Prepara e inicializa el formulario de cobro cargando
@@ -252,8 +266,8 @@ Public Class FrmCollectMembership
     ''' Fuerza la ejecución de los eventos de cambio de texto para inicializar los cálculos y colores en pantalla.
     ''' </summary>
     Private Sub RefreshPaymentCalculation()
-        HandleMoneyInputChanged(TxtPrcPgs, EventArgs.Empty)
-        HandleMoneyInputChanged(TxtDscPgs, EventArgs.Empty)
+        RefreshPaymentInputState(TxtPrcPgs)
+        RefreshPaymentInputState(TxtDscPgs)
     End Sub
 
 #End Region
@@ -266,12 +280,14 @@ Public Class FrmCollectMembership
     ''' Configura la etiqueta de encabezado adaptando el nombre según si el pago es individual o grupal.
     ''' </summary>
     Private Sub ConfigureDisplayName()
+
         If TypeOf _selectedPayment Is GroupPaymentDTO Then
             Dim grpName As String = DirectCast(_selectedPayment, GroupPaymentDTO).GroupName
             LblDisplayName.Text = "GRUPO: " & If(Not String.IsNullOrEmpty(grpName), grpName, "FAMILIAR")
         Else
             LblDisplayName.Text = _selectedPayment.DisplayName
         End If
+
     End Sub
 
 
@@ -384,29 +400,35 @@ Public Class FrmCollectMembership
     ''' - Calcula los límites válidos.
     ''' - Procesa la validación y actualización visual.
     ''' </remarks>
-    Private Sub HandleMoneyInputChanged(sender As Object, e As EventArgs) _
-        Handles TxtPrcPgs.TextChanged, TxtDscPgs.TextChanged
+    Private Sub RefreshPaymentInputState(textBox As TextBox) 'sender As Object, e As EventArgs) Handles TxtPrcPgs.TextChanged, TxtDscPgs.TextChanged
 
         '  Filtro de seguridad
         If _isLoading OrElse _selectedPayment Is Nothing Then Exit Sub
 
-        Dim textBox As TextBox = TryCast(sender, TextBox)
-        If textBox Is Nothing Then Exit Sub
+        'Dim textBox As TextBox = TryCast(sender, TextBox)
+        'If textBox Is Nothing Then Exit Sub
 
         If textBox Is TxtPrcPgs Then
             ' Determinamos el margen según el método de pago
-            Dim margin As Decimal = If(_selectedPayment.MtdPgs.Contains(PaymentMethods.Daily), MARGIN_DAILY, MARGIN_MONTHLY_GRUPAL)
+            Dim margin As Decimal = If(_selectedPayment.MtdPgs.Contains(PaymentMethods.Daily),
+                                        MARGIN_DAILY, MARGIN_MONTHLY_GRUPAL)
 
             ' Obtenemos los límites usando la nueva función tupleada
             Dim range = CalculateAllowedRange(_originalPrice, margin)
 
             ProcessMoneyInputChange(textBox, Color.DarkOrange, range.Min, range.Max)
 
-        ElseIf textBox Is TxtDscPgs Then
+        End If
+
+        'ElseIf textBox Is TxtDscPgs Then
+        If textBox Is TxtDscPgs Then
+
             Dim marginDsc As Decimal = 5D
+
             Dim rangeDsc = CalculateAllowedRange(_originalDiscount, marginDsc)
 
             ProcessMoneyInputChange(textBox, Color.DarkOrange, rangeDsc.Min, rangeDsc.Max)
+
         End If
 
     End Sub
@@ -453,7 +475,9 @@ Public Class FrmCollectMembership
                                         minValue As Decimal, maxValue As Decimal)
 
         ' Desactivamos temporalmente el evento para evitar bucles infinitos
-        RemoveHandler textBox.TextChanged, AddressOf HandleMoneyInputChanged
+        'RemoveHandler textBox.TextChanged, AddressOf RefreshPaymentInputState
+        RemoveHandler TxtPrcPgs.TextChanged, AddressOf TxtPrcPgs_TextChanged
+        RemoveHandler TxtDscPgs.TextChanged, AddressOf TxtDscPgs_TextChanged
 
         Try
             ' 1. PARSEAR: Extraemos el resultado numérico de forma pura
@@ -462,10 +486,12 @@ Public Class FrmCollectMembership
             ' 2. FORMATEAR TEXTBOX: Aplicamos el sufijo "€" y gestionamos el cursor
             ApplyMoneyTextboxFormat(textBox)
 
-            ' 3. VALIDACIÓN DE FORMATO
+            ' 3. VALIDACIÓN DE FORMATO : si ingresa el separador decimal antes de un número ", €"
             If Not parseResult.IsValid Then
 
-                UpdateCalculationVisualState(False, "FORMATO", Color.DarkOrange)
+                UpdatePriceValidationFeedback(False, Color.Red, "ERROR")
+                If textBox Is TxtPrcPgs Then BtnConfirmPayment.Enabled = False
+
                 Exit Sub
 
             End If
@@ -475,7 +501,7 @@ Public Class FrmCollectMembership
 
             ' 5. ESTADO VISUAL
             UpdateMoneyTextboxColor(textBox, isInRange, parseResult.Value, zeroColor)
-            UpdateCalculationVisualState(isInRange)
+            UpdatePriceValidationFeedback(isInRange)
 
             ' 6. NEGOCIO
             If isInRange Then
@@ -484,11 +510,19 @@ Public Class FrmCollectMembership
                 UpdatePaymentCalculation()
                 RefreshCalculationUI()
 
+                If textBox Is TxtPrcPgs Then BtnConfirmPayment.Enabled = True
+
+            Else
+                If textBox Is TxtPrcPgs Then BtnConfirmPayment.Enabled = False
+
             End If
 
         Finally
             ' Reactivamos el evento antes de salir
-            AddHandler textBox.TextChanged, AddressOf HandleMoneyInputChanged
+            'AddHandler textBox.TextChanged, AddressOf RefreshPaymentInputState
+            AddHandler TxtPrcPgs.TextChanged, AddressOf TxtPrcPgs_TextChanged
+            AddHandler TxtDscPgs.TextChanged, AddressOf TxtDscPgs_TextChanged
+
         End Try
 
     End Sub
@@ -499,49 +533,49 @@ Public Class FrmCollectMembership
     ''' </summary>
     Private Function ParseMoneyInput(text As String) As MoneyParseResult
 
-        Dim raw As String = NormalizeMoneyText(text)
+        Dim priceWithoutFormat As String = NormalizeMoneyText(text)
 
-        If String.IsNullOrEmpty(raw) Then
-            Return New MoneyParseResult(True, 0D)
-        End If
+        If String.IsNullOrEmpty(priceWithoutFormat) Then Return New MoneyParseResult(True, 0D)
 
         Dim value As Decimal
-        Dim isValid As Boolean = Decimal.TryParse(raw, value)
+
+        Dim isValid As Boolean = Decimal.TryParse(priceWithoutFormat, value)
 
         Return New MoneyParseResult(isValid, value)
 
     End Function
 
 
-    ''' <summary>
-    ''' Normaliza una cadena monetaria eliminando símbolos, espacios
-    ''' y unificando el separador decimal para facilitar su conversión numérica.
-    ''' </summary>
-    ''' <param name="text">
-    ''' Texto monetario ingresado por el usuario.
-    ''' Puede contener el símbolo € y espacios adicionales.
-    ''' </param>
-    ''' <returns>
-    ''' Cadena limpia y preparada para procesos de parseo decimal.
-    ''' </returns>
-    Private Function NormalizeMoneyText(text As String) As String
-        Return text.Replace("€", "").Trim().Replace(".", ",")
-    End Function
+    '''' <summary>
+    '''' Aplica el formato visual de moneda (€) al TextBox
+    '''' manteniendo la posición del cursor.
+    '''' </summary>
+    'Private Sub ApplyMoneyTextboxFormat(textBox As TextBox)
+
+    '    Dim cursorPos As Integer = textBox.SelectionStart
+
+    '    Dim priceWithoutFormat As String = NormalizeMoneyText(textBox.Text)
+
+    '    textBox.Text = $"{priceWithoutFormat} €"
+    '    textBox.SelectionStart = Math.Min(cursorPos, textBox.Text.Length)
+
+    'End Sub
 
 
-    ''' <summary>
-    ''' Aplica el formato visual de moneda (€) al TextBox
-    ''' manteniendo la posición del cursor.
-    ''' </summary>
-    Private Sub ApplyMoneyTextboxFormat(textBox As TextBox)
-
-        Dim cursorPos As Integer = textBox.SelectionStart
-        Dim raw As String = NormalizeMoneyText(textBox.Text)
-
-        textBox.Text = $"{raw} €"
-        textBox.SelectionStart = Math.Min(cursorPos, textBox.Text.Length)
-
-    End Sub
+    '''' <summary>
+    '''' Normaliza una cadena monetaria eliminando símbolos, espacios
+    '''' y unificando el separador decimal para facilitar su conversión numérica.
+    '''' </summary>
+    '''' <param name="text">
+    '''' Texto monetario ingresado por el usuario.
+    '''' Puede contener el símbolo € y espacios adicionales.
+    '''' </param>
+    '''' <returns>
+    '''' Cadena limpia y preparada para procesos de parseo decimal.
+    '''' </returns>
+    'Private Function NormalizeMoneyText(text As String) As String
+    '    Return text.Replace("€", "").Trim().Replace(".", ",")
+    'End Function
 
 
     ''' <summary>
@@ -562,6 +596,7 @@ Public Class FrmCollectMembership
 
         Dim minAllowed As Decimal = Math.Max(0D, originalValue - margin)
         Dim maxAllowed As Decimal = originalValue + margin
+
         Return (minAllowed, maxAllowed)
 
     End Function
@@ -677,9 +712,9 @@ Public Class FrmCollectMembership
     ''' Actualiza el estado visual de las etiquetas de cálculo
     ''' según el resultado de la validación.
     ''' </summary>
-    Private Sub UpdateCalculationVisualState(isValid As Boolean,
-                                             Optional errorText As String = "ERROR",
-                                             Optional errorColor As Color = Nothing)
+    Private Sub UpdatePriceValidationFeedback(isValid As Boolean,
+                                             Optional errorColor As Color = Nothing,
+                                             Optional errorText As String = "ERROR")
 
         If errorColor = Nothing Then errorColor = Color.Red
 

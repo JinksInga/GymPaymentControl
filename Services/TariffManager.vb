@@ -1,7 +1,6 @@
 ﻿Imports GymPaymentControl.Data
 Imports GymPaymentControl.Models
 Imports MySql.Data.MySqlClient
-Imports Org.BouncyCastle.Asn1.Ocsp
 
 Namespace Services
 

@@ -97,10 +97,10 @@
         ''' </summary>
         ''' <param name="sender">Control que dispara el evento (esperado: TextBox).</param>
         ''' <param name="e">Argumentos del evento KeyPress.</param>
-        Public Sub AllowDecimalInput(sender As Object,
-                                     e As KeyPressEventArgs)
+        Public Sub AllowDecimalInput(sender As Object, e As KeyPressEventArgs)
 
             Dim textBox = TryCast(sender, TextBox)
+
             If textBox Is Nothing Then Return
 
             Dim separator As String = Application.CurrentCulture.NumberFormat.NumberDecimalSeparator
@@ -118,6 +118,7 @@
                 End If
 
                 Return
+
             End If
 
             ' Bloquear todo lo demás
@@ -126,84 +127,6 @@
         End Sub
 
 
-        '''' <summary>
-        '''' Permite únicamente letras, teclas de control (Backspace, etc.),
-        '''' caracteres explícitamente permitidos y bloquea los definidos en strLockKey.
-        '''' </summary>
-        'Public Sub ValidateOnlyLetters(strAllowKey As String, strLockKey As String, e As KeyPressEventArgs)
-        '    Dim isLetter As Boolean = Char.IsLetter(e.KeyChar)
-        '    Dim isControl As Boolean = Char.IsControl(e.KeyChar)
-        '    Dim isAllowed As Boolean = strAllowKey.Contains(e.KeyChar)
-        '    Dim isLocked As Boolean = strLockKey.Contains(e.KeyChar)
-        '    ' Bloquear si no cumple condiciones o si está explícitamente bloqueado
-        '    If (Not isLetter AndAlso Not isControl AndAlso Not isAllowed) OrElse isLocked Then
-        '        e.Handled = True
-        '    End If
-        'End Sub
-        '''' <summary>
-        '''' Permite únicamente números enteros (0-9), teclas de control
-        '''' y caracteres opcionalmente permitidos.
-        '''' </summary>
-        'Public Sub ValidateIntegerNumbers(strAllowKey As String, e As KeyPressEventArgs)
-        '    Dim isDigit As Boolean = Char.IsDigit(e.KeyChar)
-        '    Dim isControl As Boolean = Char.IsControl(e.KeyChar)
-        '    Dim isAllowed As Boolean = strAllowKey.Contains(e.KeyChar)
-        '    If Not isDigit AndAlso Not isControl AndAlso Not isAllowed Then
-        '        e.Handled = True
-        '    End If
-        'End Sub
-        '''' <summary>
-        '''' Permite letras y números (alfanumérico), teclas de control
-        '''' y caracteres adicionales definidos por el usuario.
-        '''' </summary>
-        'Public Sub ValidateNumbersAndLetters(strAllowKey As String, e As KeyPressEventArgs)
-        '    Dim isLetterOrDigit As Boolean = Char.IsLetterOrDigit(e.KeyChar)
-        '    Dim isControl As Boolean = Char.IsControl(e.KeyChar)
-        '    Dim isAllowed As Boolean = strAllowKey.Contains(e.KeyChar)
-        '    If Not isLetterOrDigit AndAlso Not isControl AndAlso Not isAllowed Then
-        '        e.Handled = True
-        '    End If
-        'End Sub
-        '''' <summary>
-        '''' Permite números decimales usando "." como separador.
-        '''' Evita múltiples separadores en el mismo TextBox.
-        '''' ⚠ Depende de UI (TextBox).
-        '''' </summary>
-        'Public Sub ValidateDecimalNumbers(textBox As TextBox, e As KeyPressEventArgs)
-        '    Dim isDigit As Boolean = Char.IsDigit(e.KeyChar)
-        '    Dim isControl As Boolean = Char.IsControl(e.KeyChar)
-        '    If Not isDigit AndAlso Not isControl Then
-        '        If e.KeyChar = "."c AndAlso Not textBox.Text.Contains(",") Then
-        '            e.Handled = False
-        '        Else
-        '            e.Handled = True
-        '        End If
-        '    End If
-        'End Sub
-        '''' <summary>
-        '''' Permite introducir números decimales respetando la configuración regional.
-        '''' Convierte automáticamente "." o "," al separador correcto del sistema.
-        '''' </summary>
-        'Public Sub ValidateDecimalInput(sender As Object, e As KeyPressEventArgs)
-        '    Dim textBox = TryCast(sender, TextBox)
-        '    If textBox Is Nothing Then Return
-        '    ' Separador decimal según cultura (ej: "," en ES, "." en US)
-        '    Dim separator As String = Application.CurrentCulture.NumberFormat.NumberDecimalSeparator
-        '    If Not Char.IsDigit(e.KeyChar) AndAlso Not Char.IsControl(e.KeyChar) Then
-        '        If (e.KeyChar = "."c OrElse e.KeyChar = ","c) Then
-        '            ' Evitar múltiples separadores
-        '            If textBox.Text.Contains(separator) Then
-        '                e.Handled = True
-        '            Else
-        '                ' Reemplazar por el separador correcto
-        '                e.KeyChar = CChar(separator)
-        '                e.Handled = False
-        '            End If
-        '        Else
-        '            e.Handled = True
-        '        End If
-        '    End If
-        'End Sub
-
     End Module
+
 End Namespace
