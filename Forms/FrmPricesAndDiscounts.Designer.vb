@@ -22,19 +22,19 @@ Partial Class FrmPricesAndDiscounts
     'No lo modifique con el editor de código.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Dim DataGridViewCellStyle14 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle15 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle24 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle25 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle26 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle16 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle17 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle18 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle19 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle20 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle21 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle22 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle23 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle11 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle12 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle13 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle5 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle6 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle7 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle8 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle9 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle10 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.BtnModifyRate = New System.Windows.Forms.Button()
         Me.DgvPriceList = New System.Windows.Forms.DataGridView()
         Me.ColId = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -99,42 +99,42 @@ Partial Class FrmPricesAndDiscounts
         Me.DgvPriceList.AllowUserToDeleteRows = False
         Me.DgvPriceList.AllowUserToResizeColumns = False
         Me.DgvPriceList.AllowUserToResizeRows = False
-        DataGridViewCellStyle14.BackColor = System.Drawing.SystemColors.Window
-        DataGridViewCellStyle14.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DgvPriceList.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle14
-        DataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle15.BackColor = System.Drawing.SystemColors.Control
-        DataGridViewCellStyle15.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle15.ForeColor = System.Drawing.SystemColors.WindowText
-        DataGridViewCellStyle15.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle15.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        Me.DgvPriceList.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle15
+        DataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window
+        DataGridViewCellStyle1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DgvPriceList.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle1
+        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control
+        DataGridViewCellStyle2.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText
+        DataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        Me.DgvPriceList.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle2
         Me.DgvPriceList.ColumnHeadersHeight = 35
         Me.DgvPriceList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
         Me.DgvPriceList.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.ColId, Me.ColPaymentMethod, Me.ColPrice, Me.ColMinimumAge, Me.ColMaximumAge, Me.ColNumberMembers, Me.ColTotal, Me.ColDiscount, Me.ColToPay})
-        DataGridViewCellStyle24.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        DataGridViewCellStyle24.BackColor = System.Drawing.Color.PaleTurquoise
-        DataGridViewCellStyle24.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle24.ForeColor = System.Drawing.SystemColors.ControlText
-        DataGridViewCellStyle24.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle24.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        DataGridViewCellStyle24.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.DgvPriceList.DefaultCellStyle = DataGridViewCellStyle24
+        DataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle11.BackColor = System.Drawing.Color.PaleTurquoise
+        DataGridViewCellStyle11.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.ControlText
+        DataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        DataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.DgvPriceList.DefaultCellStyle = DataGridViewCellStyle11
         Me.DgvPriceList.Location = New System.Drawing.Point(33, 271)
         Me.DgvPriceList.Margin = New System.Windows.Forms.Padding(24, 12, 24, 0)
         Me.DgvPriceList.MultiSelect = False
         Me.DgvPriceList.Name = "DgvPriceList"
         Me.DgvPriceList.ReadOnly = True
-        DataGridViewCellStyle25.BackColor = System.Drawing.SystemColors.Control
-        DataGridViewCellStyle25.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle25.ForeColor = System.Drawing.SystemColors.WindowText
-        DataGridViewCellStyle25.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle25.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        Me.DgvPriceList.RowHeadersDefaultCellStyle = DataGridViewCellStyle25
+        DataGridViewCellStyle12.BackColor = System.Drawing.SystemColors.Control
+        DataGridViewCellStyle12.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle12.ForeColor = System.Drawing.SystemColors.WindowText
+        DataGridViewCellStyle12.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle12.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        Me.DgvPriceList.RowHeadersDefaultCellStyle = DataGridViewCellStyle12
         Me.DgvPriceList.RowHeadersWidth = 35
         Me.DgvPriceList.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
-        DataGridViewCellStyle26.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DgvPriceList.RowsDefaultCellStyle = DataGridViewCellStyle26
+        DataGridViewCellStyle13.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DgvPriceList.RowsDefaultCellStyle = DataGridViewCellStyle13
         Me.DgvPriceList.RowTemplate.DefaultCellStyle.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.DgvPriceList.RowTemplate.DividerHeight = 2
         Me.DgvPriceList.RowTemplate.Height = 30
@@ -145,7 +145,7 @@ Partial Class FrmPricesAndDiscounts
         'ColId
         '
         Me.ColId.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.ColId.DataPropertyName = "Id"
+        Me.ColId.DataPropertyName = "IdTariff"
         Me.ColId.HeaderText = "id"
         Me.ColId.Name = "ColId"
         Me.ColId.ReadOnly = True
@@ -157,8 +157,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColPaymentMethod.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColPaymentMethod.DataPropertyName = "PaymentMethod"
-        DataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        Me.ColPaymentMethod.DefaultCellStyle = DataGridViewCellStyle16
+        DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        Me.ColPaymentMethod.DefaultCellStyle = DataGridViewCellStyle3
         Me.ColPaymentMethod.HeaderText = "MÉTODO PAGO"
         Me.ColPaymentMethod.Name = "ColPaymentMethod"
         Me.ColPaymentMethod.ReadOnly = True
@@ -168,8 +168,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColPrice.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColPrice.DataPropertyName = "Price"
-        DataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.ColPrice.DefaultCellStyle = DataGridViewCellStyle17
+        DataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.ColPrice.DefaultCellStyle = DataGridViewCellStyle4
         Me.ColPrice.HeaderText = "PRECIO"
         Me.ColPrice.Name = "ColPrice"
         Me.ColPrice.ReadOnly = True
@@ -179,8 +179,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColMinimumAge.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColMinimumAge.DataPropertyName = "MinimumAge"
-        DataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.ColMinimumAge.DefaultCellStyle = DataGridViewCellStyle18
+        DataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.ColMinimumAge.DefaultCellStyle = DataGridViewCellStyle5
         Me.ColMinimumAge.HeaderText = "EDAD MIN"
         Me.ColMinimumAge.Name = "ColMinimumAge"
         Me.ColMinimumAge.ReadOnly = True
@@ -190,8 +190,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColMaximumAge.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColMaximumAge.DataPropertyName = "MaximumAge"
-        DataGridViewCellStyle19.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.ColMaximumAge.DefaultCellStyle = DataGridViewCellStyle19
+        DataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.ColMaximumAge.DefaultCellStyle = DataGridViewCellStyle6
         Me.ColMaximumAge.HeaderText = "EDAD MAX"
         Me.ColMaximumAge.Name = "ColMaximumAge"
         Me.ColMaximumAge.ReadOnly = True
@@ -201,8 +201,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColNumberMembers.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColNumberMembers.DataPropertyName = "NumberMembers"
-        DataGridViewCellStyle20.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.ColNumberMembers.DefaultCellStyle = DataGridViewCellStyle20
+        DataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.ColNumberMembers.DefaultCellStyle = DataGridViewCellStyle7
         Me.ColNumberMembers.HeaderText = "Nº PERSONAS"
         Me.ColNumberMembers.Name = "ColNumberMembers"
         Me.ColNumberMembers.ReadOnly = True
@@ -213,8 +213,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColTotal.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColTotal.DataPropertyName = "Total"
-        DataGridViewCellStyle21.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.ColTotal.DefaultCellStyle = DataGridViewCellStyle21
+        DataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.ColTotal.DefaultCellStyle = DataGridViewCellStyle8
         Me.ColTotal.HeaderText = "TOTAL"
         Me.ColTotal.Name = "ColTotal"
         Me.ColTotal.ReadOnly = True
@@ -224,8 +224,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColDiscount.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColDiscount.DataPropertyName = "Discount"
-        DataGridViewCellStyle22.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.ColDiscount.DefaultCellStyle = DataGridViewCellStyle22
+        DataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.ColDiscount.DefaultCellStyle = DataGridViewCellStyle9
         Me.ColDiscount.HeaderText = "DESCUENTO"
         Me.ColDiscount.Name = "ColDiscount"
         Me.ColDiscount.ReadOnly = True
@@ -236,8 +236,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColToPay.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColToPay.DataPropertyName = "TotalToPay"
-        DataGridViewCellStyle23.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.ColToPay.DefaultCellStyle = DataGridViewCellStyle23
+        DataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.ColToPay.DefaultCellStyle = DataGridViewCellStyle10
         Me.ColToPay.HeaderText = "A PAGAR"
         Me.ColToPay.Name = "ColToPay"
         Me.ColToPay.ReadOnly = True
@@ -406,7 +406,7 @@ Partial Class FrmPricesAndDiscounts
         Me.NudMaximumAge.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.NudMaximumAge.ForeColor = System.Drawing.Color.MediumBlue
         Me.NudMaximumAge.Location = New System.Drawing.Point(470, 175)
-        Me.NudMaximumAge.Maximum = New Decimal(New Integer() {99, 0, 0, 0})
+        Me.NudMaximumAge.Maximum = New Decimal(New Integer() {17, 0, 0, 0})
         Me.NudMaximumAge.Name = "NudMaximumAge"
         Me.NudMaximumAge.Size = New System.Drawing.Size(170, 26)
         Me.NudMaximumAge.TabIndex = 7
@@ -439,7 +439,7 @@ Partial Class FrmPricesAndDiscounts
         Me.NudMinimumAge.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.NudMinimumAge.ForeColor = System.Drawing.Color.MediumBlue
         Me.NudMinimumAge.Location = New System.Drawing.Point(470, 137)
-        Me.NudMinimumAge.Maximum = New Decimal(New Integer() {99, 0, 0, 0})
+        Me.NudMinimumAge.Maximum = New Decimal(New Integer() {16, 0, 0, 0})
         Me.NudMinimumAge.Name = "NudMinimumAge"
         Me.NudMinimumAge.Size = New System.Drawing.Size(170, 26)
         Me.NudMinimumAge.TabIndex = 6
@@ -451,7 +451,7 @@ Partial Class FrmPricesAndDiscounts
         Me.NudNumberMembers.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.NudNumberMembers.ForeColor = System.Drawing.Color.MediumBlue
         Me.NudNumberMembers.Location = New System.Drawing.Point(470, 99)
-        Me.NudNumberMembers.Maximum = New Decimal(New Integer() {10, 0, 0, 0})
+        Me.NudNumberMembers.Maximum = New Decimal(New Integer() {9, 0, 0, 0})
         Me.NudNumberMembers.Name = "NudNumberMembers"
         Me.NudNumberMembers.Size = New System.Drawing.Size(170, 26)
         Me.NudNumberMembers.TabIndex = 5

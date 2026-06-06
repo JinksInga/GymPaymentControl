@@ -9,31 +9,47 @@ Public Class FrmPricesAndDiscounts
 
 #Region " VARIABLES DE ESTADO Y CONSTANTES "
 
-    ' --- Servicios de Negocio (Managers) ---
+    ' --- Componentes de Negocio y Reglas Fijas ---
     Private ReadOnly _tariffManager As New TariffManager()
+    Private Const MINIMUM_AGE_FOR_DISCOUNT As Decimal = 5D
+    Private Const MINIMUM_PRICE_LIMIT As Decimal = 10D
+    Private Const MAXIMUM_PRICE_LIMIT As Decimal = 90D
 
-    ' --- Modo de Transacción y Control de Flujo ---
+    ' --- Reglas de Porcentajes para Clases Sueltas ---
+    Private Const INDIVIDUAL_CLASS_MIN_PCT As Decimal = 0.1D ' 10% del precio base
+    Private Const INDIVIDUAL_CLASS_MAX_PCT As Decimal = 0.3D ' 30% del precio base
+
+    ' --- Reglas de Porcentajes para Descuento por Edad ---
+    Private Const AGE_DISCOUNT_MIN_PCT As Decimal = 0.1D ' 10% mínimo de descuento
+    Private Const AGE_DISCOUNT_MAX_PCT As Decimal = 0.4D ' 40% máximo de descuento
+
+    ' --- Reglas de Porcentajes para Grupo Familiar ---
+    Private Const FAMILY_GROUP_MIN_PCT As Decimal = 0.05D ' 5% mínimo por miembro
+    Private Const FAMILY_GROUP_MAX_PCT As Decimal = 0.25D ' 25% máximo por miembro
+
+    ' --- Control de Flujo y Modos de Pantalla ---
     Private _currentMode As TransactionMode?
     Private _selectedTariffId As Integer
+    Private _currentTariffId As Integer
 
-    ' --- Variables de estado para el control de errores lógicos ---
-    Private _isPriceValid As Boolean = False  ' Nace en False para obligar a validar el precio
-    Private _isDiscountValid As Boolean = True ' Nace en True para que no bloquee el inicio si no hay descuento
-    Private _isToPayValid As Boolean = True ' Nace en True por defecto para tarifas normales
+    ' --- Variables de Validación (Estado del Botón Guardar) ---
+    Private _isPriceValid As Boolean
+    Private _isDiscountValid As Boolean
+    Private _isToPayValid As Boolean
+    Private _isNumberMembersValid As Boolean
+    Private _isMinimumAgeValid As Boolean
+    Private _isMaximumAgeValid As Boolean
 
-    ' --- Valores de Reglas de Negocio Comerciales ---
+    ' --- Valores Económicos de la Tarifa Activa ---
     Private _currentPrice As Decimal
     Private _currentDiscount As Decimal
     Private _currentToPay As Decimal
-
     Private _fixedMonthlyPrice As Decimal
 
-    Private _allowedPriceMin As Decimal
-    Private _allowedPriceMax As Decimal
-    Private _allowedDiscountMin As Decimal
-    Private _allowedDiscountMax As Decimal
-    Private _allowedToPayMin As Decimal
-    Private _allowedToPayMax As Decimal
+    ' --- Límites Comerciales Permitidos (Min / Max) ---
+    Private _allowedPriceMin As Decimal, _allowedPriceMax As Decimal
+    Private _allowedDiscountMin As Decimal, _allowedDiscountMax As Decimal
+    Private _allowedToPayMin As Decimal, _allowedToPayMax As Decimal
 
     ' --- Valores Temporales de Validación (Snapshots) ---
     Private _tempAgeMin As Integer
@@ -51,7 +67,7 @@ Public Class FrmPricesAndDiscounts
     Private Sub FrmPricesAndDiscounts_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         FetchAndRenderTariffsGridUI()
-        ConfigureVisualStateForConsultation()
+        SetInterfaceVisualState(isEditing:=False)
 
     End Sub
 
@@ -64,7 +80,7 @@ Public Class FrmPricesAndDiscounts
         DisableInputControls()
 
         ' 2. Orquestación semántica según la selección
-        Select Case CmbPaymentMethod.Text.Trim().ToUpper()
+        Select Case CmbPaymentMethod.Text.Trim()
 
             Case PaymentMethods.IndividualClasses '"CLASES SUELTAS"
                 ConfigureDailyTariffUI()
@@ -114,7 +130,7 @@ Public Class FrmPricesAndDiscounts
                             EvaluateNumericRangeLimits(TxtPrice, currentPriceValue, _allowedPriceMin, _allowedPriceMax)
 
             ' El botón de guardar solo se encenderá si el precio es correcto Y ADEMÁS el descuento es correcto.
-            BtnSaveRate.Enabled = _isPriceValid AndAlso _isDiscountValid AndAlso _isToPayValid
+            BtnSaveRate.Enabled = ChangeStateButtonSave()
 
             ' Si el descuento es correcto, guardamos el número limpio en la variable de estado.
             If _isPriceValid Then _currentPrice = currentPriceValue
@@ -151,14 +167,15 @@ Public Class FrmPricesAndDiscounts
 
         Try
             ' Extraemos el texto limpio sin el símbolo " €".
-            Dim cleanText As String = NormalizeMoneyText(TxtDiscount.Text)
+            Dim cleanDiscountText As String = NormalizeMoneyText(TxtDiscount.Text)
 
             ' Ponemos el formato de moneda automáticamente.
             ApplyMoneyTextboxFormat(TxtDiscount)
 
             ' Parseo numérico seguro
             Dim currentDiscountValue As Decimal
-            Dim isDecimalValid As Boolean = Decimal.TryParse(cleanText, currentDiscountValue)
+            Dim isDecimalValid As Boolean = Decimal.TryParse(cleanDiscountText, currentDiscountValue)
+
 
             ' Calculamos los límites Minimo y Maximo del descuento.
             CalculateDiscountLimits()
@@ -166,12 +183,23 @@ Public Class FrmPricesAndDiscounts
             ' Calcula el total a pagar según el tipo de pago
             UpdateDiscountCalculationsAndTotals(currentDiscountValue)
 
+            '====================
+            ' 🚨 LA PIEZA FALTANTE: Actualizamos los límites comerciales permitidos para el TOTAL A PAGAR
+            ' para que _allowedToPayMin y _allowedToPayMax sepan que el 35 es legal.
+            CalculateToPayLimits()
+            '====================
+
             ' El precio solo es válido si es un número real Y ADEMÁS está dentro de los límites.
             _isDiscountValid = isDecimalValid AndAlso
                                EvaluateNumericRangeLimits(TxtDiscount, currentDiscountValue, _allowedDiscountMin, _allowedDiscountMax)
 
+            Dim cleanToPayText As String = NormalizeMoneyText(TxtToPay.Text)
+            Dim currentToPayValue As Decimal
+            Decimal.TryParse(cleanToPayText, currentToPayValue)
+            _isToPayValid = EvaluateNumericRangeLimits(TxtToPay, currentToPayValue, _allowedToPayMin, _allowedToPayMax)
+
             ' El botón de guardar solo se encenderá si el precio es correcto Y ADEMÁS el descuento es correcto.
-            BtnSaveRate.Enabled = _isPriceValid AndAlso _isDiscountValid AndAlso _isToPayValid
+            BtnSaveRate.Enabled = ChangeStateButtonSave()
 
             ' Si el descuento es correcto, guardamos el número limpio en la variable de estado.
             If _isDiscountValid Then _currentDiscount = currentDiscountValue
@@ -187,28 +215,15 @@ Public Class FrmPricesAndDiscounts
         AllowDecimalInput(sender, e)
     End Sub
     Private Sub TxtDiscount_Enter(sender As Object, e As EventArgs) Handles TxtDiscount.Enter
-
-        'Limpia el " €" visual para que el usuario escriba cómodo y selecciona todo.
-        Dim cleanText As String = TxtDiscount.Text.Replace("€", "").Trim()
-        Dim value As Decimal = 0D
-
-        If Decimal.TryParse(cleanText, value) Then
-            TxtDiscount.Text = If(value = 0D, String.Empty, value.ToString("N2"))
-        End If
-
         TxtDiscount.SelectAll()
-
     End Sub
     Private Sub TxtDiscount_Leave(sender As Object, e As EventArgs) Handles TxtDiscount.Leave
-
-        ' Si se quedó vacío o solo con la coma por error, lo auto-repara a un bonito "0,00 €"
-        Dim cleanText As String = NormalizeMoneyText(TxtDiscount.Text)
-
-        If String.IsNullOrWhiteSpace(cleanText) OrElse cleanText = "," Then
-            TxtDiscount.Text = "0,00 €"
-            TxtToPay.Text = ""
-        End If
-
+        '' Si se quedó vacío o solo con la coma por error, lo auto-repara a un bonito "0,00 €"
+        'Dim cleanDiscountText As String = NormalizeMoneyText(TxtDiscount.Text)
+        'If String.IsNullOrWhiteSpace(cleanDiscountText) OrElse cleanDiscountText = "," Then
+        '    TxtDiscount.Text = "0,00 €"
+        '    TxtToPay.Text = ""
+        'End If
     End Sub
 
 
@@ -223,12 +238,13 @@ Public Class FrmPricesAndDiscounts
 
         Try
             ' Extraemos el texto limpio y aplicamos el formato visual de moneda.
-            Dim cleanText As String = NormalizeMoneyText(TxtToPay.Text)
+            Dim cleanToPayText As String = NormalizeMoneyText(TxtToPay.Text)
+
             ApplyMoneyTextboxFormat(TxtToPay)
 
             ' Parseo numérico seguro
             Dim currentToPayValue As Decimal
-            Dim isDecimalValid As Boolean = Decimal.TryParse(cleanText, currentToPayValue)
+            Dim isDecimalValid As Boolean = Decimal.TryParse(cleanToPayText, currentToPayValue)
 
             ' Calculamos los límites inversos y el descuento resultante
             CalculateToPayLimits()
@@ -240,8 +256,14 @@ Public Class FrmPricesAndDiscounts
             _isToPayValid = isDecimalValid AndAlso
                             EvaluateNumericRangeLimits(TxtToPay, currentToPayValue, _allowedToPayMin, _allowedToPayMax)
 
+            Dim cleanDiscountText As String = NormalizeMoneyText(TxtDiscount.Text)
+            Dim currentDiscountValue As Decimal
+            Decimal.TryParse(cleanDiscountText, currentDiscountValue)
+            _isDiscountValid = EvaluateNumericRangeLimits(TxtDiscount, currentDiscountValue,
+                                                          _allowedDiscountMin, _allowedDiscountMax)
+
             ' El botón de guardar vigila el precio, el descuento Y el total a pagar.
-            BtnSaveRate.Enabled = _isPriceValid AndAlso _isDiscountValid AndAlso _isToPayValid
+            BtnSaveRate.Enabled = ChangeStateButtonSave()
 
             ' uardamos el número limpio en la variable de estado
             If _isToPayValid Then _currentToPay = currentToPayValue
@@ -257,43 +279,34 @@ Public Class FrmPricesAndDiscounts
         AllowDecimalInput(sender, e)
     End Sub
     Private Sub TxtToPay_Enter(sender As Object, e As EventArgs) Handles TxtToPay.Enter
-
-        Dim cleanText As String = TxtToPay.Text.Replace("€", "").Trim()
-        Dim value As Decimal = 0D
-
-        If Decimal.TryParse(cleanText, value) Then
-            TxtToPay.Text = If(value = 0D, String.Empty, value.ToString("N2"))
-        End If
-
         TxtToPay.SelectAll()
-
     End Sub
     Private Sub TxtToPay_Leave(sender As Object, e As EventArgs) Handles TxtToPay.Leave
-
-        Dim cleanText As String = NormalizeMoneyText(TxtToPay.Text)
-
-        If String.IsNullOrWhiteSpace(cleanText) OrElse cleanText = "," Then
-            TxtToPay.Text = "0,00 €"
-            TxtDiscount.Text = ""
-        End If
-
+        'Dim cleanDiscountText As String = NormalizeMoneyText(TxtToPay.Text)
+        'If String.IsNullOrWhiteSpace(cleanDiscountText) OrElse cleanDiscountText = "," Then
+        '    TxtToPay.Text = "0,00 €"
+        '    TxtDiscount.Text = ""
+        'End If
     End Sub
 
 
     Private Sub NudNumberMembers_ValueChanged(sender As Object, e As EventArgs) Handles NudNumberMembers.ValueChanged
-        ' 🛡️ Guarda de seguridad: Si no estamos editando o creando, ignoramos el evento
+
         If _currentMode Is Nothing Then Exit Sub
 
-        ' 🔌 OJO: Como este control va a provocar que se recalculen los descuentos y totales,
-        ' apagamos temporalmente los manejadores de las cajas de dinero para que no salten por error
+        ' Apagamos temporalmente los eventos.
         RemoveHandler TxtDiscount.TextChanged, AddressOf TxtDiscount_TextChanged
         RemoveHandler TxtToPay.TextChanged, AddressOf TxtToPay_TextChanged
 
         Try
-            ' 1. Validamos que la tarifa actual del combo sea la de Grupo Familiar
             If CmbPaymentMethod.Text.Trim() = PaymentMethods.FamilyGroup Then
 
-                ' 2. Actualizamos la etiqueta informativa (Usando tu función ya simplificada)
+                ' 1. Evaluamos el propio control numérico, pintamos sus letras en tiempo real
+                '    y actualizamos su bandera de estado.
+                _isNumberMembersValid = EvaluateNumericRangeLimits(NudNumberMembers, NudNumberMembers.Value,
+                                                                   NudNumberMembers.Minimum, NudNumberMembers.Maximum)
+
+                ' 2. Actualizamos la etiqueta informativa
                 UpdateDynamicTariffLabel()
 
                 ' 3. Extraemos el valor actual del descuento en formato numérico para no perderlo
@@ -301,57 +314,167 @@ Public Class FrmPricesAndDiscounts
                 Dim currentDiscountValue As Decimal
                 Decimal.TryParse(cleanText, currentDiscountValue)
 
-                ' 4. 🧮 RECALCULAMOS TODO EN CADENA:
-                ' Al cambiar el número de personas, cambian los límites del descuento, 
-                ' cambian las matemáticas finales y cambia el total a pagar.
+                ' 4. Calculamos todo en cadena.
                 CalculateDiscountLimits()
                 UpdateDiscountCalculationsAndTotals(currentDiscountValue)
                 CalculateToPayLimits()
 
-                ' 5. 🛡️ RE-EVALUAMOS LA SEGURIDAD: 
-                ' Comprobamos si el descuento sigue siendo válido con los nuevos límites de personas
+                ' 5. Comprobamos si el descuento sigue siendo válido con los nuevos límites de personas
                 _isDiscountValid = EvaluateNumericRangeLimits(TxtDiscount, currentDiscountValue,
                                                               _allowedDiscountMin, _allowedDiscountMax)
 
-                ' 🔓 EL CANDADO DEL BOTÓN DIRECTO Y A LA VISTA:
-                BtnSaveRate.Enabled = _isPriceValid AndAlso _isDiscountValid AndAlso _isToPayValid
+                BtnSaveRate.Enabled = ChangeStateButtonSave()
+
             End If
 
         Finally
-            ' 🔌 Reconectamos siempre los interruptores al salir
-            AddHandler TxtToPay.TextChanged, AddressOf TxtToPay_TextChanged
+            ' Reconectamos siempre los interruptores al salir
             AddHandler TxtDiscount.TextChanged, AddressOf TxtDiscount_TextChanged
+            AddHandler TxtToPay.TextChanged, AddressOf TxtToPay_TextChanged
         End Try
+
     End Sub
     Private Sub NudNumberMembers_Enter(sender As Object, e As EventArgs) Handles NudNumberMembers.Enter
-        ' Selecciona el texto completo del control (desde la posición 0 hasta el final)
         NudNumberMembers.Select(0, NudNumberMembers.Text.Length)
+    End Sub
+    Private Sub NudNumberMembers_KeyUp(sender As Object, e As KeyEventArgs) Handles NudNumberMembers.KeyUp
+
+        Dim typedValue As Decimal
+
+        Decimal.TryParse(NormalizeMoneyText(NudNumberMembers.Text), typedValue)
+
+        _isNumberMembersValid = EvaluateNumericRangeLimits(NudNumberMembers, typedValue,
+                                                           NudNumberMembers.Minimum, NudNumberMembers.Maximum)
+
+        If _isNumberMembersValid Then NudNumberMembers.Value = typedValue
+
+        BtnSaveRate.Enabled = ChangeStateButtonSave()
+
     End Sub
 
 
     Private Sub NudMinimumAge_ValueChanged(sender As Object, e As EventArgs) Handles NudMinimumAge.ValueChanged
+
         If _currentMode Is Nothing Then Exit Sub
+
         If CmbPaymentMethod.Text.Trim() = PaymentMethods.AgeDiscount Then UpdateDynamicTariffLabel()
+
+        _isMinimumAgeValid = EvaluateNumericRangeLimits(NudMinimumAge, NudMinimumAge.Value,
+                                                        MINIMUM_AGE_FOR_DISCOUNT, NudMinimumAge.Maximum)
+
+        ValidateAgeRangeCoherence() ' Validación cruzada para el descuento por edad
+
+        BtnSaveRate.Enabled = ChangeStateButtonSave()
+
     End Sub
     Private Sub NudMinimumAge_Enter(sender As Object, e As EventArgs) Handles NudMinimumAge.Enter
         NudMinimumAge.Select(0, NudMinimumAge.Text.Length)
     End Sub
+    Private Sub NudMinimumAge_KeyUp(sender As Object, e As KeyEventArgs) Handles NudMinimumAge.KeyUp
+
+        If String.IsNullOrWhiteSpace(NudMinimumAge.Text) Then
+
+            NudMinimumAge.ForeColor = Color.Red
+            NudMinimumAge.Font = New System.Drawing.Font(NudMinimumAge.Font, FontStyle.Bold)
+            _isMinimumAgeValid = False
+
+            BtnSaveRate.Enabled = ChangeStateButtonSave()
+            Exit Sub
+
+        End If
+
+        Dim typedValue As Decimal
+        Decimal.TryParse(NormalizeMoneyText(NudMinimumAge.Text), typedValue)
+
+        _isMinimumAgeValid = EvaluateNumericRangeLimits(NudMinimumAge, typedValue,
+                                                        MINIMUM_AGE_FOR_DISCOUNT, NudMinimumAge.Maximum)
+
+        If _isMinimumAgeValid Then NudMinimumAge.Value = typedValue
+
+        ValidateAgeRangeCoherence() ' Validación cruzada para el descuento por edad
+
+        BtnSaveRate.Enabled = ChangeStateButtonSave()
+
+    End Sub
 
 
     Private Sub NudMaximumAge_ValueChanged(sender As Object, e As EventArgs) Handles NudMaximumAge.ValueChanged
+
         If _currentMode Is Nothing Then Exit Sub
+
         If CmbPaymentMethod.Text.Trim() = PaymentMethods.AgeDiscount Then UpdateDynamicTariffLabel()
+
+        _isMaximumAgeValid = EvaluateNumericRangeLimits(NudMaximumAge, NudMaximumAge.Value,
+                                                        MINIMUM_AGE_FOR_DISCOUNT, NudMaximumAge.Maximum)
+
+        ValidateAgeRangeCoherence() ' Validación cruzada para el descuento por edad
+
+        BtnSaveRate.Enabled = ChangeStateButtonSave()
+
     End Sub
     Private Sub NudMaximumAge_Enter(sender As Object, e As EventArgs) Handles NudMaximumAge.Enter
         NudMaximumAge.Select(0, NudMaximumAge.Text.Length)
+    End Sub
+    Private Sub NudMaximumAge_KeyUp(sender As Object, e As KeyEventArgs) Handles NudMaximumAge.KeyUp
+
+        If String.IsNullOrWhiteSpace(NudMaximumAge.Text) Then
+
+            NudMaximumAge.ForeColor = Color.Red
+            NudMaximumAge.Font = New System.Drawing.Font(NudMaximumAge.Font, FontStyle.Bold)
+            _isMaximumAgeValid = False
+
+            BtnSaveRate.Enabled = ChangeStateButtonSave()
+            Exit Sub
+
+        End If
+
+        Dim typedValue As Decimal
+        Decimal.TryParse(NormalizeMoneyText(NudMaximumAge.Text), typedValue)
+
+        _isMaximumAgeValid = EvaluateNumericRangeLimits(NudMaximumAge, typedValue,
+                                                        MINIMUM_AGE_FOR_DISCOUNT, NudMaximumAge.Maximum)
+
+        If _isMaximumAgeValid Then NudMaximumAge.Value = typedValue
+
+        ValidateAgeRangeCoherence() ' Validación cruzada para el descuento por edad
+
+        BtnSaveRate.Enabled = ChangeStateButtonSave()
+
     End Sub
 
 
     Private Sub DgvPriceList_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvPriceList.CellContentClick
         '
     End Sub
+    Private Sub DgvPriceList_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvPriceList.CellClick
+
+        If e.RowIndex < 0 Then Exit Sub
+
+        ' Extraemos el objeto de negocio completo directo de la memoria RAM.
+        Dim selectedTariff = DirectCast(DgvPriceList.CurrentRow.DataBoundItem, TariffDTO)
+
+        ' Captura de identificadores y estado de la tarifa seleccionada desde las propiedades del objeto
+        _currentTariffId = selectedTariff.IdTariff
+        _selectedTariffId = _currentTariffId
+
+        ' Actualizamos los cuadros de texto con la info de la tarifa.
+        TxtPrice.Text = selectedTariff.Price.ToString("C2")
+        TxtTotal.Text = selectedTariff.Total.ToString("C2")
+        TxtDiscount.Text = selectedTariff.Discount.ToString("C2")
+        TxtToPay.Text = selectedTariff.TotalToPay.ToString("C2")
+
+        LblPaymentMethod.Text = selectedTariff.PaymentMethod.ToString().Trim()
+        NudMinimumAge.Value = selectedTariff.MinimumAge
+        NudMaximumAge.Value = selectedTariff.MaximumAge
+        NudNumberMembers.Value = selectedTariff.NumberMembers
+
+    End Sub
+
 
     Private Sub BtnNewRate_Click(sender As Object, e As EventArgs) Handles BtnNewRate.Click
+
+        ' El ID de la memoria RAM debe nacer en 0 pase lo que pase.
+        _currentTariffId = 0
 
         ' 1. Establecemos el modo de la transacción actual
         _currentMode = TransactionMode.NewRecord
@@ -361,7 +484,7 @@ Public Class FrmPricesAndDiscounts
         ResetStateVariables()
 
         ' 3. Transición visual del formulario al "Modo Edición"
-        ConfigureVisualStateForEdition()
+        SetInterfaceVisualState(isEditing:=True)
 
         ' 4. Regla de Negocio Especial: Evaluar si es la primera tarifa del sistema
         If DgvPriceList.RowCount = 0 Then
@@ -372,18 +495,158 @@ Public Class FrmPricesAndDiscounts
 
     End Sub
 
+
     Private Sub BtnSaveRate_Click(sender As Object, e As EventArgs) Handles BtnSaveRate.Click
-        '
+
+        Dim selectedMethod As String = CmbPaymentMethod.Text.Trim()
+        Dim confirmationMessage As String
+
+        ' 1. MENSAJE : Construir cuerpo del mensaje
+        Select Case selectedMethod
+
+            Case PaymentMethods.IndividualClasses
+                confirmationMessage = $"La TARIFA fijada es de {TxtPrice.Text} por día.{vbCrLf}{vbCrLf}" &
+                                  $"El precio fijado se usará en los pagos de las Clases Sueltas."
+
+            Case PaymentMethods.AgeDiscount
+                confirmationMessage = $"Se ha guardado la tarifa correctamente.{vbCrLf}{vbCrLf}" &
+                                  $"El intervalo de edad es de {NudMinimumAge.Value} a {NudMaximumAge.Value} años."
+
+            Case PaymentMethods.FamilyGroup
+                confirmationMessage = $"El precio de la tarifa familiar es de {TxtToPay.Text}.{vbCrLf}{vbCrLf}" &
+                                  $"El descuento aplicado para {NudNumberMembers.Value} personas es de {TxtDiscount.Text}.{vbCrLf}{vbCrLf}" &
+                                  $"Se ha guardado la tarifa correctamente."
+
+            Case PaymentMethods.MonthlyFeeSupplies
+                confirmationMessage = $"El precio del bono se ha establecido en {TxtPrice.Text}.{vbCrLf}{vbCrLf}" &
+                                  $"El bono incluye la mensualidad más implementos."
+
+            Case Else
+                If DgvPriceList.RowCount = 0 Then
+                    confirmationMessage = $"La TARIFA fijada es de {TxtPrice.Text} mensuales.{vbCrLf}{vbCrLf}" &
+                                      $"El precio se usará en todos los pagos de los clientes."
+                Else
+                    MsgBox($"No se puede guardar ninguna tarifa.{vbCrLf}{vbCrLf}Selecciona un Tipo de Pago de la lista.", vbCritical, "Tabla de precios y descuentos")
+                    Exit Sub
+                End If
+
+        End Select
+
+        ' 2. DETECCIÓN DE DUPLICADOS EN EL DATAGRIDVIEW : Si nos devuelve True, significa que ya existe,
+        '    pintó la fila y debemos detener el guardado.
+        If FindAndSelectRowByName(LblPaymentMethod.Text) Then
+
+            MsgBox($"No se puede GUARDAR la nueva tarifa.{vbCrLf}{vbCrLf}" &
+               $"Ya existe un registro con este nombre: {LblPaymentMethod.Text}{vbCrLf}{vbCrLf}" &
+               $"Puedes ELIMINAR o MODIFICAR los datos del registro.", vbCritical, "Error de registro")
+
+            TxtPrice.Focus()
+
+            Exit Sub
+        End If
+
+        ' 3. GUARDAR USANDO DTO Y TARIFFMANAGER
+        Try
+            Dim newTariffDto As New TariffDTO() With
+                {
+                    .IdTariff = _currentTariffId,
+                    .PaymentMethod = LblPaymentMethod.Text,
+                    .Price = _currentPrice,
+                    .MinimumAge = CInt(NudMinimumAge.Value),
+                    .MaximumAge = CInt(NudMaximumAge.Value),
+                    .NumberMembers = CInt(NudNumberMembers.Value),
+                    .Discount = _currentDiscount
+                }
+
+            _currentTariffId = _tariffManager.Save(newTariffDto)
+
+        Catch ex As Exception
+            MsgBox($"Error al guardar en el sistema a través de TariffManager: {vbCrLf}{ex.Message}", vbCritical, "Error de Persistencia")
+            Exit Sub
+        End Try
+
+        ' 4. REFRESCAR LA INTERFAZ DE USUARIO
+        FetchAndRenderTariffsGridUI()
+
+        FindAndSelectRowByName(LblPaymentMethod.Text)
+
+        _currentMode = Nothing
+        SetInterfaceVisualState(isEditing:=False)
+
+        DisableInputControls()
+
+        CmbPaymentMethod.Text = String.Empty
+
+        MsgBox(confirmationMessage, vbInformation, "Tabla de precios y descuentos")
+
     End Sub
+
+
+    Private Sub BtnModifyRate_Click(sender As Object, e As EventArgs) Handles BtnModifyRate.Click
+
+        ' 1. COMPROBAR SI HAY REGISTRO SELECCIONADO
+        If _currentTariffId = 0 Then
+            MsgBox("Selecciona un registro de la lista para MODIFICAR.", vbCritical, "Verificar")
+            DgvPriceList.Focus()
+            Exit Sub
+        End If
+
+        ' 2. ENCHUFAMOS EL MODO EDICIÓN
+        _currentMode = TransactionMode.EditRecord
+
+        ' 3. EVALUAMOS EL MÉTODO DE PAGO USANDO TUS CONSTANTES DE NEGOCIO
+        Dim currentPayment As String = LblPaymentMethod.Text.Trim()
+
+        Select Case True
+
+            Case currentPayment.StartsWith(PaymentMethods.Daily) OrElse
+                currentPayment.StartsWith(PaymentMethods.MonthImp)
+                TxtPrice.Enabled = True
+                TxtPrice.Focus()
+
+            Case currentPayment.StartsWith(PaymentMethods.AgeDscnt)
+                TxtDiscount.Enabled = True
+                TxtToPay.Enabled = True
+                NudMinimumAge.Enabled = True
+                NudMaximumAge.Enabled = True
+                TxtDiscount.Focus()
+
+                _tempAgeMin = Convert.ToInt32(NudMinimumAge.Value)
+                _tempAgeMax = Convert.ToInt32(NudMaximumAge.Value)
+
+            Case currentPayment.StartsWith(PaymentMethods.FmlGroup)
+                TxtDiscount.Enabled = True
+                TxtToPay.Enabled = True
+                NudNumberMembers.Enabled = True
+                TxtDiscount.Focus()
+
+                _tempAgeMax = Convert.ToInt32(NudNumberMembers.Value)
+
+            Case Else
+                Dim response As MsgBoxResult = MsgBox("Vas a modificar el PRECIO FIJO GENERAL." & vbCr &
+                                                     "Se modificarán todas las tarifas asociadas con el nuevo precio." & vbCr & vbCr &
+                                                     "¿Estás seguro de modificar el precio fijo?",
+                                                     vbQuestion + vbYesNo + vbDefaultButton2, "Advertencia")
+
+                If response = vbYes Then
+                    TxtPrice.Enabled = True
+                    TxtPrice.Focus()
+                Else
+                    _currentMode = Nothing
+                    Exit Sub
+                End If
+
+        End Select
+
+        ' 4. CONTROL DE INTERFAZ Y BOTONES
+        SetInterfaceVisualState(isEditing:=True)
+
+    End Sub
+
 
     Private Sub BtnUpdateRate_Click(sender As Object, e As EventArgs) Handles BtnUpdateRate.Click
         '
     End Sub
-
-    Private Sub BtnModifyRate_Click(sender As Object, e As EventArgs) Handles BtnModifyRate.Click
-        '
-    End Sub
-
     Private Sub BtnCancelRegistration_Click(sender As Object, e As EventArgs) Handles BtnCancelRegistration.Click
         '
     End Sub
@@ -418,11 +681,17 @@ Public Class FrmPricesAndDiscounts
         TxtTotal.Clear()
 
         TxtPrice.Enabled = True
+        TxtPrice.Text = "0"
         TxtPrice.Focus()
 
-        ' Configuración de límites o parámetros comerciales iniciales
-        _allowedPriceMin = 10D
-        _allowedPriceMax = 90D
+        _allowedPriceMin = MINIMUM_PRICE_LIMIT
+        _allowedPriceMax = MAXIMUM_PRICE_LIMIT
+
+        _isPriceValid = False   ' FALSE : El texto es "0" y debe cambiarlo obligatoriamente.
+        _isDiscountValid = True ' TRUE : La primera mensualidad no lleva descuento.
+        _isToPayValid = True    ' TRUE : No hay cálculos de total cruzados.
+
+        BtnSaveRate.Enabled = ChangeStateButtonSave()
 
     End Sub
 
@@ -457,50 +726,97 @@ Public Class FrmPricesAndDiscounts
     ' Métodos dedicados exclusivamente a la cosmética y mutación de controles.
 
     ''' <summary>
-    ''' Cambia los controles de la interfaz al modo de consulta general, bloqueando ediciones inactivas.
+    ''' Gestiona de forma centralizada la visibilidad y disponibilidad de los controles de la pantalla 
+    ''' según el estado de la transacción actual.
     ''' </summary>
-    Private Sub ConfigureVisualStateForConsultation()
+    ''' <param name="isEditing">TRUE si el formulario entra en modo Creación/Edición. FALSE para modo Consulta/Lectura.</param>
+    Private Sub SetInterfaceVisualState(isEditing As Boolean)
 
-        CmbPaymentMethod.Enabled = False
+        ' 1. EVALUAMOS LA EXISTENCIA DE DATOS EN LA TABLA
+        ' Esto determina si se pueden pulsar los botones de Modificar/Eliminar en modo consulta
+        Dim hasRows As Boolean = (DgvPriceList.RowCount > 0)
 
-        ' Control de visibilidad de botones (Modo Lectura)
-        BtnNewRate.Visible = True
-        BtnModifyRate.Visible = True
-        BtnDeleteRate.Visible = True
-        BtnSaveRate.Visible = False
-        BtnUpdateRate.Visible = False
-        BtnCancelRegistration.Visible = False
+        ' 2. CONTROLES DE NAVEGACIÓN Y SELECCIÓN
+        ' Si estamos editando, bloqueamos la grilla para evitar clics accidentales. 
+        ' Si estamos en consulta, solo habilitamos la grilla si tiene filas.
+        DgvPriceList.Enabled = If(isEditing, False, hasRows)
+        CmbPaymentMethod.Enabled = isEditing
 
-        ' Evaluamos si hay datos en la rejilla para permitir acciones de edición
-        Dim hasRows As Boolean = DgvPriceList.RowCount > 0
-        DgvPriceList.Enabled = hasRows
-        BtnModifyRate.Visible = hasRows
-        BtnDeleteRate.Visible = hasRows
+        ' 3. BOTONES DE ACCIÓN PRINCIPAL (Nuevo, Modificar, Eliminar)
+        ' Aparecen en modo consulta (Modificar/Eliminar condicionados a si hay filas) y desaparecen al editar.
+        BtnNewRate.Visible = Not isEditing
+        BtnModifyRate.Visible = If(isEditing, False, hasRows)
+        BtnDeleteRate.Visible = If(isEditing, False, hasRows)
 
-        BtnNewRate.Focus()
+        ' 4. BOTONES DE TRANSACCIÓN (Guardar, Actualizar, Cancelar)
+        ' Aparecen únicamente cuando estamos editando o creando un registro
+        BtnCancelRegistration.Visible = isEditing
+
+        ' 🎯 El truco maestro para Guardar vs Actualizar:
+        ' Evaluamos tu variable global _currentMode para saber exactamente cuál de los dos botones mostrar al editar
+        If isEditing Then
+            BtnSaveRate.Visible = (_currentMode = TransactionMode.NewRecord)
+            BtnUpdateRate.Visible = (_currentMode = TransactionMode.EditRecord)
+        Else
+            ' Si no estamos editando, ambos botones transaccionales se ocultan
+            BtnSaveRate.Visible = False
+            BtnUpdateRate.Visible = False
+        End If
+
+        ' 5. FOCOS ESTATÉGICOS AUTOMÁTICOS
+        ' Colocamos el foco inicial para que el usuario no tenga que usar el ratón
+        If Not isEditing Then
+            BtnNewRate.Focus()
+        End If
 
     End Sub
 
+    '''' <summary>
+    '''' Cambia los controles de la interfaz al modo de consulta general, bloqueando ediciones inactivas.
+    '''' </summary>
+    'Private Sub ConfigureVisualStateForConsultation()
 
-    ''' <summary>
-    ''' Configura los componentes visuales para bloquear la rejilla y permitir la edición en los controles de entrada.
-    ''' </summary>
-    Private Sub ConfigureVisualStateForEdition()
+    '    CmbPaymentMethod.Enabled = False
 
-        ' Ocultamos acciones principales de lectura
-        BtnNewRate.Visible = False
-        BtnModifyRate.Visible = False
-        BtnDeleteRate.Visible = False
+    '    ' Control de visibilidad de botones (Modo Lectura)
+    '    BtnNewRate.Visible = True
+    '    BtnModifyRate.Visible = True
+    '    BtnDeleteRate.Visible = True
+    '    BtnSaveRate.Visible = False
+    '    BtnUpdateRate.Visible = False
+    '    BtnCancelRegistration.Visible = False
 
-        ' Mostramos los controladores de la transacción activa
-        BtnSaveRate.Visible = True
-        BtnCancelRegistration.Visible = True
+    '    ' Evaluamos si hay datos en la rejilla para permitir acciones de edición
+    '    Dim hasRows As Boolean = DgvPriceList.RowCount > 0
+    '    DgvPriceList.Enabled = hasRows
+    '    BtnModifyRate.Visible = hasRows
+    '    BtnDeleteRate.Visible = hasRows
 
-        ' Habilitamos selectores e inhabilitamos la tabla para evitar cambios de foco bruscos
-        CmbPaymentMethod.Enabled = True
-        DgvPriceList.Enabled = False
+    '    BtnNewRate.Focus()
 
-    End Sub
+    'End Sub
+
+
+    '''' <summary>
+    '''' Configura los componentes visuales para bloquear la rejilla y permitir la edición en los controles de entrada.
+    '''' </summary>
+    'Private Sub ConfigureVisualStateForEdition()
+
+    '    ' Ocultamos acciones principales de lectura
+    '    BtnNewRate.Visible = False
+    '    BtnModifyRate.Visible = False
+    '    BtnDeleteRate.Visible = False
+
+    '    ' Mostramos los controladores de la transacción activa
+    '    BtnSaveRate.Visible = True
+    '    BtnSaveRate.Enabled = False
+    '    BtnCancelRegistration.Visible = True
+
+    '    ' Habilitamos selectores e inhabilitamos la tabla para evitar cambios de foco bruscos
+    '    CmbPaymentMethod.Enabled = True
+    '    DgvPriceList.Enabled = False
+
+    'End Sub
 
 
     ''' <summary>
@@ -525,12 +841,19 @@ Public Class FrmPricesAndDiscounts
     ''' </summary>
     Private Sub ConfigureDailyTariffUI()
 
-        NudNumberMembers.Value = 1
-        TxtTotal.Clear()
+        TxtPrice.Enabled = True
+        TxtPrice.Text = 0
+        TxtPrice.Focus()
+
         LblPaymentMethod.Text = PaymentMethods.Daily
 
-        TxtPrice.Enabled = True
-        TxtPrice.Focus()
+        NudNumberMembers.Value = 1
+
+        _isPriceValid = False   ' FALSE : Obliga a teclear un precio válido diferente de 0.
+        _isDiscountValid = True ' TRUE : No aplica descuento.
+        _isToPayValid = True    ' TRUE : No aplica total a pagar.
+
+        BtnSaveRate.Enabled = ChangeStateButtonSave()
 
     End Sub
 
@@ -540,20 +863,32 @@ Public Class FrmPricesAndDiscounts
     ''' </summary>
     Private Sub ConfigureAgeDiscountUI()
 
-        ' Asignamos el valor numérico de respaldo (puedes usar ToString si tus cajas manejan texto base)
         TxtPrice.Text = _fixedMonthlyPrice.ToString("N2")
-        TxtTotal.Text = _fixedMonthlyPrice.ToString("N2")
+        TxtTotal.Text = TxtPrice.Text '_fixedMonthlyPrice.ToString("N2")
 
         TxtDiscount.Enabled = True
+        TxtDiscount.Text = 0
+        TxtDiscount.Focus()
+
         TxtToPay.Enabled = True
 
+        LblPaymentMethod.Text = PaymentMethods.AgeDscnt
+
         NudNumberMembers.Value = 1
+
         NudMinimumAge.Enabled = True
+        NudMinimumAge.Value = MINIMUM_AGE_FOR_DISCOUNT
+
         NudMaximumAge.Enabled = True
+        NudMaximumAge.Value = MINIMUM_AGE_FOR_DISCOUNT
 
-        LblPaymentMethod.Text = PaymentMethods.AgeDscnt '"DSCTO EDAD"
+        _isPriceValid = True       ' TRUE : El precio base ya está establecido por el sistema.
+        _isDiscountValid = False   ' FALSE : Obliga a ingresar un descuento válido.
+        _isToPayValid = True       ' TRUE : Se evaluará cuando cambie el descuento o el total.
+        _isMinimumAgeValid = True  ' TRUE : La edad mínima es 5 y es un valor correcto.
+        _isMaximumAgeValid = False ' FALSE : La edad máxima es 5 igual que _isMinimumAgeValid y es un valor incorrecto.
 
-        TxtDiscount.Focus()
+        BtnSaveRate.Enabled = ChangeStateButtonSave()
 
     End Sub
 
@@ -566,14 +901,23 @@ Public Class FrmPricesAndDiscounts
         TxtPrice.Text = _fixedMonthlyPrice.ToString("N2")
 
         TxtDiscount.Enabled = True
+        TxtDiscount.Text = 0
+        TxtDiscount.Focus()
+
         TxtToPay.Enabled = True
 
+        LblPaymentMethod.Text = PaymentMethods.FmlGroup
+
         NudNumberMembers.Enabled = True
-        NudNumberMembers.Value = 1
+        NudNumberMembers.Minimum = 3
+        NudNumberMembers.Value = 3
 
-        LblPaymentMethod.Text = PaymentMethods.FmlGroup '"GRUPO FAM"
+        _isPriceValid = True         ' TRUE : El precio base está validado.
+        _isDiscountValid = False     ' FALSE : Exige interactuar o se calcule el rango correcto.
+        _isToPayValid = True         ' TRUE : El precio a pagar ya está calculado.
+        _isNumberMembersValid = True ' TRUE : Arranca con el valor por defecto "3 integrantes" que es válido.
 
-        NudNumberMembers.Focus()
+        BtnSaveRate.Enabled = ChangeStateButtonSave()
 
     End Sub
 
@@ -583,14 +927,19 @@ Public Class FrmPricesAndDiscounts
     ''' </summary>
     Private Sub ConfigureMonthlyWithEquipmentTariffUI()
 
+        TxtPrice.Enabled = True
+        TxtPrice.Text = 0
+        TxtPrice.Focus()
+
+        LblPaymentMethod.Text = PaymentMethods.MonthImp
+
         NudNumberMembers.Value = 1
 
-        TxtTotal.Clear()
+        _isPriceValid = False   ' FALSE : Obliga a teclear un precio válido diferente de 0.
+        _isDiscountValid = True ' TRUE : No aplica descuento.
+        _isToPayValid = True    ' TRUE : No aplica total a pagar.
 
-        LblPaymentMethod.Text = PaymentMethods.MonthImp '"MES + IMPLE"
-
-        TxtPrice.Enabled = True
-        TxtPrice.Focus()
+        BtnSaveRate.Enabled = ChangeStateButtonSave()
 
     End Sub
 
@@ -600,6 +949,7 @@ Public Class FrmPricesAndDiscounts
     ''' </summary>
     Private Sub ClearInputControls()
 
+        NudNumberMembers.Minimum = 0
         NudNumberMembers.Value = 0
         NudMinimumAge.Value = 0
         NudMaximumAge.Value = 0
@@ -622,8 +972,8 @@ Public Class FrmPricesAndDiscounts
         ' Regla del Sistema: Si es la primera tarifa o es la Mensualidad base, los límites son fijos
         If DgvPriceList.RowCount = 0 OrElse LblPaymentMethod.Text.Trim() = PaymentMethods.Monthly Then
 
-            _allowedPriceMin = 10D
-            _allowedPriceMax = 90D
+            _allowedPriceMin = MINIMUM_PRICE_LIMIT
+            _allowedPriceMax = MAXIMUM_PRICE_LIMIT
 
             Exit Sub
 
@@ -633,8 +983,8 @@ Public Class FrmPricesAndDiscounts
         Select Case CmbPaymentMethod.Text.Trim()
 
             Case PaymentMethods.IndividualClasses '"CLASES SUELTAS"
-                _allowedPriceMin = _fixedMonthlyPrice * 0.1D
-                _allowedPriceMax = _fixedMonthlyPrice * 0.3D
+                _allowedPriceMin = _fixedMonthlyPrice * INDIVIDUAL_CLASS_MIN_PCT
+                _allowedPriceMax = _fixedMonthlyPrice * INDIVIDUAL_CLASS_MAX_PCT
 
             Case PaymentMethods.MonthlyFeeSupplies '"MENSUALIDAD + IMPLEMENTOS"
                 _allowedPriceMin = _fixedMonthlyPrice + (_fixedMonthlyPrice / 2D)
@@ -656,14 +1006,14 @@ Public Class FrmPricesAndDiscounts
 
             Case PaymentMethods.AgeDiscount '"DESCUENTO POR EDAD"
 
-                _allowedDiscountMin = _fixedMonthlyPrice * 0.1D
-                _allowedDiscountMax = _fixedMonthlyPrice * 0.4D
+                _allowedDiscountMin = _fixedMonthlyPrice * AGE_DISCOUNT_MIN_PCT
+                _allowedDiscountMax = _fixedMonthlyPrice * AGE_DISCOUNT_MAX_PCT
 
             Case PaymentMethods.FamilyGroup '"GRUPO FAMILIAR"
 
                 Dim totalGroupBase As Decimal = _fixedMonthlyPrice * NudNumberMembers.Value
-                _allowedDiscountMin = totalGroupBase * 0.05D
-                _allowedDiscountMax = totalGroupBase * 0.25D
+                _allowedDiscountMin = totalGroupBase * FAMILY_GROUP_MIN_PCT
+                _allowedDiscountMax = totalGroupBase * FAMILY_GROUP_MAX_PCT
 
             Case Else
 
@@ -677,14 +1027,15 @@ Public Class FrmPricesAndDiscounts
     Private Sub CalculateToPayLimits()
 
         Select Case CmbPaymentMethod.Text.Trim()
+
             Case PaymentMethods.AgeDiscount
-                _allowedToPayMin = _fixedMonthlyPrice - (_fixedMonthlyPrice * 0.4D)
-                _allowedToPayMax = _fixedMonthlyPrice - (_fixedMonthlyPrice * 0.1D)
+                _allowedToPayMin = _fixedMonthlyPrice - (_fixedMonthlyPrice * AGE_DISCOUNT_MAX_PCT)
+                _allowedToPayMax = _fixedMonthlyPrice - (_fixedMonthlyPrice * AGE_DISCOUNT_MIN_PCT)
 
             Case PaymentMethods.FamilyGroup
                 Dim totalGroupBase As Decimal = _fixedMonthlyPrice * NudNumberMembers.Value
-                _allowedToPayMin = totalGroupBase - (totalGroupBase * 0.25D)
-                _allowedToPayMax = totalGroupBase - (totalGroupBase * 0.05D)
+                _allowedToPayMin = totalGroupBase - (totalGroupBase * FAMILY_GROUP_MAX_PCT)
+                _allowedToPayMax = totalGroupBase - (totalGroupBase * FAMILY_GROUP_MIN_PCT)
 
             Case Else
                 _allowedToPayMin = 0D
@@ -699,39 +1050,40 @@ Public Class FrmPricesAndDiscounts
     ''' Actualiza la etiqueta informativa agregando el precio actual en tiempo real según el tipo de tarifa.
     ''' </summary>
     Private Sub UpdateDynamicTariffLabel()
-        Dim prefix As String = String.Empty
 
-        ' 1. Averiguamos el texto base según el combo (Un solo Select)
+        Dim prefix As String
+
         Select Case CmbPaymentMethod.Text.Trim()
 
             Case PaymentMethods.IndividualClasses
-                prefix = PaymentMethods.Daily '"DIARIO"
+                prefix = PaymentMethods.Daily
 
             Case PaymentMethods.MonthlyFeeSupplies
-                prefix = PaymentMethods.MonthImp '"MES + IMPLE"
+                prefix = PaymentMethods.MonthImp
 
             Case PaymentMethods.AgeDiscount
-                prefix = $"{PaymentMethods.AgeDscnt} {NudMinimumAge.Value}-{NudMaximumAge.Value}" '"DSCTO EDAD"
+                prefix = $"{PaymentMethods.AgeDscnt} {NudMinimumAge.Value}-{NudMaximumAge.Value}"
 
             Case PaymentMethods.FamilyGroup
-                prefix = $"{PaymentMethods.FmlGroup} {NudNumberMembers.Value}" '"GRUPO FAM"
+                prefix = $"{PaymentMethods.FmlGroup} {NudNumberMembers.Value}"
 
             Case Else
                 prefix = PaymentMethods.Monthly
 
         End Select
 
-        ' Obtenemos el texto del precio y le BORRAMOS el símbolo de euro.
         Dim currentPriceText As String = TxtPrice.Text.Replace("€", "").Trim()
 
         ' Si está vacío o es cero, mostramos solo el prefijo.
-        If String.IsNullOrEmpty(currentPriceText) OrElse currentPriceText = "0" OrElse currentPriceText = "0,00" Then
+        If String.IsNullOrEmpty(currentPriceText) OrElse
+            currentPriceText = "0" OrElse currentPriceText = "0,00" Then
+
             LblPaymentMethod.Text = prefix
             Exit Sub
 
         End If
 
-        ' Solo las clases sueltas y mensualidad+implementos muestran el precio en tu lógica
+        ' Solo las clases sueltas y mensualidad+implementos muestran el precio.
         If CmbPaymentMethod.Text.Trim() = PaymentMethods.IndividualClasses OrElse
             CmbPaymentMethod.Text.Trim() = PaymentMethods.MonthlyFeeSupplies Then
 
@@ -746,16 +1098,12 @@ Public Class FrmPricesAndDiscounts
 
     Private Sub UpdateDiscountCalculationsAndTotals(currentDiscountValue As Decimal)
 
-        ' Evaluamos directamente el ComboBox para calcular lo que el cliente tiene que pagar
-        Select Case CmbPaymentMethod.Text.Trim()'.ToUpper()
+        Select Case CmbPaymentMethod.Text.Trim()
 
-            Case PaymentMethods.AgeDiscount '"DESCUENTO POR EDAD"
-
-                'Dim totalToPay As Decimal = 
+            Case PaymentMethods.AgeDiscount
                 TxtToPay.Text = (_fixedMonthlyPrice - currentDiscountValue).ToString("C2")
 
-            Case PaymentMethods.FamilyGroup '"GRUPO FAMILIAR"
-
+            Case PaymentMethods.FamilyGroup
                 Dim total As Decimal = _fixedMonthlyPrice * NudNumberMembers.Value
                 TxtTotal.Text = total.ToString("C2")
 
@@ -763,7 +1111,6 @@ Public Class FrmPricesAndDiscounts
                 TxtToPay.Text = totalToPay.ToString("C2")
 
             Case Else
-                ' Si es otra tarifa sin descuentos estructurados, limpiamos la caja del total a pagar
                 TxtToPay.Text = String.Empty
         End Select
 
@@ -783,8 +1130,6 @@ Public Class FrmPricesAndDiscounts
                 Dim calculatedDiscount As Decimal = totalGroupBase - currentToPayValue
                 TxtDiscount.Text = calculatedDiscount.ToString("C2")
 
-                'Case Else
-                ' Si no aplica, no alteramos la caja del descuento
         End Select
 
     End Sub
@@ -802,19 +1147,16 @@ Public Class FrmPricesAndDiscounts
     Private Sub FetchAndRenderTariffsGridUI()
 
         Try
-            ' 1. 📥 NEGOCIO: Solicitamos los datos puros al mánager experto
             Dim tariffsList As List(Of TariffDTO) = _tariffManager.FetchAllTariffs()
 
-            ' 2. 🧮 REGLA DE NEGOCIO ANTIGUA: Capturar el precio de la tarifa fija mes (Id = 1)
-            ' En lugar de evaluar fila a fila en un bucle visual, usamos una consulta LINQ semántica muy elegante
-            Dim fixedMonthlyTariff = tariffsList.FirstOrDefault(Function(t) t.Id = 1)
+            ' Capturar el precio de la tarifa fija mes (IdTariff = 1),
+            ' usamos una consulta LINQ semántica.
+            Dim fixedMonthlyTariff = tariffsList.FirstOrDefault(Function(t) t.IdTariff = 1)
 
-            If fixedMonthlyTariff IsNot Nothing Then
-                _fixedMonthlyPrice = fixedMonthlyTariff.Price
-            End If
+            If fixedMonthlyTariff IsNot Nothing Then _fixedMonthlyPrice = fixedMonthlyTariff.Price
 
-            ' 3. 🎨 INTERFAZ: Limpiamos y enlazamos la lista directamente a la cuadrícula (Grid)
-            DgvPriceList.DataSource = Nothing ' Rompemos cualquier enlace antiguo para refrescar de forma segura
+            ' Limpiamos y enlazamos la lista directamente al Grid.
+            DgvPriceList.DataSource = Nothing
             DgvPriceList.AutoGenerateColumns = False
             DgvPriceList.DataSource = tariffsList
 
@@ -831,10 +1173,88 @@ Public Class FrmPricesAndDiscounts
 
     Public Enum TransactionMode
         NewRecord
-        UpdateRecord
+        EditRecord
     End Enum
 
 #End Region
+
+
+
+    ''' <summary>
+    ''' Busca una tarifa en el DataGridView por su nombre. Si la encuentra, la selecciona visualmente en pantalla.
+    ''' </summary>
+    ''' <param name="tariffName">Nombre de la tarifa a buscar (ej: LblPaymentMethod.Text)</param>
+    ''' <returns>True si la tarifa ya existía en la lista; False si no se encontró.</returns>
+    Private Function FindAndSelectRowByName(tariffName As String) As Boolean
+
+        Try
+            For Each row As DataGridViewRow In DgvPriceList.Rows
+
+                If row.Cells("ColPaymentMethod").Value?.ToString() = tariffName Then
+
+                    DgvPriceList.CurrentCell = row.Cells("ColPaymentMethod")
+                    row.Selected = True
+                    Return True
+
+                End If
+            Next
+
+        Catch ex As Exception
+            MsgBox($"Error visual al buscar la tarifa en la lista: {vbCrLf}{ex.Message}", vbCritical, "Error de Interfaz")
+        End Try
+
+        Return False
+
+    End Function
+
+    '=====================================================
+    Private Function ChangeStateButtonSave() As Boolean
+
+        ' El modo de transacción no está activo, protegemos el botón.
+        If _currentMode Is Nothing Then Return False
+
+        Select Case CmbPaymentMethod.Text.Trim()
+
+            Case PaymentMethods.IndividualClasses  ' "CLASES SUELTAS"
+                Return _isPriceValid AndAlso _isDiscountValid AndAlso _isToPayValid
+
+            Case PaymentMethods.AgeDiscount        ' "DESCUENTO POR EDAD"
+                Return _isPriceValid AndAlso _isDiscountValid AndAlso _isToPayValid AndAlso _isMinimumAgeValid AndAlso _isMaximumAgeValid
+
+            Case PaymentMethods.FamilyGroup        ' "GRUPO FAMILIAR"
+                Return _isPriceValid AndAlso _isDiscountValid AndAlso _isToPayValid AndAlso _isNumberMembersValid
+
+            Case PaymentMethods.MonthlyFeeSupplies ' "MENSUALIDAD + IMPLEMENTOS"
+                Return _isPriceValid AndAlso _isDiscountValid AndAlso _isToPayValid
+
+            Case Else                              ' "TARIFA DESCONOCIDA O NEUTRA"
+                Return False
+
+        End Select
+
+    End Function
+    '=====================================================
+
+    Private Sub ValidateAgeRangeCoherence()
+
+        Dim minAge As Decimal = NudMinimumAge.Value
+        Dim maxAge As Decimal = NudMaximumAge.Value
+
+        ' COMPROBACIÓN : La edad máxima DEBE ser mayor estricta que la mínima (Max > Min)
+        If minAge >= maxAge Then
+
+            NudMaximumAge.ForeColor = Color.Red
+            NudMaximumAge.Font = New System.Drawing.Font(NudMaximumAge.Font, FontStyle.Bold)
+
+            _isMaximumAgeValid = False
+        Else
+            NudMaximumAge.ForeColor = Color.MediumBlue
+            NudMaximumAge.Font = New System.Drawing.Font(NudMaximumAge.Font, NudMaximumAge.Font.Style And Not FontStyle.Bold)
+
+            _isMaximumAgeValid = True
+        End If
+
+    End Sub
 
 
 End Class

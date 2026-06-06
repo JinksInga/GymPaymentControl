@@ -349,7 +349,7 @@ Public Class FrmNewModifyClient
 
         ' 3. Buscar coincidencia exacta en los resultados
         Dim matchRow = DgvListGroupsDailyPayment.Rows.Cast(Of DataGridViewRow)().
-                       FirstOrDefault(Function(r) r.Cells("colNameDailyGroup").Value?.ToString().ToUpper() = searchText.ToUpper())
+                       FirstOrDefault(Function(r) r.Cells("colNameDailyGroup").Value?.ToString() = searchText)
 
         If matchRow IsNot Nothing Then
             ' --- COINCIDENCIA ENCONTRADA ---
@@ -869,6 +869,7 @@ Public Class FrmNewModifyClient
         ' 2. Buscamos el valor en el Grid
         ' (Asumo que la columna con el nombre "DIARIO X" es la primera o tiene un nombre específico)
         For Each row As DataGridViewRow In DgvListGroupsDailyPayment.Rows
+
             If row.Cells("colNameDailyGroup").Value?.ToString() = contractedPayment Then
                 ' 3. ¡Lo encontramos! Marcamos la fila
                 row.Selected = True
@@ -878,7 +879,9 @@ Public Class FrmNewModifyClient
                 ' 4. Hacemos scroll automático si la lista es larga para que se vea la fila
                 DgvListGroupsDailyPayment.FirstDisplayedScrollingRowIndex = row.Index
                 Exit For
+
             End If
+
         Next
 
     End Sub

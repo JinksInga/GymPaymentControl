@@ -26,8 +26,8 @@ Namespace Models
         ' ======================
         ' Identificadores
         ' ======================
-        Public Property IdPgs As Integer Implements IPaymentCalculable.IdPgs ' Id del pago
-        Public Property IdGrp As Integer ' Id del grupo familiar
+        Public Property IdPgs As Integer Implements IPaymentCalculable.IdPgs ' IdTariff del pago
+        Public Property IdGrp As Integer ' IdTariff del grupo familiar
 
         ' ======================
         ' Datos del grupo

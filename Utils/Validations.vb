@@ -96,16 +96,16 @@ Namespace Utils
         ''' Normaliza una cadena monetaria eliminando símbolos, espacios
         ''' y unificando el separador decimal para facilitar su conversión numérica.
         ''' </summary>
-        ''' <param name="text">
+        ''' <param name="rawText">
         ''' Texto monetario ingresado por el usuario.
         ''' Puede contener el símbolo € y espacios adicionales.
         ''' </param>
         ''' <returns>
         ''' Cadena limpia y preparada para procesos de parseo decimal.
         ''' </returns>
-        Public Function NormalizeMoneyText(text As String) As String
+        Public Function NormalizeMoneyText(rawText As String) As String
 
-            Return text.Replace("€", "").Trim().Replace(".", ",")
+            Return rawText.Replace("€", "").Trim().Replace(".", ",")
 
         End Function
 

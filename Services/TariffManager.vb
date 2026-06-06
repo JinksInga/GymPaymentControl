@@ -33,7 +33,7 @@ Namespace Services
                                 ' Creamos el DTO y mapeamos los campos de forma segura usando sus tipos correspondientes
                                 Dim tariff As New TariffDTO() With
                                     {
-                                        .Id = reader.GetInt16("id_trfa"),
+                                        .IdTariff = reader.GetInt16("id_trfa"),
                                         .PaymentMethod = reader.GetString("tipo_trfa"),
                                         .Price = reader.GetDecimal("prcio_trfa"),
                                         .MinimumAge = reader.GetInt16("emin_trfa"),
@@ -54,6 +54,58 @@ Namespace Services
 
         End Function
 
-    End Class
 
-End Namespace
+        '==============================================================================
+
+        Public Function Save(tariffDto As TariffDTO) As Integer
+
+            Dim sqlQuery As String
+            Dim insertedId As Integer = tariffDto.IdTariff
+
+            If tariffDto.IdTariff = 0 Then
+
+                sqlQuery = "INSERT INTO trfa_dscto (tipo_trfa, prcio_trfa, emin_trfa, emax_trfa, nperson_trfa, dscto_trfa) " &
+                           "VALUES (@tipo_trfa, @prcio_trfa, @emin_trfa, @emax_trfa, @nperson_trfa, @dscto_trfa); " &
+                           "SELECT LAST_INSERT_ID();"
+            Else
+
+                sqlQuery = "UPDATE trfa_dscto SET " &
+                           "tipo_trfa = @tipo_trfa, prcio_trfa = @prcio_trfa, emin_trfa = @emin_trfa, " &
+                           "emax_trfa = @emax_trfa, nperson_trfa = @nperson_trfa, dscto_trfa = @dscto_trfa " &
+                           "WHERE id_trfa = @id_trfa"
+            End If
+
+            Using connection = GetConnection()
+
+                Using command As New MySqlCommand(sqlQuery, connection)
+
+                    command.Parameters.AddWithValue("@tipo_trfa", tariffDto.PaymentMethod)
+                    command.Parameters.AddWithValue("@prcio_trfa", tariffDto.Price)
+                    command.Parameters.AddWithValue("@emin_trfa", tariffDto.MinimumAge)
+                    command.Parameters.AddWithValue("@emax_trfa", tariffDto.MaximumAge)
+                    command.Parameters.AddWithValue("@nperson_trfa", tariffDto.NumberMembers)
+                    command.Parameters.AddWithValue("@dscto_trfa", tariffDto.Discount)
+
+                    If tariffDto.IdTariff > 0 Then command.Parameters.AddWithValue("@id_trfa", tariffDto.IdTariff)
+
+                    connection.Open()
+
+                    If tariffDto.IdTariff = 0 Then
+
+                        insertedId = Convert.ToInt32(command.ExecuteScalar())
+                    Else
+                        command.ExecuteNonQuery()
+
+                    End If
+
+                End Using
+
+            End Using
+
+            Return insertedId
+
+        End Function
+
+
+    End Class
+    End Namespace

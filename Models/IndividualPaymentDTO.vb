@@ -37,8 +37,8 @@ Namespace Models
         ' ======================
         ' Identificadores
         ' ======================
-        Public Property IdPgs As Integer Implements IPaymentCalculable.IdPgs ' Id del pago
-        Public Property IdCli As Integer ' Id del cliente
+        Public Property IdPgs As Integer Implements IPaymentCalculable.IdPgs ' IdTariff del pago
+        Public Property IdCli As Integer ' IdTariff del cliente
         'Public Property IdUser As Integer? ' Permite saber quién cobró la mensualidad (puede ser Null)
         Public Property NomUser As String   ' El nombre que viene al hacer LEFT JOIN
 

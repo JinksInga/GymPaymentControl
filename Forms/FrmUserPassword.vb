@@ -44,7 +44,7 @@ Public Class FrmUserPassword
         '| IF : Verificamos si las credenciales son incorrectas.
         '|      * Mostramos un mensaje de error y salimos del procedimiento.
         '|
-        '| * Se cargan los datos del usuario (Id, Username y Role) en la sesión 'UserSession'.
+        '| * Se cargan los datos del usuario (IdTariff, Username y Role) en la sesión 'UserSession'.
         '| * Registramos la sesión del usuario llamando a la función 'RegisterSession'.
         '| * Limpiamos la variable temporal 'idUserTemp'.
         '| * Abrimos el formulario principal 'FrmMdiMain'.

@@ -5,7 +5,7 @@
     ''' </summary>
     Public Class TariffDTO
 
-        Public Property Id As Short
+        Public Property IdTariff As Short
         Public Property PaymentMethod As String
         Public Property Price As Decimal
         Public Property MinimumAge As Short

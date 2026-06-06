@@ -9,30 +9,42 @@ Namespace UIHelpers
     ''' </summary>
     Public Module FormHelpers
 
-        Public Function EvaluateNumericRangeLimits(textBox As TextBox, valor As Decimal,
-                                                   minimo As Decimal, maximo As Decimal) As Boolean
+        Public Function EvaluateNumericRangeLimits(control As Control, value As Decimal,
+                                                   minimum As Decimal, maximum As Decimal) As Boolean
+
+            Dim cleanText As String = NormalizeMoneyText(control.Text).Trim()
+
+            ' Si el texto está completamente vacío (el usuario borró todo o solo dejó el " €")
+            If String.IsNullOrEmpty(cleanText) Then
+                control.ForeColor = Color.Red
+                control.Font = New System.Drawing.Font(control.Font, FontStyle.Bold)
+                Return False
+            End If
 
             Dim isFormatValid As Boolean = True
 
             ' (Tu lógica de la coma y los decimales...)
-            If textBox.Text.Contains(",") Then
-                Dim intDec() As String = textBox.Text.Split(","c)
-                If intDec(1).Length = 2 OrElse intDec(1).Length > 4 Then
+            If control.Text.Contains(",") Then
+
+                Dim intDec() As String = control.Text.Split(","c)
+                'If intDec.Length > 1 (¿El array tiene más de un pedazo? Es decir, ¿hubo realmente una división por coma?).
+                If intDec.Length > 1 AndAlso (intDec(1).Length = 2 OrElse intDec(1).Length > 4) Then
                     isFormatValid = False
                 End If
+
             End If
 
             ' Condición de rango
-            If Not isFormatValid OrElse (valor < minimo OrElse valor > maximo) Then
+            If Not isFormatValid OrElse (value < minimum OrElse value > maximum) Then
 
-                textBox.ForeColor = Color.Red
-                textBox.Font = New System.Drawing.Font(textBox.Font, FontStyle.Bold)
+                control.ForeColor = Color.Red
+                control.Font = New System.Drawing.Font(control.Font, FontStyle.Bold)
 
                 Return False
 
             Else
-                textBox.ForeColor = Color.Green
-                textBox.Font = New System.Drawing.Font(textBox.Font, textBox.Font.Style And Not FontStyle.Bold)
+                control.ForeColor = Color.MediumBlue
+                control.Font = New System.Drawing.Font(control.Font, control.Font.Style And Not FontStyle.Bold)
 
                 Return True
 

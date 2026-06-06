@@ -138,8 +138,8 @@ Namespace Services
 
             ' 1. Una sola consulta SQL para ambos casos (Individual o Grupal)
             Dim sqlQuery As String = "INSERT INTO clientes(nom_cli, ape_cli, fdn_cli, tlf_cli, eml_cli, dir_cli, mpg_cli, fdi_cli, std_cli, id_grp)
-                                    VALUES(@nom, @ape, @fdn, @tlf, @eml, @dir, @mpg, @fdi, @std, @idgrp);
-                                    SELECT LAST_INSERT_ID();"
+                                        VALUES(@nom, @ape, @fdn, @tlf, @eml, @dir, @mpg, @fdi, @std, @idgrp);
+                                        SELECT LAST_INSERT_ID();"
 
             Using command As New MySqlCommand(sqlQuery, connection, transaction)
 
