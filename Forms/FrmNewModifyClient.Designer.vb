@@ -26,6 +26,7 @@ Partial Class FrmNewModifyClient
         Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.ToolTip = New System.Windows.Forms.ToolTip(Me.components)
+        Me.ChkRegistrationDate = New System.Windows.Forms.CheckBox()
         Me.RbInactiveState = New System.Windows.Forms.RadioButton()
         Me.RbActiveStatus = New System.Windows.Forms.RadioButton()
         Me.LblEstadoCli = New System.Windows.Forms.Label()
@@ -52,7 +53,6 @@ Partial Class FrmNewModifyClient
         Me.LblEmail = New System.Windows.Forms.Label()
         Me.LblTelefono = New System.Windows.Forms.Label()
         Me.GbDatos = New System.Windows.Forms.GroupBox()
-        Me.ChkRegistrationDate = New System.Windows.Forms.CheckBox()
         Me.DtpBirthdate = New System.Windows.Forms.DateTimePicker()
         Me.LblEdad = New System.Windows.Forms.Label()
         Me.TxtLastName = New System.Windows.Forms.TextBox()
@@ -73,6 +73,19 @@ Partial Class FrmNewModifyClient
         CType(Me.ErrorProvider, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.PnlBotonera.SuspendLayout()
         Me.SuspendLayout()
+        '
+        'ChkRegistrationDate
+        '
+        Me.ChkRegistrationDate.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.ChkRegistrationDate.Font = New System.Drawing.Font("Microsoft Sans Serif", 20.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.ChkRegistrationDate.Location = New System.Drawing.Point(466, 299)
+        Me.ChkRegistrationDate.Margin = New System.Windows.Forms.Padding(0)
+        Me.ChkRegistrationDate.Name = "ChkRegistrationDate"
+        Me.ChkRegistrationDate.Size = New System.Drawing.Size(26, 26)
+        Me.ChkRegistrationDate.TabIndex = 7
+        Me.ChkRegistrationDate.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.ToolTip.SetToolTip(Me.ChkRegistrationDate, "Activa la fecha de inscripción.")
+        Me.ChkRegistrationDate.UseVisualStyleBackColor = True
         '
         'RbInactiveState
         '
@@ -457,19 +470,6 @@ Partial Class FrmNewModifyClient
         Me.GbDatos.TabStop = False
         Me.GbDatos.Text = "Datos del cliente :"
         '
-        'ChkRegistrationDate
-        '
-        Me.ChkRegistrationDate.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter
-        Me.ChkRegistrationDate.Font = New System.Drawing.Font("Microsoft Sans Serif", 20.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.ChkRegistrationDate.Location = New System.Drawing.Point(466, 299)
-        Me.ChkRegistrationDate.Margin = New System.Windows.Forms.Padding(0)
-        Me.ChkRegistrationDate.Name = "ChkRegistrationDate"
-        Me.ChkRegistrationDate.Size = New System.Drawing.Size(26, 26)
-        Me.ChkRegistrationDate.TabIndex = 7
-        Me.ChkRegistrationDate.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        Me.ToolTip.SetToolTip(Me.ChkRegistrationDate, "Activa la fecha de inscripción.")
-        Me.ChkRegistrationDate.UseVisualStyleBackColor = True
-        '
         'DtpBirthdate
         '
         Me.DtpBirthdate.CalendarFont = New System.Drawing.Font("Microsoft Sans Serif", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
@@ -635,9 +635,9 @@ Partial Class FrmNewModifyClient
         Me.PnlBotonera.AutoSize = True
         Me.PnlBotonera.BackColor = System.Drawing.Color.Silver
         Me.PnlBotonera.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
-        Me.PnlBotonera.Controls.Add(Me.BtnSaveCustomerData)
         Me.PnlBotonera.Controls.Add(Me.BtnCancelRegistration)
         Me.PnlBotonera.Controls.Add(Me.BtnUpdateCustomerData)
+        Me.PnlBotonera.Controls.Add(Me.BtnSaveCustomerData)
         Me.PnlBotonera.Dock = System.Windows.Forms.DockStyle.Right
         Me.PnlBotonera.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.PnlBotonera.Location = New System.Drawing.Point(989, 0)

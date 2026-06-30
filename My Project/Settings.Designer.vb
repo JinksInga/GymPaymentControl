@@ -22,7 +22,7 @@ Namespace My
 
         Private Shared defaultInstance As MySettings = CType(Global.System.Configuration.ApplicationSettingsBase.Synchronized(New MySettings), MySettings)
 
-#Region "My.Settings Auto-Save Functionality"
+#Region "My.Settings Auto-UpsertTariff Functionality"
 #If _MyType = "WindowsForms" Then
         Private Shared addedHandler As Boolean
 

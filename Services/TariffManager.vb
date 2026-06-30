@@ -10,6 +10,36 @@ Namespace Services
         Inherits BaseRepository
 
         ''' <summary>
+        ''' Consulta de forma rápida y eficiente en la base de datos si el gimnasio cuenta con tarifas registradas.
+        ''' </summary>
+        ''' <returns>True si existe al menos una tarifa en el sistema; de lo contrario, False.</returns>
+        Public Function CheckIfTariffsExist() As Boolean
+
+            Dim sqlQuery As String = "SELECT COUNT(*) FROM trfa_dscto"
+
+            Using connection = GetConnection()
+
+                Using command As New MySqlCommand(sqlQuery, connection)
+
+                    Try
+                        connection.Open()
+                        Dim count As Integer = Convert.ToInt32(command.ExecuteScalar())
+
+                        Return count > 0
+
+                    Catch ex As Exception
+
+                        Return False
+
+                    End Try
+
+                End Using
+            End Using
+
+        End Function
+
+
+        ''' <summary>
         ''' Recupera todas las tarifas y descuentos de la base de datos ordenadas por tipo.
         ''' </summary>
         Public Function FetchAllTariffs() As List(Of TariffDTO)
@@ -18,7 +48,6 @@ Namespace Services
 
             Dim sqlQuery As String = "SELECT * FROM trfa_dscto ORDER BY tipo_trfa"
 
-            ' Utilizar bloques Using asegura que la conexión y el comando se cierren correctamente pase lo que pase
             Using connection = GetConnection()
 
                 Using command As New MySqlCommand(sqlQuery, connection)
@@ -30,7 +59,7 @@ Namespace Services
                         If reader.HasRows Then
 
                             While reader.Read()
-                                ' Creamos el DTO y mapeamos los campos de forma segura usando sus tipos correspondientes
+
                                 Dim tariff As New TariffDTO() With
                                     {
                                         .IdTariff = reader.GetInt16("id_trfa"),
@@ -55,9 +84,21 @@ Namespace Services
         End Function
 
 
-        '==============================================================================
-
-        Public Function Save(tariffDto As TariffDTO) As Integer
+        ''' <summary>
+        ''' Guarda de forma unificada la tarifa en la base de datos, decidiendo automáticamente si debe 
+        ''' registrar una nueva (Insert) o actualizar una existente (Update) basándose en el ID de la tarifa.
+        ''' </summary>
+        ''' <param name="tariffDto">El objeto de transferencia de datos (DTO) que contiene toda la información de la tarifa.</param>
+        ''' <returns>
+        ''' El identificador único (<italic>id_trfa</italic>) de la tarifa. 
+        ''' Si fue una inserción, devuelve el ID autogenerado por MySQL; si fue una actualización, devuelve el mismo ID de entrada.
+        ''' </returns>
+        ''' <remarks>
+        ''' Patrón <bold>Upsert</bold>: Si el campo <italic>IdTariff</italic> es igual a cero (0), la función asume que es una 
+        ''' tarifa nueva y ejecuta un INSERT recuperando el último ID con <italic>LAST_INSERT_ID()</italic>. 
+        ''' Si el ID es mayor a cero, ejecuta un UPDATE sobre el registro correspondiente.
+        ''' </remarks>
+        Public Function UpsertTariff(tariffDto As TariffDTO) As Integer
 
             Dim sqlQuery As String
             Dim insertedId As Integer = tariffDto.IdTariff
@@ -104,6 +145,45 @@ Namespace Services
 
             Return insertedId
 
+        End Function
+
+
+        ''' <summary>
+        ''' Elimina de forma permanente una tarifa de la base de datos a partir de su ID único.
+        ''' </summary>
+        ''' <param name="tariffId">El ID de la tarifa que se desea eliminar.</param>
+        ''' <returns>True si el registro se eliminó correctamente; False si no se encontró o no se pudo borrar.</returns>
+        Public Function DeleteTariff(tariffId As Integer) As Boolean
+
+            ' ID 1 (tarifa mensual base) NO se borra, por si falla la validación de la interfaz.
+            If tariffId = 1 Then Return False
+
+            Dim sqlQuery As String = "DELETE FROM trfa_dscto WHERE id_trfa = @idTariff"
+
+            Using connection = GetConnection()
+
+                Using command As New MySqlCommand(sqlQuery, connection)
+
+                    command.Parameters.AddWithValue("@idTariff", tariffId)
+
+                    Try
+                        connection.Open()
+
+                        ' ExecuteNonQuery devuelve el número de filas afectadas en la BBDD
+                        Dim rowsAffected As Integer = command.ExecuteNonQuery()
+
+                        Return rowsAffected > 0
+
+                    Catch ex As MySqlException
+
+                        Throw New Exception(ex.Message)
+
+                    Catch ex As Exception
+                        Throw New Exception(ex.Message)
+                    End Try
+
+                End Using
+            End Using
         End Function
 
 

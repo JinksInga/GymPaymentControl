@@ -1,67 +1,73 @@
 ﻿Imports System.Configuration
 Imports GymPaymentControl.Models
+Imports GymPaymentControl.Services
 Imports MySql.Data.MySqlClient
 
 Public Class FrmMdiMain
-    ''
-    ''
-    ''
+
+    ' Variable especial vinculada a los eventos del formulario de tarifas
+    Private WithEvents _frmTariffsEvents As FrmPricesAndDiscounts
+
     Private Sub FrmMdiMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
-        '|---------------------------------------------------------------------------
-        '| TEXTO BARRA DE TITULO, CARGAR FORM Y VALIDAR BOTÓN
-        '|---------------------------------------------------
-        '|
-        '| TRY : Controlamos algún error
-        '|      * Agregamos el nombre del usuario y su rol en la barra de título.
-        '|      * Con 'MdiParent' asignamos al formulario 'FrmMdiMain' como el contenedor.
-        '|      * Usamos 'Show' para mostrar el formulario hijo 'FrmListDebtors'.
-        '|      * Si el usuario no es el admin desactivamos el 'BtnPriceAndDiscounts'
-        '|
-        '| CATCH : 
-        '|      * Mostramos un mensaje con el error capturado. 
+        '|----------------------------------------------------------------------
+        '| INICIALIZACIÓN DE SESIÓN Y CONTROL DE BLOQUEO POR TARIFAS FALTANTES |
+        '|----------------------------------------------------------------------
 
         Try
             Me.Text = $"{Me.Text} {UserSession.UserName} - {UserSession.Role}"
 
-            FrmListDebtors.MdiParent = Me
-            FrmListDebtors.Show()
+            Dim tariffManager As New TariffManager()
 
-            BtnPriceAndDiscounts.Enabled = (UserSession.Role = "ADMINISTRADOR")
+            Dim hasTariffs As Boolean = tariffManager.CheckIfTariffsExist()
+
+            If hasTariffs Then
+
+                FrmListDebtors.MdiParent = Me
+                FrmListDebtors.Show()
+                BtnPriceAndDiscounts.Enabled = (UserSession.Role = "ADMINISTRADOR")
+
+            Else
+
+                BtnClientPayments.Enabled = False
+                BtnFamilyGroup.Enabled = False
+                BtnOutstandingPayments.Enabled = False
+
+                If UserSession.Role = "ADMINISTRADOR" Then
+
+                    _frmTariffsEvents = FrmPricesAndDiscounts
+
+                    ShowFormChild(FrmPricesAndDiscounts)
+
+                    MessageBox.Show("                     ⚠️ CONFIGURACIÓN REQUERIDA ⚠️" & Environment.NewLine &
+                                    " ------------------------------------------------------------------------------" & Environment.NewLine & Environment.NewLine &
+                                    "  El sistema se ha iniciado en modo restringido debido a que" & Environment.NewLine &
+                                    "  no existen tarifas registradas." & Environment.NewLine & Environment.NewLine &
+                                    "  Configure la TARIFA BASE para desbloquear el programa.",
+                                    "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                Else
+
+                    BtnPriceAndDiscounts.Enabled = False
+
+                    MessageBox.Show("                          ❌ ACCESO RESTRINGIDO ❌" & Environment.NewLine &
+                                    " ------------------------------------------------------------------------------" & Environment.NewLine & Environment.NewLine &
+                                    "  El sistema se encuentra bloqueado debido a que no existen" & Environment.NewLine &
+                                    "  existen tarifas configuradas." & Environment.NewLine & Environment.NewLine &
+                                    "  Solicite a un ADMINISTRADOR que configure los precios.",
+                                    "Sistema bloqueado", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                End If
+            End If
 
         Catch ex As Exception
-            MessageBox.Show("Error al cargar sesión: " & ex.Message)
-
+            MessageBox.Show("ERROR AL INICIO DE LA APP : " & ex.Message)
         End Try
 
     End Sub
     Private Sub FrmMdiMain_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
 
-        '|------------------------------------------------------------------------------------------------
-        '| COMPROBAR RESPUESTA Y REGISTRO DE SALIDA EN BASE DE DATOS
-        '|----------------------------------------------------------
-        '|
-        '| IF : Pregunta al usuario si realmente quiere salir, si la respuesta es NO entramos al bloque If.
-        '|      * Cancelamos el evento de cierre 'e.Cancel = True', manteniendo la aplicación abierta.
-        '|      * 'Exit Sub' Sale de la función para no ejecutar el resto del código.
-        '|
-        '| TRY : Controlamos posibles errores.
-        '|      * Recupera la cadena de conexión desde el archivo 'App.config'.
-        '|
-        '|      USING : Asegura que la conexión se cierre y se libere automáticamente de la memoria.
-        '|          * Abrimos la conexión  con la base de datos.
-        '|          * Consultamos a la BBDD el último registro de la tabla 'sesion_user' para actualizar la
-        '|            fecha y la hora de salida del usuario que inició sesión y lo almacenamos en la variable
-        '|            'sqlQuery'. Usamos LIMIT 1 y DESC para asegurar que solo tocamos el último registro.
-        '|
-        '|              USING : Creamos una instancia 'sqlCommand' de 'MySqlCommand' dentro del bloque 'Using'
-        '|                      para ejecutar la consulta SQL y liberar automática los recursos.
-        '|                      * Creamos un parámetro '@fecha' para la consulta SQL.
-        '|                      * Ejecutamos la consulta 'ExecuteNonQuery', solo actualiza fila o el registro.
-        '|
-        '| CATCH : Capturamos el error, si falla la conexión o no se puede actualizar el registro.
-        '|      * Mostramos un mensaje con el error.
-        '|
+        '|------------------------------------------------------------
+        '| COMPROBAR RESPUESTA Y REGISTRO DE SALIDA EN BASE DE DATOS |
+        '|------------------------------------------------------------
 
         If MsgBox("¿Está seguro que desea CERRAR la aplicación?", vbQuestion + vbYesNo, "Segundos Fuera") = vbNo Then
             e.Cancel = True
@@ -86,110 +92,64 @@ Public Class FrmMdiMain
             End Using
 
         Catch ex As Exception
-            MsgBox("Error al registrar salida : " & ex.Message)
-
+            MsgBox("ERROR AL REGISTRAR LA SALIDA : " & ex.Message)
         End Try
 
     End Sub
     Private Sub FrmMdiMain_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
-
-        '|--------------------------------------------------------------------------------
-        '| CERRAR TODOS LOS FORMULARIOS
-        '|-----------------------------
-        '| * Cerramos toda la aplicación de forma ordenada. Esto ordena el cierre de todos
-        '|   los hilos de forma segura, después de ejecutar el código de ‘FormClosing’.
-
+        ' Cerramos toda la aplicación de forma ordenada. Esto ordena el cierre de todos
+        ' los hilos de forma segura, después de ejecutar el código de ‘FormClosing’.
         Application.Exit()
-
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub BtnClientPayments_Click(sender As Object, e As EventArgs) Handles BtnClientPayments.Click
-
-        '|-----------------------------------------------------------------------
-        '| MOSTRAR FORMULARIO HIJO DENTRO CONTENEDOR MDI
-        '|----------------------------------------------
-        '| * Llamamos a la función 'ShowFormChild' y le pasamos como parámetro el
-        '|   formulario hijo 'FrmClientsPayments'
-
         ShowFormChild(FrmClientsPayments)
-
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub BtnFamilyGroup_Click(sender As Object, e As EventArgs) Handles BtnFamilyGroup.Click
-
-        '|-----------------------------------------------------------------------
-        '| MOSTRAR FORMULARIO HIJO DENTRO CONTENEDOR MDI
-        '|----------------------------------------------
-        '| * Llamamos a la función 'ShowFormChild' y le pasamos como parámetro el
-        '|   formulario hijo 'FrmFamilyGroup'
-
         ShowFormChild(FrmFamilyGroup)
-
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub BtnOutstandingPayments_Click(sender As Object, e As EventArgs) Handles BtnOutstandingPayments.Click
-
-        '|-----------------------------------------------------------------------------
-        '| MOSTRAR FORMULARIO HIJO DENTRO CONTENEDOR MDI
-        '|----------------------------------------------
-        '| * Llamamos a la función 'ShowFormChild' y le pasamos como parámetro el
-        '|   formulario hijo 'FrmListDebtors'
-
         ShowFormChild(FrmListDebtors)
-
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub BtnPriceAndDiscounts_Click(sender As Object, e As EventArgs) Handles BtnPriceAndDiscounts.Click
 
-        '|-----------------------------------------------------------------------------
-        '| MOSTRAR FORMULARIO HIJO DENTRO CONTENEDOR MDI
-        '|----------------------------------------------
-        '| * Llamamos a la función 'ShowFormChild' y le pasamos como parámetro el
-        '|   formulario hijo 'FrmDiscountTable'
+        ' Enlazamos la instancia global a nuestra variable para escuchar sus eventos.
+        _frmTariffsEvents = FrmPricesAndDiscounts
 
         ShowFormChild(FrmPricesAndDiscounts)
-
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub BtnGoOut_Click(sender As Object, e As EventArgs) Handles BtnGoOut.Click
-
-        '|-----------------------------------------------------------------------------
-        '| CERRAR FORMULARIO PRINCIPAL
-        '|----------------------------
-        '| * Me.Close() activa automáticamente el FormClosing del formulario principal.
-
+        ' Me.Close() activa automáticamente el FormClosing del formulario principal.
         Me.Close()
-
     End Sub
-    ''
-    ''
-    ''
-    Private Sub ShowFormChild(formChild As Form)
 
-        '|---------------------------------------------------------------------------------
-        '| FUNCION PARA MOSTRAR UN FORMULARIO HIJO DENTRO DEL MDIFORM
-        '|-----------------------------------------------------------
-        '| IF : Comprobamos si el formulario está abierto.
-        '|
-        '|      IF : Comprobamos si el formulario esta minimizado.
-        '|          * Restauramos el formulario
-        '|
-        '|      * Si el formulario está oculto lo traemos al frente.
-        '|
-        '| ELSE : Cargamos el formulario por primera vez.
-        '|      * Con 'MdiParent' asignamos al formulario 'FrmMdiMain' como contenedor MDI.
-        '|      * Usamos 'Show' para mostrar el formulario hijo, que recibimos por parámetro,
-        '|        dentro del contenedor MDI.
+
+    ''' <summary>
+    ''' Orquesta la apertura y el posicionamiento de los formularios hijo dentro del contenedor MDI principal, 
+    ''' garantizando un comportamiento de instancia única en la interfaz de usuario.
+    ''' </summary>
+    ''' <param name="formChild">La instancia del formulario secundario que se desea renderizar o traer al frente.</param>
+    ''' <remarks>
+    ''' El método evalúa el estado actual de la pantalla para optimizar la experiencia de usuario (UX):
+    ''' <list type="bullet">
+    ''' <item>
+    ''' <description><bold>Si el formulario ya está visible:</bold> Comprueba si está minimizado para restaurarlo a su tamaño normal y utiliza <italic>Activate()</italic> para darle el foco visual instantáneo.</description>
+    ''' </item>
+    ''' <item>
+    ''' <description><bold>Si el formulario está cerrado u oculto:</bold> Le asigna el <italic>MdiParent</italic> apuntando al contenedor actual (<italic>Me</italic>) y lo inicializa en pantalla con el método <italic>Show()</italic>.</description>
+    ''' </item>
+    ''' </list>
+    ''' </remarks>
+    Private Sub ShowFormChild(formChild As Form)
 
         If formChild.Visible Then
 
@@ -205,5 +165,35 @@ Public Class FrmMdiMain
         End If
 
     End Sub
+
+
+    ''' <summary>
+    ''' Escucha el evento lanzado por el formulario de tarifas al cerrarse y bloquea o libera 
+    ''' la navegación del menú principal según las reglas de negocio.
+    ''' </summary>
+    Private Sub OnTariffFormClosing(sender As Object, totalRows As Integer) Handles _frmTariffsEvents.TariffClosingValidation
+
+        If totalRows > 0 Then
+
+            BtnClientPayments.Enabled = True
+            BtnFamilyGroup.Enabled = True
+            BtnOutstandingPayments.Enabled = True
+        Else
+
+            BtnClientPayments.Enabled = False
+            BtnFamilyGroup.Enabled = False
+            BtnOutstandingPayments.Enabled = False
+
+            MessageBox.Show("              ⚠❌ CONTROL DE PAGOS BLOQUEADO ❌⚠️" & Environment.NewLine &
+                            " ----------------------------------------------------------------------------" & Environment.NewLine & Environment.NewLine &
+                            "  No se puede operar con el PROGRAMA porque no existen" & Environment.NewLine &
+                            "  tarifas configuradas." & Environment.NewLine & Environment.NewLine &
+                            "  Por favor, cree al menos la MENSUALIDAD GENERAL para" & Environment.NewLine &
+                            "  activar el sistema.",
+                            "Alerta de configuración", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End If
+
+    End Sub
+
 
 End Class
