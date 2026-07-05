@@ -22,19 +22,19 @@ Partial Class FrmPricesAndDiscounts
     'No lo modifique con el editor de código.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Dim DataGridViewCellStyle40 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle41 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle50 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle51 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle52 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle42 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle43 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle44 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle45 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle46 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle47 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle48 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle49 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle11 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle12 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle13 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle5 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle6 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle7 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle8 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle9 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle10 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.BtnModifyRate = New System.Windows.Forms.Button()
         Me.DgvPriceList = New System.Windows.Forms.DataGridView()
         Me.ColId = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -51,7 +51,6 @@ Partial Class FrmPricesAndDiscounts
         Me.TxtTotal = New System.Windows.Forms.TextBox()
         Me.LblPrice = New System.Windows.Forms.Label()
         Me.TxtPrice = New System.Windows.Forms.TextBox()
-        Me.LblPaymentMethod_ = New System.Windows.Forms.Label()
         Me.CmbPaymentMethod = New System.Windows.Forms.ComboBox()
         Me.TxtDiscount = New System.Windows.Forms.TextBox()
         Me.LblToPay = New System.Windows.Forms.Label()
@@ -63,7 +62,6 @@ Partial Class FrmPricesAndDiscounts
         Me.NudNumberMembers = New System.Windows.Forms.NumericUpDown()
         Me.LblMinimumAge = New System.Windows.Forms.Label()
         Me.LblPaymentMethod = New System.Windows.Forms.Label()
-        Me.LblNamePay = New System.Windows.Forms.Label()
         Me.BtnCloseWindow = New System.Windows.Forms.Button()
         Me.BtnDeleteRate = New System.Windows.Forms.Button()
         Me.BtnNewRate = New System.Windows.Forms.Button()
@@ -72,6 +70,8 @@ Partial Class FrmPricesAndDiscounts
         Me.BtnCancelRegistration = New System.Windows.Forms.Button()
         Me.PnlBotonera = New System.Windows.Forms.Panel()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.LblPaymentMethod_ = New System.Windows.Forms.Label()
+        Me.LblNamePay = New System.Windows.Forms.Label()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
         CType(Me.DgvPriceList, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -105,42 +105,42 @@ Partial Class FrmPricesAndDiscounts
         Me.DgvPriceList.AllowUserToDeleteRows = False
         Me.DgvPriceList.AllowUserToResizeColumns = False
         Me.DgvPriceList.AllowUserToResizeRows = False
-        DataGridViewCellStyle40.BackColor = System.Drawing.SystemColors.Window
-        DataGridViewCellStyle40.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DgvPriceList.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle40
-        DataGridViewCellStyle41.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle41.BackColor = System.Drawing.SystemColors.Control
-        DataGridViewCellStyle41.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle41.ForeColor = System.Drawing.SystemColors.WindowText
-        DataGridViewCellStyle41.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle41.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        Me.DgvPriceList.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle41
+        DataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window
+        DataGridViewCellStyle1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DgvPriceList.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle1
+        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control
+        DataGridViewCellStyle2.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText
+        DataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        Me.DgvPriceList.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle2
         Me.DgvPriceList.ColumnHeadersHeight = 35
         Me.DgvPriceList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
         Me.DgvPriceList.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.ColId, Me.ColPaymentMethod, Me.ColPrice, Me.ColMinimumAge, Me.ColMaximumAge, Me.ColNumberMembers, Me.ColTotal, Me.ColDiscount, Me.ColToPay})
-        DataGridViewCellStyle50.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        DataGridViewCellStyle50.BackColor = System.Drawing.Color.PaleTurquoise
-        DataGridViewCellStyle50.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle50.ForeColor = System.Drawing.SystemColors.ControlText
-        DataGridViewCellStyle50.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle50.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        DataGridViewCellStyle50.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.DgvPriceList.DefaultCellStyle = DataGridViewCellStyle50
+        DataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle11.BackColor = System.Drawing.Color.PaleTurquoise
+        DataGridViewCellStyle11.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.ControlText
+        DataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        DataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.DgvPriceList.DefaultCellStyle = DataGridViewCellStyle11
         Me.DgvPriceList.Location = New System.Drawing.Point(33, 222)
         Me.DgvPriceList.Margin = New System.Windows.Forms.Padding(24, 12, 24, 24)
         Me.DgvPriceList.MultiSelect = False
         Me.DgvPriceList.Name = "DgvPriceList"
         Me.DgvPriceList.ReadOnly = True
-        DataGridViewCellStyle51.BackColor = System.Drawing.SystemColors.Control
-        DataGridViewCellStyle51.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle51.ForeColor = System.Drawing.SystemColors.WindowText
-        DataGridViewCellStyle51.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle51.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        Me.DgvPriceList.RowHeadersDefaultCellStyle = DataGridViewCellStyle51
+        DataGridViewCellStyle12.BackColor = System.Drawing.SystemColors.Control
+        DataGridViewCellStyle12.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle12.ForeColor = System.Drawing.SystemColors.WindowText
+        DataGridViewCellStyle12.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle12.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        Me.DgvPriceList.RowHeadersDefaultCellStyle = DataGridViewCellStyle12
         Me.DgvPriceList.RowHeadersWidth = 35
         Me.DgvPriceList.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
-        DataGridViewCellStyle52.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DgvPriceList.RowsDefaultCellStyle = DataGridViewCellStyle52
+        DataGridViewCellStyle13.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DgvPriceList.RowsDefaultCellStyle = DataGridViewCellStyle13
         Me.DgvPriceList.RowTemplate.DefaultCellStyle.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.DgvPriceList.RowTemplate.DividerHeight = 2
         Me.DgvPriceList.RowTemplate.Height = 30
@@ -163,8 +163,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColPaymentMethod.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColPaymentMethod.DataPropertyName = "PaymentMethod"
-        DataGridViewCellStyle42.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        Me.ColPaymentMethod.DefaultCellStyle = DataGridViewCellStyle42
+        DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        Me.ColPaymentMethod.DefaultCellStyle = DataGridViewCellStyle3
         Me.ColPaymentMethod.HeaderText = "MÉTODO PAGO"
         Me.ColPaymentMethod.Name = "ColPaymentMethod"
         Me.ColPaymentMethod.ReadOnly = True
@@ -174,8 +174,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColPrice.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColPrice.DataPropertyName = "Price"
-        DataGridViewCellStyle43.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.ColPrice.DefaultCellStyle = DataGridViewCellStyle43
+        DataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.ColPrice.DefaultCellStyle = DataGridViewCellStyle4
         Me.ColPrice.HeaderText = "PRECIO"
         Me.ColPrice.Name = "ColPrice"
         Me.ColPrice.ReadOnly = True
@@ -185,8 +185,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColMinimumAge.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColMinimumAge.DataPropertyName = "MinimumAge"
-        DataGridViewCellStyle44.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.ColMinimumAge.DefaultCellStyle = DataGridViewCellStyle44
+        DataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.ColMinimumAge.DefaultCellStyle = DataGridViewCellStyle5
         Me.ColMinimumAge.HeaderText = "EDAD MIN"
         Me.ColMinimumAge.Name = "ColMinimumAge"
         Me.ColMinimumAge.ReadOnly = True
@@ -196,8 +196,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColMaximumAge.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColMaximumAge.DataPropertyName = "MaximumAge"
-        DataGridViewCellStyle45.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.ColMaximumAge.DefaultCellStyle = DataGridViewCellStyle45
+        DataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.ColMaximumAge.DefaultCellStyle = DataGridViewCellStyle6
         Me.ColMaximumAge.HeaderText = "EDAD MAX"
         Me.ColMaximumAge.Name = "ColMaximumAge"
         Me.ColMaximumAge.ReadOnly = True
@@ -207,8 +207,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColNumberMembers.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColNumberMembers.DataPropertyName = "NumberMembers"
-        DataGridViewCellStyle46.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.ColNumberMembers.DefaultCellStyle = DataGridViewCellStyle46
+        DataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.ColNumberMembers.DefaultCellStyle = DataGridViewCellStyle7
         Me.ColNumberMembers.HeaderText = "Nº PERSONAS"
         Me.ColNumberMembers.Name = "ColNumberMembers"
         Me.ColNumberMembers.ReadOnly = True
@@ -219,8 +219,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColTotal.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColTotal.DataPropertyName = "Total"
-        DataGridViewCellStyle47.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.ColTotal.DefaultCellStyle = DataGridViewCellStyle47
+        DataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.ColTotal.DefaultCellStyle = DataGridViewCellStyle8
         Me.ColTotal.HeaderText = "TOTAL"
         Me.ColTotal.Name = "ColTotal"
         Me.ColTotal.ReadOnly = True
@@ -230,8 +230,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColDiscount.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColDiscount.DataPropertyName = "Discount"
-        DataGridViewCellStyle48.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.ColDiscount.DefaultCellStyle = DataGridViewCellStyle48
+        DataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.ColDiscount.DefaultCellStyle = DataGridViewCellStyle9
         Me.ColDiscount.HeaderText = "DESCUENTO"
         Me.ColDiscount.Name = "ColDiscount"
         Me.ColDiscount.ReadOnly = True
@@ -242,8 +242,8 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.ColToPay.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
         Me.ColToPay.DataPropertyName = "TotalToPay"
-        DataGridViewCellStyle49.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
-        Me.ColToPay.DefaultCellStyle = DataGridViewCellStyle49
+        DataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.ColToPay.DefaultCellStyle = DataGridViewCellStyle10
         Me.ColToPay.HeaderText = "A PAGAR"
         Me.ColToPay.Name = "ColToPay"
         Me.ColToPay.ReadOnly = True
@@ -269,6 +269,7 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.LblTotal.AutoSize = True
         Me.LblTotal.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblTotal.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(0, Byte), Integer))
         Me.LblTotal.Location = New System.Drawing.Point(258, 31)
         Me.LblTotal.Margin = New System.Windows.Forms.Padding(0)
         Me.LblTotal.Name = "LblTotal"
@@ -297,6 +298,7 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.LblPrice.AutoSize = True
         Me.LblPrice.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblPrice.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(0, Byte), Integer))
         Me.LblPrice.Location = New System.Drawing.Point(42, 31)
         Me.LblPrice.Margin = New System.Windows.Forms.Padding(0)
         Me.LblPrice.Name = "LblPrice"
@@ -321,18 +323,6 @@ Partial Class FrmPricesAndDiscounts
         Me.TxtPrice.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         Me.TxtPrice.WordWrap = False
         '
-        'LblPaymentMethod_
-        '
-        Me.LblPaymentMethod_.AutoSize = True
-        Me.LblPaymentMethod_.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblPaymentMethod_.Location = New System.Drawing.Point(39, 28)
-        Me.LblPaymentMethod_.Margin = New System.Windows.Forms.Padding(16, 0, 0, 0)
-        Me.LblPaymentMethod_.Name = "LblPaymentMethod_"
-        Me.LblPaymentMethod_.Size = New System.Drawing.Size(89, 16)
-        Me.LblPaymentMethod_.TabIndex = 1
-        Me.LblPaymentMethod_.Text = "Tipo de pago"
-        Me.LblPaymentMethod_.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
         'CmbPaymentMethod
         '
         Me.CmbPaymentMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
@@ -342,10 +332,10 @@ Partial Class FrmPricesAndDiscounts
         Me.CmbPaymentMethod.FormattingEnabled = True
         Me.CmbPaymentMethod.IntegralHeight = False
         Me.CmbPaymentMethod.Items.AddRange(New Object() {"", "   CLASES SUELTAS", "   DESCUENTO POR EDAD", "   GRUPO FAMILIAR", "   MENSUALIDAD + IMPLEMENTOS"})
-        Me.CmbPaymentMethod.Location = New System.Drawing.Point(144, 25)
-        Me.CmbPaymentMethod.Margin = New System.Windows.Forms.Padding(16, 8, 16, 0)
+        Me.CmbPaymentMethod.Location = New System.Drawing.Point(131, 26)
+        Me.CmbPaymentMethod.Margin = New System.Windows.Forms.Padding(0)
         Me.CmbPaymentMethod.Name = "CmbPaymentMethod"
-        Me.CmbPaymentMethod.Size = New System.Drawing.Size(280, 24)
+        Me.CmbPaymentMethod.Size = New System.Drawing.Size(288, 24)
         Me.CmbPaymentMethod.TabIndex = 0
         '
         'TxtDiscount
@@ -368,6 +358,7 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.LblToPay.AutoSize = True
         Me.LblToPay.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblToPay.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(0, Byte), Integer))
         Me.LblToPay.Location = New System.Drawing.Point(241, 64)
         Me.LblToPay.Margin = New System.Windows.Forms.Padding(0)
         Me.LblToPay.Name = "LblToPay"
@@ -380,6 +371,7 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.LblDiscount.AutoSize = True
         Me.LblDiscount.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblDiscount.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(0, Byte), Integer))
         Me.LblDiscount.Location = New System.Drawing.Point(16, 65)
         Me.LblDiscount.Margin = New System.Windows.Forms.Padding(16, 0, 0, 0)
         Me.LblDiscount.Name = "LblDiscount"
@@ -405,6 +397,7 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.LblMaximumAge.AutoSize = True
         Me.LblMaximumAge.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblMaximumAge.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(0, Byte), Integer))
         Me.LblMaximumAge.Location = New System.Drawing.Point(202, 65)
         Me.LblMaximumAge.Margin = New System.Windows.Forms.Padding(0)
         Me.LblMaximumAge.Name = "LblMaximumAge"
@@ -417,6 +410,7 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.LblNumberOfMembers.AutoSize = True
         Me.LblNumberOfMembers.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblNumberOfMembers.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(0, Byte), Integer))
         Me.LblNumberOfMembers.Location = New System.Drawing.Point(28, 31)
         Me.LblNumberOfMembers.Margin = New System.Windows.Forms.Padding(28, 0, 0, 0)
         Me.LblNumberOfMembers.Name = "LblNumberOfMembers"
@@ -455,6 +449,7 @@ Partial Class FrmPricesAndDiscounts
         '
         Me.LblMinimumAge.AutoSize = True
         Me.LblMinimumAge.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblMinimumAge.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(0, Byte), Integer))
         Me.LblMinimumAge.Location = New System.Drawing.Point(206, 31)
         Me.LblMinimumAge.Margin = New System.Windows.Forms.Padding(0)
         Me.LblMinimumAge.Name = "LblMinimumAge"
@@ -469,24 +464,12 @@ Partial Class FrmPricesAndDiscounts
         Me.LblPaymentMethod.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblPaymentMethod.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.LblPaymentMethod.ForeColor = System.Drawing.Color.MediumBlue
-        Me.LblPaymentMethod.Location = New System.Drawing.Point(607, 28)
-        Me.LblPaymentMethod.Margin = New System.Windows.Forms.Padding(16, 8, 16, 16)
+        Me.LblPaymentMethod.Location = New System.Drawing.Point(610, 26)
+        Me.LblPaymentMethod.Margin = New System.Windows.Forms.Padding(0)
         Me.LblPaymentMethod.Name = "LblPaymentMethod"
-        Me.LblPaymentMethod.Size = New System.Drawing.Size(280, 24)
+        Me.LblPaymentMethod.Size = New System.Drawing.Size(276, 24)
         Me.LblPaymentMethod.TabIndex = 0
         Me.LblPaymentMethod.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
-        'LblNamePay
-        '
-        Me.LblNamePay.AutoSize = True
-        Me.LblNamePay.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblNamePay.Location = New System.Drawing.Point(478, 31)
-        Me.LblNamePay.Margin = New System.Windows.Forms.Padding(16, 0, 0, 0)
-        Me.LblNamePay.Name = "LblNamePay"
-        Me.LblNamePay.Size = New System.Drawing.Size(113, 16)
-        Me.LblNamePay.TabIndex = 2
-        Me.LblNamePay.Text = "Nombre del pago"
-        Me.LblNamePay.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
         'BtnCloseWindow
         '
@@ -595,11 +578,11 @@ Partial Class FrmPricesAndDiscounts
         Me.PnlBotonera.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.PnlBotonera.Controls.Add(Me.BtnDeleteRate)
         Me.PnlBotonera.Controls.Add(Me.BtnCloseWindow)
-        Me.PnlBotonera.Controls.Add(Me.BtnNewRate)
         Me.PnlBotonera.Controls.Add(Me.BtnModifyRate)
+        Me.PnlBotonera.Controls.Add(Me.BtnCancelRegistration)
+        Me.PnlBotonera.Controls.Add(Me.BtnNewRate)
         Me.PnlBotonera.Controls.Add(Me.BtnSaveRate)
         Me.PnlBotonera.Controls.Add(Me.BtnUpdateRate)
-        Me.PnlBotonera.Controls.Add(Me.BtnCancelRegistration)
         Me.PnlBotonera.Dock = System.Windows.Forms.DockStyle.Right
         Me.PnlBotonera.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.PnlBotonera.Location = New System.Drawing.Point(972, 0)
@@ -611,9 +594,9 @@ Partial Class FrmPricesAndDiscounts
         'GroupBox1
         '
         Me.GroupBox1.Controls.Add(Me.CmbPaymentMethod)
-        Me.GroupBox1.Controls.Add(Me.LblNamePay)
         Me.GroupBox1.Controls.Add(Me.LblPaymentMethod)
         Me.GroupBox1.Controls.Add(Me.LblPaymentMethod_)
+        Me.GroupBox1.Controls.Add(Me.LblNamePay)
         Me.GroupBox1.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox1.Location = New System.Drawing.Point(33, 25)
         Me.GroupBox1.Margin = New System.Windows.Forms.Padding(24, 16, 24, 0)
@@ -623,6 +606,34 @@ Partial Class FrmPricesAndDiscounts
         Me.GroupBox1.TabIndex = 1
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Descripción"
+        '
+        'LblPaymentMethod_
+        '
+        Me.LblPaymentMethod_.BackColor = System.Drawing.SystemColors.ButtonFace
+        Me.LblPaymentMethod_.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.LblPaymentMethod_.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblPaymentMethod_.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(0, Byte), Integer))
+        Me.LblPaymentMethod_.Location = New System.Drawing.Point(24, 25)
+        Me.LblPaymentMethod_.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
+        Me.LblPaymentMethod_.Name = "LblPaymentMethod_"
+        Me.LblPaymentMethod_.Size = New System.Drawing.Size(396, 26)
+        Me.LblPaymentMethod_.TabIndex = 89
+        Me.LblPaymentMethod_.Text = "  Tipo de pago"
+        Me.LblPaymentMethod_.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'LblNamePay
+        '
+        Me.LblNamePay.BackColor = System.Drawing.SystemColors.ButtonFace
+        Me.LblNamePay.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.LblNamePay.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblNamePay.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(0, Byte), Integer))
+        Me.LblNamePay.Location = New System.Drawing.Point(482, 25)
+        Me.LblNamePay.Margin = New System.Windows.Forms.Padding(0, 8, 0, 0)
+        Me.LblNamePay.Name = "LblNamePay"
+        Me.LblNamePay.Size = New System.Drawing.Size(405, 26)
+        Me.LblNamePay.TabIndex = 90
+        Me.LblNamePay.Text = "  Nombre del pago"
+        Me.LblNamePay.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'GroupBox2
         '
@@ -683,7 +694,6 @@ Partial Class FrmPricesAndDiscounts
         CType(Me.NudNumberMembers, System.ComponentModel.ISupportInitialize).EndInit()
         Me.PnlBotonera.ResumeLayout(False)
         Me.GroupBox1.ResumeLayout(False)
-        Me.GroupBox1.PerformLayout()
         Me.GroupBox2.ResumeLayout(False)
         Me.GroupBox2.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
@@ -700,7 +710,6 @@ Partial Class FrmPricesAndDiscounts
     Friend WithEvents TxtTotal As TextBox
     Friend WithEvents LblPrice As Label
     Friend WithEvents TxtPrice As TextBox
-    Friend WithEvents LblPaymentMethod_ As Label
     Friend WithEvents CmbPaymentMethod As ComboBox
     Friend WithEvents TxtDiscount As TextBox
     Friend WithEvents LblToPay As Label
@@ -712,7 +721,6 @@ Partial Class FrmPricesAndDiscounts
     Friend WithEvents NudNumberMembers As NumericUpDown
     Friend WithEvents LblMinimumAge As Label
     Friend WithEvents LblPaymentMethod As Label
-    Friend WithEvents LblNamePay As Label
     Friend WithEvents BtnCloseWindow As Button
     Friend WithEvents BtnDeleteRate As Button
     Friend WithEvents BtnNewRate As Button
@@ -732,4 +740,6 @@ Partial Class FrmPricesAndDiscounts
     Friend WithEvents GroupBox1 As GroupBox
     Friend WithEvents GroupBox2 As GroupBox
     Friend WithEvents GroupBox3 As GroupBox
+    Friend WithEvents LblPaymentMethod_ As Label
+    Friend WithEvents LblNamePay As Label
 End Class

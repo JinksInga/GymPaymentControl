@@ -1,5 +1,4 @@
 ﻿Imports System.ComponentModel
-Imports System.Runtime.CompilerServices
 Imports GymPaymentControl.Constants
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
@@ -36,8 +35,6 @@ Public Class FrmPricesAndDiscounts
 
     Private _isCalculating As Boolean
 
-    'Private _isInitialLoading As Boolean = True
-
     ' --- Variables de Validación (Estado del Botón Guardar) ---
     Private _isPriceValid As Boolean
     Private _isDiscountValid As Boolean
@@ -71,29 +68,22 @@ Public Class FrmPricesAndDiscounts
     ' Los disparadores nativos de los componentes de Windows Forms.
 
     Private Sub FrmPricesAndDiscounts_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
-
         ' Lanzamos el grito al aire (RaiseEvent) pasando la cantidad de filas actuales
         RaiseEvent TariffClosingValidation(Me, DgvPriceList.RowCount)
-
     End Sub
     Private Sub FrmPricesAndDiscounts_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
-        '_isInitialLoading = True ' Encendemos el escudo de arranque
-
         FetchAndRenderTariffsGridUI()
+
         SetInterfaceVisualState(isEditing:=False)
 
-        ' ============================================================================
-        ' LA SOLUCIÓN NATIVA DEFINITIVA
-        ' ============================================================================
-        ' Mandamos la limpieza al final de la cola de mensajes de Windows.
+        ' Quitamos la fila seleccionada al final de la cola de mensajes de Windows.
         ' Se ejecutará de forma invisible e instantánea justo al terminar de pintarse.
         BeginInvoke(Sub()
                         If String.IsNullOrEmpty(LblPaymentMethod.Text.Trim()) Then
                             DgvPriceList.CurrentCell = Nothing
                         End If
                     End Sub)
-
     End Sub
 
 
@@ -101,7 +91,9 @@ Public Class FrmPricesAndDiscounts
 
         ' Reseteo y limpieza base, ante cualquier cambio de selección.
         ClearInputControls()
+
         ResetStateVariables()
+
         DisableInputControls()
 
         Select Case CmbPaymentMethod.Text.Trim()
@@ -299,9 +291,9 @@ Public Class FrmPricesAndDiscounts
         _isCalculating = True
 
         Try
-            Dim namePaymentMethod As String = GetNamePaymentMethod()
+            Dim paymentMethod As String = GetNamePaymentMethod()
 
-            If namePaymentMethod = PaymentMethods.FamilyGroup Then
+            If paymentMethod = PaymentMethods.FamilyGroup Then
 
                 ' Evaluamos el control, pintamos en tiempo real y actualizamos su bandera de estado.
                 _isNumberMembersValid = EvaluateNumericRangeLimits(NudNumberMembers, NudNumberMembers.Value,
@@ -357,9 +349,9 @@ Public Class FrmPricesAndDiscounts
 
         If _currentMode Is Nothing Then Exit Sub
 
-        Dim namePaymentMethod As String = GetNamePaymentMethod()
+        Dim paymentMethod As String = GetNamePaymentMethod()
 
-        If namePaymentMethod = PaymentMethods.AgeDiscount Then UpdateDynamicTariffLabel()
+        If paymentMethod = PaymentMethods.AgeDiscount Then UpdateDynamicTariffLabel()
 
         _isMinimumAgeValid = EvaluateNumericRangeLimits(NudMinimumAge, NudMinimumAge.Value,
                                                         MINIMUM_AGE_FOR_DISCOUNT, NudMinimumAge.Maximum)
@@ -410,9 +402,9 @@ Public Class FrmPricesAndDiscounts
 
         If _currentMode Is Nothing Then Exit Sub
 
-        Dim namePaymentMethod As String = GetNamePaymentMethod()
+        Dim paymentMethod As String = GetNamePaymentMethod()
 
-        If namePaymentMethod = PaymentMethods.AgeDiscount Then UpdateDynamicTariffLabel()
+        If paymentMethod = PaymentMethods.AgeDiscount Then UpdateDynamicTariffLabel()
 
         _isMaximumAgeValid = EvaluateNumericRangeLimits(NudMaximumAge, NudMaximumAge.Value,
                                                         MINIMUM_AGE_FOR_DISCOUNT, NudMaximumAge.Maximum)
@@ -495,24 +487,6 @@ Public Class FrmPricesAndDiscounts
         End Try
 
     End Sub
-    'Private Sub DgvPriceList_SelectionChanged(sender As Object, e As EventArgs) Handles DgvPriceList.SelectionChanged
-
-    '    ' Si el formulario está cargando de cero y no hay una búsqueda activa de tarifa...
-    '    If _isInitialLoading AndAlso String.IsNullOrEmpty(LblPaymentMethod.Text.Trim()) Then
-
-    '        ' Encendemos un cerrojo temporal para evitar bucles en este mismo evento
-    '        _isInitialLoading = False
-
-    '        ' PUM: Le quitamos la selección automática que .NET acaba de forzar
-    '        DgvPriceList.CurrentCell = Nothing
-
-    '        Exit Sub
-    '    End If
-
-    '    ' A partir de aquí, el escudo se apaga y la grilla funciona normal para los clics del usuario
-    '    _isInitialLoading = False
-
-    'End Sub
 
 
     Private Sub BtnNewRate_Click(sender As Object, e As EventArgs) Handles BtnNewRate.Click
@@ -525,12 +499,11 @@ Public Class FrmPricesAndDiscounts
 
         SetInterfaceVisualState(isEditing:=True)
 
-        If DgvPriceList.RowCount = 0 Then
-            ApplyFirstTariffDefaultRules()
-        Else
-            DgvPriceList.CurrentCell = Nothing
-            CmbPaymentMethod.Focus()
-        End If
+        DgvPriceList.CurrentCell = Nothing
+
+        CmbPaymentMethod.Focus()
+
+        If DgvPriceList.RowCount = 0 Then ApplyFirstTariffDefaultRules()
 
     End Sub
 
@@ -565,43 +538,41 @@ Public Class FrmPricesAndDiscounts
             Exit Sub
         End Try
 
-        Dim selectedMethod As String = CmbPaymentMethod.Text.Trim()
-        Dim confirmationMessage As String
+        Dim paymentMethod As String = GetNamePaymentMethod()
+        Dim messageBody As String = String.Empty
 
         ' CONSTRUIR EL CUERPO DEL MENSAJE
-        Select Case selectedMethod
+        Select Case paymentMethod
 
-            Case PaymentMethods.IndividualClasses
-                confirmationMessage = TariffTransactionReport(selectedMethod, LblPaymentMethod.Text,
-                                                              TxtTotal.Text, TxtDiscount.Text, TxtToPay.Text,
-                                                              "Se ha GUARDADO el registro correctamente.")
+            Case PaymentMethods.IndividualClasses, PaymentMethods.MonthlyFeeSupplies
 
-            Case PaymentMethods.AgeDiscount
-                Dim ageRange As String = $"Rango de edad : Entre {NudMinimumAge.Value} y {NudMaximumAge.Value} años"
+                Dim currentPrice = _currentPrice.ToString("C2")
 
-                confirmationMessage = TariffTransactionReport(selectedMethod, LblPaymentMethod.Text, ageRange,
-                                                              TxtTotal.Text, TxtDiscount.Text, TxtToPay.Text,
-                                                              "Se ha GUARDADO el registro correctamente.")
+                messageBody = TariffTransactionReport(paymentMethod, LblPaymentMethod.Text,
+                                                      currentPrice, DialogMessages.RecordSavedSuccessfully)
 
-            Case PaymentMethods.FamilyGroup
-                Dim maximumMembers As String = $"Cupo máximo : {NudNumberMembers.Value} INTEGRANTES"
+            Case PaymentMethods.AgeDiscount, PaymentMethods.FamilyGroup
 
-                confirmationMessage = TariffTransactionReport(selectedMethod, LblPaymentMethod.Text, maximumMembers,
-                                                              TxtTotal.Text, TxtDiscount.Text, TxtToPay.Text,
-                                                              "Se ha GUARDADO el registro correctamente.")
+                Dim additionalInfo As String = GetAdditionalTariffInfo(paymentMethod)
 
-            Case PaymentMethods.MonthlyFeeSupplies
-                confirmationMessage = TariffTransactionReport(selectedMethod, LblPaymentMethod.Text,
-                                                              TxtTotal.Text, TxtDiscount.Text, TxtToPay.Text,
-                                                              "Se ha GUARDADO el registro correctamente.")
+                Dim discount As String = CDec(NormalizeMoneyText(TxtDiscount.Text)).ToString("C2")
 
-            Case Else
-                confirmationMessage = $"  La TARIFA fijada es de {TxtTotal.Text} mensuales." & Environment.NewLine & Environment.NewLine &
-                                      "  El precio se usará en todos los pagos de los clientes."
+                Dim toPay As String = CDec(NormalizeMoneyText(TxtToPay.Text)).ToString("C2")
+
+                messageBody = TariffTransactionReport(paymentMethod, LblPaymentMethod.Text, additionalInfo,
+                                                      TxtTotal.Text, discount, toPay,
+                                                      DialogMessages.RecordSavedSuccessfully)
+
+            Case PaymentMethods.Monthly
+
+                Dim currentPrice = _currentPrice.ToString("C2")
+
+                messageBody = TariffTransactionReport(currentPrice, TariffMessages.GeneralPriceDescription,
+                                                      DialogMessages.RecordSavedSuccessfully)
 
         End Select
 
-        MessageBox.Show(confirmationMessage, "Nuevo registro", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        MessageBox.Show(messageBody, "Nuevo registro", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         _currentMode = Nothing
 
@@ -615,8 +586,6 @@ Public Class FrmPricesAndDiscounts
 
         CmbPaymentMethod.Text = String.Empty
 
-        DgvPriceList.CurrentCell = Nothing
-
     End Sub
 
 
@@ -624,23 +593,27 @@ Public Class FrmPricesAndDiscounts
 
         ' COMPROBAR SI HAY REGISTRO SELECCIONADO
         If _currentTariffId = 0 Then
-            MsgBox("Selecciona un registro de la lista para MODIFICAR.", vbCritical, "Verificar")
-            'DgvPriceList.Focus()
+
+            MessageBox.Show(SelectRecordWarning("modificar"), "Verificar selección",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error)
+            DgvPriceList.Focus()
             Exit Sub
+
         End If
 
         _currentMode = TransactionMode.EditRecord
 
-        Dim selectRateType As String = LblPaymentMethod.Text.Trim()
+        Dim paymentMethod As String = GetNamePaymentMethod()
 
-        Select Case True
+        Select Case paymentMethod
 
-            Case selectRateType.StartsWith(PaymentMethods.Daily) OrElse
-                selectRateType.StartsWith(PaymentMethods.MonthImp)
+            Case PaymentMethods.IndividualClasses, PaymentMethods.MonthlyFeeSupplies
+
                 TxtPrice.Enabled = True
                 TxtPrice.Focus()
 
-            Case selectRateType.StartsWith(PaymentMethods.AgeDscnt)
+            Case PaymentMethods.AgeDiscount
+
                 TxtDiscount.Enabled = True
                 TxtToPay.Enabled = True
                 NudMinimumAge.Enabled = True
@@ -650,7 +623,8 @@ Public Class FrmPricesAndDiscounts
                 _tempAgeMin = Convert.ToInt32(NudMinimumAge.Value)
                 _tempAgeMax = Convert.ToInt32(NudMaximumAge.Value)
 
-            Case selectRateType.StartsWith(PaymentMethods.FmlGroup)
+            Case PaymentMethods.FamilyGroup
+
                 TxtDiscount.Enabled = True
                 TxtToPay.Enabled = True
                 NudNumberMembers.Enabled = True
@@ -658,13 +632,14 @@ Public Class FrmPricesAndDiscounts
 
                 _tempAgeMax = Convert.ToInt32(NudNumberMembers.Value)
 
-            Case Else
-                Dim response As MsgBoxResult = MsgBox("Vas a modificar el PRECIO FIJO GENERAL." & vbCr &
-                                                     "Se modificarán todas las tarifas asociadas con el nuevo precio." & vbCr & vbCr &
-                                                     "¿Estás seguro de modificar el precio fijo?",
-                                                     vbQuestion + vbYesNo + vbDefaultButton2, "Advertencia")
+            Case PaymentMethods.Monthly
 
-                If response = vbYes Then
+                Dim messageBody = TariffTransactionReport(TxtPrice.Text, TariffMessages.ModifyRelatedRatesWarning,
+                                                          TariffMessages.BasePriceModificationConfirmation)
+
+                Dim userResponse As MsgBoxResult = MessageBox.Show(messageBody, "Advertencia", MessageBoxButtons.YesNo,
+                                                                   MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2)
+                If userResponse = vbYes Then
                     TxtPrice.Enabled = True
                     TxtPrice.Focus()
                 Else
@@ -674,7 +649,6 @@ Public Class FrmPricesAndDiscounts
 
         End Select
 
-        Dim paymentMethod As String = GetNamePaymentMethod()
         ConfigureValidationState(paymentMethod, TransactionMode.EditRecord)
 
         SetInterfaceVisualState(isEditing:=True)
@@ -692,6 +666,8 @@ Public Class FrmPricesAndDiscounts
             Exit Sub
         End If
 
+        Dim paymentMethod As String = GetNamePaymentMethod()
+
         ' ACTUALIZAR USANDO DTO Y TARIFFMANAGER
         Try
             Dim tariffToUpdateDto As New TariffDTO() With
@@ -708,48 +684,50 @@ Public Class FrmPricesAndDiscounts
             Dim isUpdated As Boolean = _tariffManager.UpsertTariff(tariffToUpdateDto)
 
             If Not isUpdated Then
-                MsgBox("No se pudo realizar la actualización en la base de datos.", vbExclamation, "Atención")
+                MsgBox("ERROR AL ACTUALIZAR")
                 Exit Sub
             End If
+
+            ' SI ES LA TARIFA MENSUAL BASE, DISPARAMOS EL RECALCULO EN CASCADA
+            If paymentMethod = PaymentMethods.Monthly Then _tariffManager.UpdateDerivedTariffsPrice(_currentPrice)
 
         Catch ex As Exception
             MsgBox($"ERROR AL ACTUALIZAR : {vbCrLf}{ex.Message}")
             Exit Sub
         End Try
 
-        Dim selectRateType As String = LblPaymentMethod.Text.Trim()
-        Dim confirmationMessage As String
-
         ' CONSTRUIR EL CUERPO DEL MENSAJE
-        Select Case True
 
-            Case selectRateType.StartsWith(PaymentMethods.Daily)
-                confirmationMessage = TariffTransactionReport(PaymentMethods.IndividualClasses, selectRateType,
-                                                              TxtTotal.Text, TxtDiscount.Text, TxtToPay.Text,
-                                                              "Se ha ACTUALIZADO el registro correctamente.")
+        Dim messageBody As String = String.Empty
 
-            Case selectRateType.StartsWith(PaymentMethods.AgeDscnt)
-                Dim ageRange As String = $"Rango de edad : Entre {NudMinimumAge.Value} y {NudMaximumAge.Value} años"
+        Select Case paymentMethod
 
-                confirmationMessage = TariffTransactionReport(PaymentMethods.AgeDiscount, selectRateType, ageRange,
-                                                              TxtTotal.Text, TxtDiscount.Text, TxtToPay.Text,
-                                                              "Se ha ACTUALIZADO el registro correctamente.")
+            Case PaymentMethods.IndividualClasses, PaymentMethods.MonthlyFeeSupplies
 
-            Case selectRateType.StartsWith(PaymentMethods.FmlGroup)
-                Dim maximumMembers As String = $"Cupo máximo : {NudNumberMembers.Value} INTEGRANTES"
+                Dim currentPrice = _currentPrice.ToString("C2")
 
-                confirmationMessage = TariffTransactionReport(PaymentMethods.FamilyGroup, selectRateType, maximumMembers,
-                                                              TxtTotal.Text, TxtDiscount.Text, TxtToPay.Text,
-                                                              "Se ha ACTUALIZADO el registro correctamente.")
+                messageBody = TariffTransactionReport(paymentMethod, LblPaymentMethod.Text,
+                                                      currentPrice, DialogMessages.RecordUpdatedSuccessfully)
 
-            Case selectRateType.StartsWith(PaymentMethods.MonthImp)
-                confirmationMessage = TariffTransactionReport(PaymentMethods.MonthlyFeeSupplies, selectRateType,
-                                                              TxtTotal.Text, TxtDiscount.Text, TxtToPay.Text,
-                                                              "Se ha ACTUALIZADO el registro correctamente.")
+            Case PaymentMethods.AgeDiscount, PaymentMethods.FamilyGroup
 
-            Case Else
-                confirmationMessage = $"  La tarifa se ha ACTUALIZADO a {TxtPrice.Text} mensuales." & Environment.NewLine & Environment.NewLine &
-                                      "  El nuevo precio se usará en todos los pagos de los clientes."
+
+                Dim additionalInfo As String = GetAdditionalTariffInfo(paymentMethod)
+
+                Dim discount As String = CDec(NormalizeMoneyText(TxtDiscount.Text)).ToString("C2")
+
+                Dim toPay As String = CDec(NormalizeMoneyText(TxtToPay.Text)).ToString("C2")
+
+                messageBody = TariffTransactionReport(paymentMethod, LblPaymentMethod.Text, additionalInfo,
+                                                      TxtTotal.Text, discount, toPay,
+                                                      DialogMessages.RecordUpdatedSuccessfully)
+
+            Case PaymentMethods.Monthly
+
+                Dim currentPrice = _currentPrice.ToString("C2")
+
+                messageBody = TariffTransactionReport(currentPrice, TariffMessages.GeneralPriceDescription,
+                                                      DialogMessages.RecordUpdatedSuccessfully)
 
         End Select
 
@@ -765,99 +743,79 @@ Public Class FrmPricesAndDiscounts
 
         CmbPaymentMethod.Text = String.Empty
 
-        MsgBox(confirmationMessage, vbInformation, "Registro modificado")
+        MessageBox.Show(messageBody, "Registro modificado", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
     End Sub
 
 
     Private Sub BtnDeleteRate_Click(sender As Object, e As EventArgs) Handles BtnDeleteRate.Click
 
-        Try
-            ' Comprobar si hay un registro seleccionado
-            If _currentTariffId = 0 Then
-                MsgBox("Selecciona una tarifa de la lista para poder eliminarla.", vbCritical, "Verificar Selección")
-                DgvPriceList.Focus()
-                Exit Sub
-            End If
+        ' COMPROBAR SI HAY REGISTRO SELECCIONADO
+        If _currentTariffId = 0 Then
 
-            ' REGLA DE NEGOCIO : Prohibido borrar la tarifa base (ID = 1)
-            If _currentTariffId = 1 Then
-                MsgBox($"No se permite ELIMINAR la tarifa base (Mensualidad General).{vbCrLf}{vbCrLf}" &
-                   "Si lo deseas, puedes MODIFICAR su precio establecido.", vbExclamation, "Operación Restringida")
-                DgvPriceList.Focus()
-                Exit Sub
-            End If
+            MessageBox.Show(SelectRecordWarning("eliminar"), "Verificar selección",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error)
+            DgvPriceList.Focus()
+            Exit Sub
+
+        End If
+
+        _currentMode = TransactionMode.DeleteRecord
+
+        Try
 
             ' CONSTRUCCIÓN INTELIGENTE DEL MENSAJE CONFIRMACIÓN
+            Dim paymentMethod As String = GetNamePaymentMethod()
             Dim messageBody As String = String.Empty
-            Dim paymentMethodName As String = GetNamePaymentMethod()
 
-            Select Case paymentMethodName
+            Select Case paymentMethod
 
-                Case PaymentMethods.IndividualClasses
-                    messageBody = $"REGISTRO SELECCIONADO : CLASES SUELTAS{vbCrLf}{vbCrLf}" &
-                              $"Código de Registro: {_currentTariffId}{vbCrLf}" &
-                              $"---------------------------------{vbCrLf}" &
-                              $"Precio Base: {TxtPrice.Text}{vbCrLf}" &
-                              $"Descuento: {TxtDiscount.Text}"
+                Case PaymentMethods.IndividualClasses, PaymentMethods.MonthlyFeeSupplies
 
-                Case PaymentMethods.AgeDiscount
-                    messageBody = $"REGISTRO SELECCIONADO : DESCUENTO POR EDAD{vbCrLf}{vbCrLf}" &
-                              $"Código de Registro: {_currentTariffId}{vbCrLf}" &
-                              $"---------------------------------{vbCrLf}" &
-                              $"Precio Base: {TxtPrice.Text}{vbCrLf}" &
-                              $"Descuento: {TxtDiscount.Text}{vbCrLf}" &
-                              $"Rango de Edad: {NudMinimumAge.Value} a {NudMaximumAge.Value} años"
+                    messageBody = TariffTransactionReport(paymentMethod, LblPaymentMethod.Text,
+                                                          TxtTotal.Text, DialogMessages.RecordDeletionConfirmation)
 
-                Case PaymentMethods.FamilyGroup
-                    messageBody = $"REGISTRO SELECCIONADO : GRUPO FAMILIAR{vbCrLf}{vbCrLf}" &
-                              $"Código de Registro: {_currentTariffId}{vbCrLf}" &
-                              $"---------------------------------{vbCrLf}" &
-                              $"Precio Total: {TxtTotal.Text}{vbCrLf}" &
-                              $"Nº Integrantes: {NudNumberMembers.Value}{vbCrLf}" &
-                              $"Descuento Aplicado: {TxtDiscount.Text}{vbCrLf}" &
-                              $"Total a Pagar: {TxtToPay.Text}"
+                Case PaymentMethods.AgeDiscount, PaymentMethods.FamilyGroup
 
-                Case PaymentMethods.MonthlyFeeSupplies
-                    messageBody = $"REGISTRO SELECCIONADO : MENSUALIDAD + IMPLEMENTOS{vbCrLf}{vbCrLf}" &
-                              $"Código de Registro: {_currentTariffId}{vbCrLf}" &
-                              $"---------------------------------{vbCrLf}" &
-                              $"Precio Base: {TxtPrice.Text}{vbCrLf}" &
-                              $"Descuento: {TxtDiscount.Text}"
+                    Dim additionalInfo As String = GetAdditionalTariffInfo(paymentMethod)
 
-                Case Else
-                    messageBody = $"¿Está seguro de que desea eliminar la tarifa con Código {_currentTariffId}?"
+                    messageBody = TariffTransactionReport(paymentMethod, LblPaymentMethod.Text, additionalInfo,
+                                                          TxtTotal.Text, TxtDiscount.Text, TxtToPay.Text,
+                                                          DialogMessages.RecordDeletionConfirmation)
+
+                Case PaymentMethods.Monthly
+
+                    messageBody = TariffTransactionReport(TxtTotal.Text, TariffMessages.BaseRateCannotBeDeleted,
+                                                          TariffMessages.BaseRateCanBeModified)
+
+                    MessageBox.Show(messageBody, "Operación Restringida", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    DgvPriceList.Focus()
+                    Exit Sub
+
             End Select
 
-            ' Agregamos la pregunta de cierre estándar a todos los mensajes
-            Dim fullQuestion As String = $"{messageBody}{vbCrLf}{vbCrLf}¿Está completamente seguro de ELIMINAR este registro?"
-
             ' PREGUNTA DE SEGURIDAD (El botón 'No' viene enfocado por defecto para evitar accidentes)
-            Dim userResponse As MsgBoxResult = MsgBox(fullQuestion, vbQuestion + vbYesNo + vbDefaultButton2, "Confirmar Eliminación")
+            Dim userResponse As MsgBoxResult = MessageBox.Show(messageBody, "Confirmar Eliminación", MessageBoxButtons.YesNo,
+                                                               MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
 
             If userResponse = vbYes Then
 
-                ' PERSISTENCIA MEDIANTE EL MANAGER
-                Dim isDeleted As Boolean = _tariffManager.DeleteTariff(_currentTariffId)
+                _tariffManager.DeleteTariff(_currentTariffId)
 
-                If isDeleted Then
+                _currentMode = Nothing
 
-                    _currentMode = Nothing
+                ClearInputControls()
 
-                    ClearInputControls()
+                ResetStateVariables()
 
-                    ResetStateVariables()
+                SetInterfaceVisualState(isEditing:=False)
 
-                    SetInterfaceVisualState(isEditing:=False)
+                FetchAndRenderTariffsGridUI()
 
-                    FetchAndRenderTariffsGridUI()
+                DgvPriceList.CurrentCell = Nothing
 
-                    DgvPriceList.CurrentCell = Nothing
-
-                    MsgBox("La tarifa seleccionada se ha eliminado correctamente del sistema.", vbInformation, "Éxito")
-                Else
-                    MsgBox("No se pudo eliminar el registro. Verifique si está en uso.", vbCritical, "Error de Persistencia")
-                End If
+                MessageBox.Show(DialogMessages.RecordDeletedSuccessfully, "Registro eliminado",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information)
 
             End If
 
@@ -920,10 +878,10 @@ Public Class FrmPricesAndDiscounts
     ''' </remarks>
     Private Sub CalculateDiscountLimits()
 
-        Dim namePaymentMethod As String = GetNamePaymentMethod()
+        Dim paymentMethod As String = GetNamePaymentMethod()
 
         ' Determinamos los límites del descuento según la selección del combo (Sustituye a "DSCTO" o "GRUPO")
-        Select Case namePaymentMethod
+        Select Case paymentMethod
 
             Case PaymentMethods.AgeDiscount
 
@@ -960,10 +918,10 @@ Public Class FrmPricesAndDiscounts
 
         End If
 
-        Dim namePaymentMethod As String = GetNamePaymentMethod()
+        Dim paymentMethod As String = GetNamePaymentMethod()
 
         ' Determinamos los límites comerciales según la selección del combo
-        Select Case namePaymentMethod
+        Select Case paymentMethod
 
             Case PaymentMethods.IndividualClasses
                 _allowedPriceMin = _fixedMonthlyPrice * INDIVIDUAL_CLASS_MIN_PCT
@@ -1002,9 +960,9 @@ Public Class FrmPricesAndDiscounts
     ''' </remarks>
     Private Sub CalculateToPayLimits()
 
-        Dim namePaymentMethod As String = GetNamePaymentMethod()
+        Dim paymentMethod As String = GetNamePaymentMethod()
 
-        Select Case namePaymentMethod
+        Select Case paymentMethod
 
             Case PaymentMethods.AgeDiscount
                 _allowedToPayMin = _fixedMonthlyPrice - (_fixedMonthlyPrice * AGE_DISCOUNT_MAX_PCT)
@@ -1022,6 +980,37 @@ Public Class FrmPricesAndDiscounts
         End Select
 
     End Sub
+
+
+    ''' <summary>
+    ''' Genera la información complementaria que se mostrará
+    ''' en el cuadro de confirmación de la operación,
+    ''' adaptándola al tipo de tarifa seleccionado.
+    ''' </summary>
+    ''' <param name="paymentMethod">
+    ''' Método de pago o tarifa que determina el contenido
+    ''' de la información adicional.
+    ''' </param>
+    ''' <returns>
+    ''' Texto descriptivo correspondiente a la tarifa seleccionada,
+    ''' o una cadena vacía si no aplica.
+    ''' </returns>
+    Private Function GetAdditionalTariffInfo(paymentMethod As String) As String
+
+        Select Case paymentMethod
+
+            Case PaymentMethods.AgeDiscount
+                Return $"Rango de edad : Entre {NudMinimumAge.Value} y {NudMaximumAge.Value} años"
+
+            Case PaymentMethods.FamilyGroup
+                Return $"Cupo máximo : {NudNumberMembers.Value} INTEGRANTES"
+
+            Case Else
+                Return String.Empty
+
+        End Select
+
+    End Function
 
 
     ''' <summary>
@@ -1084,9 +1073,9 @@ Public Class FrmPricesAndDiscounts
         ' El modo de transacción no está activo, protegemos el botón.
         If _currentMode Is Nothing Then Return False
 
-        Dim namePaymentMethod As String = GetNamePaymentMethod()
+        Dim paymentMethod As String = GetNamePaymentMethod()
 
-        Select Case namePaymentMethod
+        Select Case paymentMethod
 
             Case PaymentMethods.IndividualClasses, PaymentMethods.MonthlyFeeSupplies, PaymentMethods.Monthly
                 Return _isPriceValid AndAlso _isDiscountValid AndAlso _isToPayValid
@@ -1147,11 +1136,12 @@ Public Class FrmPricesAndDiscounts
         CmbPaymentMethod.Enabled = False
         NudNumberMembers.Value = 1
         LblPaymentMethod.Text = PaymentMethods.Monthly
-        TxtTotal.Clear()
 
         TxtPrice.Enabled = True
         TxtPrice.Text = "0"
         TxtPrice.Focus()
+
+        TxtDiscount.Text = "0"
 
         _allowedPriceMin = MINIMUM_PRICE_LIMIT
         _allowedPriceMax = MAXIMUM_PRICE_LIMIT
@@ -1471,9 +1461,9 @@ Public Class FrmPricesAndDiscounts
     ''' </remarks>
     Private Sub UpdateDiscountCalculationsAndTotals(currentDiscountValue As Decimal)
 
-        Dim namePaymentMethod As String = GetNamePaymentMethod()
+        Dim paymentMethod As String = GetNamePaymentMethod()
 
-        Select Case namePaymentMethod
+        Select Case paymentMethod
 
             Case PaymentMethods.AgeDiscount
                 TxtToPay.Text = (_fixedMonthlyPrice - currentDiscountValue).ToString("C2")
@@ -1495,10 +1485,10 @@ Public Class FrmPricesAndDiscounts
     ''' </summary>
     Private Sub UpdateDynamicTariffLabel()
 
-        Dim namePaymentMethod As String = GetNamePaymentMethod()
+        Dim paymentMethod As String = GetNamePaymentMethod()
         Dim prefix As String
 
-        Select Case namePaymentMethod
+        Select Case paymentMethod
 
             Case PaymentMethods.IndividualClasses
                 prefix = PaymentMethods.Daily
@@ -1529,8 +1519,8 @@ Public Class FrmPricesAndDiscounts
         End If
 
         ' Solo las clases sueltas y mensualidad+implementos muestran el precio.
-        If namePaymentMethod = PaymentMethods.IndividualClasses OrElse
-            namePaymentMethod = PaymentMethods.MonthlyFeeSupplies Then
+        If paymentMethod = PaymentMethods.IndividualClasses OrElse
+            paymentMethod = PaymentMethods.MonthlyFeeSupplies Then
 
             LblPaymentMethod.Text = $"{prefix} {currentPriceText}"
         Else
@@ -1558,9 +1548,9 @@ Public Class FrmPricesAndDiscounts
     ''' </remarks>
     Private Sub UpdateToPayCalculationsAndDiscounts(currentToPayValue As Decimal)
 
-        Dim namePaymentMethod As String = GetNamePaymentMethod()
+        Dim paymentMethod As String = GetNamePaymentMethod()
 
-        Select Case namePaymentMethod
+        Select Case paymentMethod
 
             Case PaymentMethods.AgeDiscount
                 Dim calculatedDiscount As Decimal = _fixedMonthlyPrice - currentToPayValue
@@ -1643,7 +1633,7 @@ Public Class FrmPricesAndDiscounts
             Next
 
         Catch ex As Exception
-            MsgBox($"Error visual al verificar duplicados en la lista: {vbCrLf}{ex.Message}", vbCritical, "Error de Interfaz")
+            MsgBox($"ERROR AL VERIFICAR DUPLICADOS: {vbCrLf}{ex.Message}")
         End Try
 
         Return False ' No hay conflicto, todo limpio para operar
@@ -1658,6 +1648,7 @@ Public Class FrmPricesAndDiscounts
     Public Enum TransactionMode
         NewRecord
         EditRecord
+        DeleteRecord
     End Enum
 
 #End Region

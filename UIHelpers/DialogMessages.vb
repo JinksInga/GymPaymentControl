@@ -187,6 +187,111 @@
 
 #Region " Mensajes de Tarifas y Precios "
 
+        ' =========================================================================
+        ' CONSTANTES DE ACCIÓN EN TariffTransactionReport (parametro actionMessage)
+        ' =========================================================================
+        Public Const RecordSavedSuccessfully As String = "Se ha GUARDADO el registro correctamente."
+
+        Public Const RecordUpdatedSuccessfully As String = "Se ha ACTUALIZADO el registro correctamente."
+
+        Public Const RecordDeletedSuccessfully As String = "Se ha ELIMINADO el registro correctamente."
+
+        Public Const RecordDeletionConfirmation As String = "¿Está seguro de ELIMINAR este registro?"
+
+        ''' <summary>
+        ''' Genera un mensaje indicando que debe seleccionarse un registro
+        ''' antes de realizar una acción sobre él.
+        ''' </summary>
+        ''' <param name="actionText">
+        ''' Acción que el usuario intenta realizar
+        ''' (por ejemplo: "MODIFICAR" o "ELIMINAR").
+        ''' </param>
+        ''' <returns>
+        ''' Mensaje de advertencia para mostrar al usuario.
+        ''' </returns>
+        Public Function SelectRecordWarning(actionText As String) As String
+
+            Return $"Selecciona un registro de la lista para {actionText.Trim().ToUpper()}."
+
+        End Function
+
+        ''' <summary>
+        ''' Plantilla unificada en formato de reporte/ticket con el desglose de los costos de una tarifa, 
+        ''' para mostrar en cuadros de diálogo de Guardar, Actualizar o Eliminar.
+        ''' </summary>
+        ''' <param name="paymentType">El tipo de pago general (ej: CLASES SUELTAS, MENSUALIDAD + IMPLEMENTOS).</param>
+        ''' <param name="paymentName">El nombre del registro guardado en BBDD (ej: DIARIO 10, MES + IMPLE 50).</param>
+        ''' <param name="price">El precio base o total a pagar formateado.</param>
+        ''' <param name="actionMessage">El mensaje de cierre o instrucción (ej: '¿Deseas eliminar este registro?' o 'Guardado correctamente.').</param>
+        ''' <returns>Cuerpo de texto estructurado y alineado para el MessageBox.</returns>
+        Public Function TariffTransactionReport(paymentType As String, paymentName As String,
+                                                price As String, actionMessage As String) As String
+
+            Return $"  Tipo de pago : {paymentType}" & Environment.NewLine &
+                   $"  Nombre pago : {paymentName}" & Environment.NewLine & Environment.NewLine &
+                   "  ------------------------------------------------------------" & Environment.NewLine &
+                   $"      Precio          --->  {price}" & Environment.NewLine &
+                   $"      Descuento  --->  0.00 €" & Environment.NewLine &
+                   $"      A pagar       --->  {price}" & Environment.NewLine &
+                   "  ------------------------------------------------------------" & Environment.NewLine & Environment.NewLine &
+                   $"  {actionMessage}"
+
+        End Function
+
+
+        ''' <summary>
+        ''' Plantilla unificada en formato de reporte/ticket con el desglose de los costos de una tarifa, 
+        ''' para mostrar en cuadros de diálogo de Guardar, Actualizar o Eliminar.
+        ''' </summary>
+        ''' <param name="paymentType">El tipo de pago general (ej: DESCUENTO POR EDAD, GRUPO FAMILIAR).</param>
+        ''' <param name="paymentName">El nombre base registrado en BBDD (ej: DSCTO EDAD 5-9).</param>
+        ''' <param name="additionalInfo">La regla específica formateada (ej: 'Rango: Desde 5 hasta 9 años' o 'Integrantes: 4 personas').</param>
+        ''' <param name="basePrice">El precio base o subtotal formateado.</param>
+        ''' <param name="discount">El descuento total aplicado formateado.</param>
+        ''' <param name="toPay">El monto neto final a pagar formateado.</param>
+        ''' <param name="actionMessage">El mensaje de cierre o instrucción (ej: '¿Deseas eliminar este registro?' o 'Guardado correctamente.').</param>
+        ''' <returns>Cuerpo de texto estructurado y alineado para el MessageBox.</returns>
+        Public Function TariffTransactionReport(paymentType As String, paymentName As String, additionalInfo As String,
+                                                basePrice As String, discount As String, toPay As String,
+                                                actionMessage As String) As String
+
+            Return $"  Tipo de pago : {paymentType}" & Environment.NewLine &
+                   $"  Nombre pago : {paymentName}" & Environment.NewLine & Environment.NewLine &
+                   $"  {additionalInfo}" & Environment.NewLine & Environment.NewLine &
+                   "  ------------------------------------------------------------" & Environment.NewLine &
+                   $"      Precio          --->  {basePrice}" & Environment.NewLine &
+                   $"      Descuento  --->   {discount}" & Environment.NewLine &
+                   $"      A pagar       --->  {toPay}" & Environment.NewLine &
+                   "  ------------------------------------------------------------" & Environment.NewLine & Environment.NewLine &
+                   $"  {actionMessage}"
+
+        End Function
+
+
+        ''' <summary>
+        ''' Plantilla unificada en formato de reporte/ticket con la tarifa única mensual, 
+        ''' para mostrar en cuadros de diálogo de Guardar, Actualizar o Eliminar.
+        ''' Genera un mensaje de advertencia antes de modificar el precio de la tarifa única mensual.
+        ''' o precio base de las tarifas familiares y descuentos por edad.
+        ''' </summary>
+        ''' <param name="currentPrice">El precio base o tarifa única mensual.</param>
+        ''' <param name="additionalInfo">La regla específica formateada (ej: 'Rango: Desde 5 hasta 9 años' o 'Integrantes: 4 personas').</param>
+        ''' <param name="actionMessage">El mensaje de cierre o instrucción (ej: '¿Deseas eliminar este registro?' o 'Guardado correctamente.').</param>
+        ''' <returns>Cuerpo de texto estructurado y alineado para el MessageBox.</returns>
+        Public Function TariffTransactionReport(currentPrice As String, additionalInfo As String,
+                                                     actionMessage As String) As String
+
+            Return "   Tipo de pago : TARIFA UNICA MENSUAL" & Environment.NewLine &
+                   "   Nombre pago : MENSUAL" & Environment.NewLine & Environment.NewLine &
+                   "  ----------------------------------------------------" & Environment.NewLine &
+                   $"      Precio actual  --->  {currentPrice}" & Environment.NewLine &
+                   "  ----------------------------------------------------" & Environment.NewLine & Environment.NewLine &
+                   $"  ⚠️ {additionalInfo} ⚠️" & Environment.NewLine & Environment.NewLine &
+                   $"  {actionMessage}"
+
+        End Function
+
+
         ''' <summary>
         ''' Genera un mensaje de error unificado cuando se detecta que el método de pago ya existe en la base de datos, 
         ''' adaptando los textos informativos y correctivos según el modo de la transacción actual.
@@ -201,60 +306,6 @@
                    $"         MÉTODO PAGO : {paymentMethod}" & Environment.NewLine & Environment.NewLine &
                    "   Puedes MODIFICAR los datos de la tarifa o ELIMINAR el" & Environment.NewLine &
                    "   registro duplicado."
-
-        End Function
-
-        ''' <summary>
-        ''' Plantilla unificada en formato de reporte/ticket con el desglose de los costos de una tarifa, 
-        ''' para mostrar en cuadros de diálogo de Guardar, Actualizar o Eliminar.
-        ''' </summary>
-        ''' <param name="paymentType">El tipo de pago general (ej: CLASES SUELTAS, MENSUALIDAD + IMPLEMENTOS).</param>
-        ''' <param name="paymentName">El nombre del registro guardado en BBDD (ej: DIARIO 10, MES + IMPLE 50).</param>
-        ''' <param name="price">El precio base o subtotal formateado.</param>
-        ''' <param name="discount">El descuento total aplicado formateado.</param>
-        ''' <param name="toPay">El monto neto final a pagar formateado.</param>
-        ''' <param name="actionMessage">El mensaje de cierre o instrucción (ej: '¿Deseas eliminar este registro?' o 'Guardado correctamente.').</param>
-        ''' <returns>Cuerpo de texto estructurado y alineado para el MessageBox.</returns>
-        Public Function TariffTransactionReport(paymentType As String, paymentName As String,
-                                                price As String, discount As String, toPay As String,
-                                                actionMessage As String) As String
-
-            Return $"  Tipo de pago : {paymentType}" & Environment.NewLine &
-                   $"  Nombre pago : {paymentName}" & Environment.NewLine & Environment.NewLine &
-                   "  ------------------------------------------------------------" & Environment.NewLine &
-                   $"      Precio          --->  {price}" & Environment.NewLine &
-                   $"      Descuento  --->  {discount}" & Environment.NewLine &
-                   $"      A pagar       --->  {toPay}" & Environment.NewLine &
-                   "  ------------------------------------------------------------" & Environment.NewLine & Environment.NewLine &
-                   $"  {actionMessage}"
-
-        End Function
-
-        ''' <summary>
-        ''' Plantilla unificada en formato de reporte/ticket con el desglose de los costos de una tarifa, 
-        ''' para mostrar en cuadros de diálogo de Guardar, Actualizar o Eliminar.
-        ''' </summary>
-        ''' <param name="paymentType">El tipo de pago general (ej: DESCUENTO POR EDAD, GRUPO FAMILIAR).</param>
-        ''' <param name="paymentName">El nombre base registrado en BBDD (ej: DSCTO EDAD 5-9).</param>
-        ''' <param name="additionalInfo">La regla específica formateada (ej: 'Rango: Desde 5 hasta 9 años' o 'Integrantes: 4 personas').</param>
-        ''' <param name="price">El precio base o subtotal formateado.</param>
-        ''' <param name="discount">El descuento total aplicado formateado.</param>
-        ''' <param name="toPay">El monto neto final a pagar formateado.</param>
-        ''' <param name="actionMessage">El mensaje de cierre o instrucción (ej: '¿Deseas eliminar este registro?' o 'Guardado correctamente.').</param>
-        ''' <returns>Cuerpo de texto estructurado y alineado para el MessageBox.</returns>
-        Public Function TariffTransactionReport(paymentType As String, paymentName As String, additionalInfo As String,
-                                                price As String, discount As String, toPay As String,
-                                                actionMessage As String) As String
-
-            Return $"  Tipo de pago : {paymentType}" & Environment.NewLine &
-                   $"  Nombre pago : {paymentName}" & Environment.NewLine & Environment.NewLine &
-                   $"  {additionalInfo}" & Environment.NewLine & Environment.NewLine &
-                   "  ------------------------------------------------------------" & Environment.NewLine &
-                   $"      Precio          --->  {price}" & Environment.NewLine &
-                   $"      Descuento  --->    {discount}" & Environment.NewLine &
-                   $"      A pagar       --->  {toPay}" & Environment.NewLine &
-                   "  ------------------------------------------------------------" & Environment.NewLine & Environment.NewLine &
-                   $"  {actionMessage}"
 
         End Function
 

@@ -194,12 +194,14 @@
     <Compile Include="Models\UserDTO.vb" />
     <Compile Include="Models\UserSession.vb" />
     <Compile Include="Services\AuthManager.vb" />
+    <Compile Include="Services\FamilyGroupManager.vb" />
     <Compile Include="Services\PaymentGenerator.vb" />
     <Compile Include="Services\PaymentManager.vb" />
     <Compile Include="Services\TariffManager.vb" />
     <Compile Include="UIHelpers\FormHelpers.vb" />
     <Compile Include="UIHelpers\InputValidators.vb" />
     <Compile Include="UIHelpers\AppTexts.vb" />
+    <Compile Include="UIHelpers\TariffMessages.vb" />
     <Compile Include="UIHelpers\ValidationMessages.vb" />
     <Compile Include="UIHelpers\DialogMessages.vb" />
     <Compile Include="Utils\DateUtils.vb" />

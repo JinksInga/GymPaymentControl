@@ -149,6 +149,45 @@ Namespace Services
 
 
         ''' <summary>
+        ''' Actualiza en cascada el precio base de todas las tarifas derivadas por edad o grupo familiar.
+        ''' </summary>
+        ''' <param name="newPrice">El nuevo precio base establecido en la tarifa mensual.</param>
+        ''' <returns>True si se actualizó al menos una tarifa derivada; de lo contrario, False.</returns>
+        Public Function UpdateDerivedTariffsPrice(newPrice As Decimal) As Boolean
+
+            Dim sqlQuery As String = "UPDATE trfa_dscto SET prcio_trfa = @NewPrice
+                                        WHERE tipo_trfa LIKE 'DSCTO EDAD%' OR tipo_trfa LIKE 'GRUPO FAM%'"
+
+            Using connection = GetConnection()
+
+                Using command As New MySqlCommand(sqlQuery, connection)
+
+                    command.Parameters.AddWithValue("@NewPrice", newPrice)
+
+                    Try
+                        connection.Open()
+
+                        ' ExecuteNonQuery devuelve el número de filas afectadas en la BBDD
+                        Dim rowsAffected As Integer = command.ExecuteNonQuery()
+
+                        Return rowsAffected > 0
+
+                    Catch ex As MySqlException
+
+                        Throw New Exception($"ERROR DE MySQL : {vbCrLf}{ex.Message}")
+
+                    Catch ex As Exception
+                        Throw New Exception($"ERROR GENERAL : {vbCrLf}{ex.Message}")
+
+                    End Try
+
+                End Using
+            End Using
+
+        End Function
+
+
+        ''' <summary>
         ''' Elimina de forma permanente una tarifa de la base de datos a partir de su ID único.
         ''' </summary>
         ''' <param name="tariffId">El ID de la tarifa que se desea eliminar.</param>
@@ -180,6 +219,7 @@ Namespace Services
 
                     Catch ex As Exception
                         Throw New Exception(ex.Message)
+
                     End Try
 
                 End Using
