@@ -9,6 +9,7 @@ Namespace Services
         ' Al heredar, obtenemos el motor de conexión.
         Inherits BaseRepository
 
+
         ''' <summary>
         ''' Consulta de forma rápida y eficiente en la base de datos si el gimnasio cuenta con tarifas registradas.
         ''' </summary>
@@ -224,8 +225,10 @@ Namespace Services
 
                 End Using
             End Using
+
         End Function
 
 
     End Class
-    End Namespace
+
+End Namespace

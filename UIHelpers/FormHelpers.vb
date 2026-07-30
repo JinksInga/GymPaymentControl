@@ -1,4 +1,4 @@
-﻿Imports GymPaymentControl.Utils.Validations
+﻿Imports GymPaymentControl.Utils
 
 Namespace UIHelpers
 
@@ -12,7 +12,7 @@ Namespace UIHelpers
         Public Function EvaluateNumericRangeLimits(control As Control, value As Decimal,
                                                    minimum As Decimal, maximum As Decimal) As Boolean
 
-            Dim cleanText As String = NormalizeMoneyText(control.Text).Trim()
+            Dim cleanText As String = Validations.NormalizeMoneyText(control.Text).Trim()
 
             ' Si el texto está completamente vacío (el usuario borró todo o solo dejó el " €")
             If String.IsNullOrEmpty(cleanText) Then
@@ -61,7 +61,7 @@ Namespace UIHelpers
 
             Dim cursorPos As Integer = textBox.SelectionStart
 
-            Dim priceWithoutFormat As String = NormalizeMoneyText(textBox.Text)
+            Dim priceWithoutFormat As String = Validations.NormalizeMoneyText(textBox.Text)
 
             textBox.Text = $"{priceWithoutFormat} €"
             textBox.SelectionStart = Math.Min(cursorPos, textBox.Text.Length)
@@ -178,25 +178,67 @@ Namespace UIHelpers
 
 
         ''' <summary>
-        ''' Valida los datos del cliente en los campos obligatorios utilizando la
-        ''' lógica de negocio y actualiza la interfaz de usuario en consecuencia.
-        ''' - Muestra un error si el campo está vacío o no es válido.
-        ''' - Normaliza el texto si es correcto.
-        ''' - Cambia el color del control según el resultado.
+        ''' Sincroniza la apariencia visual de un TextBox con el resultado de
+        ''' una validación.
         ''' </summary>
-        ''' <param name="textBox">Control que contiene el nombre del cliente.</param>
-        ''' <param name="errorProvider">Componente usado para mostrar errores en la UI.</param>
-        Public Sub ValidateRequiredFieldUI(textBox As TextBox, errorProvider As ErrorProvider)
+        ''' <remarks>
+        ''' Gestiona el ErrorProvider, el color de fondo del control y la
+        ''' normalización del texto para reflejar los estados de edición,
+        ''' validación correcta o error.
+        ''' </remarks>
+        Public Sub UpdateValidationState(textBox As TextBox, isValid As Boolean,
+                                         errorMessage As String, errorProvider As ErrorProvider)
 
-            errorProvider.Clear()
+            If textBox Is Nothing Then Exit Sub
 
-            If Not IsCustomerNameValid(textBox.Text) Then
-                errorProvider.SetError(textBox, EmptyField)
-                textBox.BackColor = Color.MistyRose
-            Else
-                textBox.Text = NormalizeName(textBox.Text)
-                textBox.BackColor = Color.Azure
+            If errorProvider IsNot Nothing Then
+                errorProvider.SetError(textBox, If(isValid, String.Empty, errorMessage))
             End If
+
+            If Not isValid Then
+                textBox.BackColor = Color.MistyRose
+
+            Else
+
+                If textBox.Focused Then
+                    textBox.BackColor = Color.Beige
+
+                Else
+
+                    textBox.BackColor = Color.Azure
+
+                    Dim normalized As String = Validations.NormalizeName(textBox.Text)
+                    If textBox.Text <> normalized Then
+                        textBox.Text = normalized
+
+                    End If
+                End If
+            End If
+
+        End Sub
+
+
+        ''' <summary>
+        ''' Valida el nombre introducido en el control y actualiza su estado
+        ''' visual según el resultado de la validación.
+        ''' </summary>
+        ''' <remarks>
+        ''' Si el nombre es válido, normaliza su formato y restaura la apariencia
+        ''' del control. En caso contrario, muestra el mensaje de error
+        ''' correspondiente y resalta el campo para indicar la incidencia.
+        ''' </remarks>
+        ''' <param name="textBox">
+        ''' Control que contiene el nombre del cliente o del grupo familiar.
+        ''' </param>
+        ''' <param name="errorProvider">
+        ''' Componente utilizado para mostrar los mensajes de validación.
+        ''' </param>
+        Public Sub ValidateCustomerNameUI(textBox As TextBox, errorProvider As ErrorProvider)
+
+            Dim isValid As Boolean = Validations.IsCustomerNameValid(textBox.Text)
+            Dim message As String = If(isValid, String.Empty, ValidationMessages.EmptyField)
+
+            UpdateValidationState(textBox, isValid, message, errorProvider)
 
         End Sub
 
@@ -234,8 +276,8 @@ Namespace UIHelpers
             errorProvider.Clear()
             textBox.BackColor = Color.Azure
 
-            If IsCustomerNameValid(textBox.Text) Then
-                textBox.Text = NormalizeName(textBox.Text)
+            If Validations.IsCustomerNameValid(textBox.Text) Then
+                textBox.Text = Validations.NormalizeName(textBox.Text)
             End If
 
         End Sub
@@ -259,7 +301,7 @@ Namespace UIHelpers
 
             errorProvider.Clear()
 
-            If Not IsCustomerAgeValid(control.Text) Then
+            If Not Validations.IsCustomerAgeValid(control.Text) Then
                 errorProvider.SetError(control, WrongAge)
                 control.BackColor = Color.MistyRose
             Else
@@ -307,8 +349,8 @@ Namespace UIHelpers
             If String.IsNullOrWhiteSpace(textBox.Text) Then
                 textBox.BackColor = If(isInside, Color.Beige, Color.Azure)
 
-            ElseIf Not IsValidEmail(textBox.Text) Then
-                errorProvider.SetError(textBox, InvalidEmailMessage)
+            ElseIf Not Validations.IsValidEmail(textBox.Text) Then
+                errorProvider.SetError(textBox, DialogMessages.InvalidEmailMessage)
                 textBox.BackColor = Color.MistyRose
             Else
                 errorProvider.Clear()
@@ -326,11 +368,11 @@ Namespace UIHelpers
 
             If String.IsNullOrWhiteSpace(textBox.Text) Then Return True
 
-            If IsValidEmail(textBox.Text) Then Return True
+            If Validations.IsValidEmail(textBox.Text) Then Return True
 
             textBox.BackColor = Color.MistyRose
 
-            ShowValidationError(InvalidEmailMessage, $"Error al {titleAction.ToLower()}", textBox)
+            ShowValidationError(DialogMessages.InvalidEmailMessage, $"Error al {titleAction.ToLower()}", textBox)
 
             Return False
 

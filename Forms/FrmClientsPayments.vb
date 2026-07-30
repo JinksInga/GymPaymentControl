@@ -439,7 +439,7 @@ Public Class FrmClientsPayments
 
         '| Lanzar formulario.
         NavigateToForm.OpenFrmCollectMembership(newPayment, AddressOf RefreshPaymentHistory,
-                                                TransactionMode.NewPayment)
+                                                FrmCollectMembership.TransactionMode.NewPayment)
 
     End Sub
 

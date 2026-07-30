@@ -24,6 +24,7 @@ Namespace Services
         ' Declaramos el Manager de Pagos para poder usar el método maestro
         Private ReadOnly _paymentManager As New PaymentManager()
 
+
         ''' <summary>
         ''' Genera los pagos correspondientes al mes actual para:
         ''' - Clientes individuales activos con pago mensual
@@ -129,10 +130,10 @@ Namespace Services
 
             ' 1. Decisión inteligente de la Query según el tipo de pago
             If isDaily Then
-                ' 🔹 CASO DIARIO: Comparación directa y limpia ya que tu campo es de tipo DATE
+                ' CASO DIARIO: Comparación directa y limpia ya que tu campo es de tipo DATE
                 sqlQuery = "SELECT COUNT(*) FROM pagos WHERE fdi_pgs = @fullDate AND "
             Else
-                ' 🔸 CASO MENSUAL / GRUPAL: Tu filtro tradicional por mes y año
+                ' CASO MENSUAL / GRUPAL: Tu filtro tradicional por mes y año
                 sqlQuery = "SELECT COUNT(*) FROM pagos WHERE MONTH(fdi_pgs) = @month AND YEAR(fdi_pgs) = @year AND "
             End If
 
@@ -192,7 +193,7 @@ Namespace Services
         ''' <summary>
         ''' Obtiene la tarifa grupal según el número de integrantes.
         ''' </summary>
-        Private Function GetGroupRate(connection As MySqlConnection, transaction As MySqlTransaction,
+        Friend Function GetGroupRate(connection As MySqlConnection, transaction As MySqlTransaction,
                                       numberPeople As Integer) As DataRow
 
             Dim sqlQuery As String = "SELECT prcio_trfa, dscto_trfa
@@ -246,9 +247,7 @@ Namespace Services
 
         End Function
 
-        '
-        '
-        '
+
         Public Function HasPendingMassivePayments() As Boolean
 
             Dim firstDayOfMonth As New DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)
@@ -284,4 +283,5 @@ Namespace Services
 
 
     End Class
+
 End Namespace

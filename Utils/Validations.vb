@@ -80,14 +80,9 @@ Namespace Utils
         ''' <returns>Cadena normalizada.</returns>
         Public Function NormalizeName(text As String) As String
 
-            Dim result As String = text.Trim()
+            If String.IsNullOrWhiteSpace(text) Then Return String.Empty
 
-            ' Reemplazar múltiples espacios por uno solo
-            While result.Contains("  ")
-                result = result.Replace("  ", " ")
-            End While
-
-            Return result
+            Return Regex.Replace(text.Trim(), "\s+", " ")
 
         End Function
 

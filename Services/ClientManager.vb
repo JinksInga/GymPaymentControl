@@ -234,9 +234,9 @@ Namespace Services
         End Sub
 
 
-        '|-------------------------------------------------------------------
-        '| 
-        '|-------------------------------------------------------------------
+        '|-----------------------------------------------------
+        '| FUNCIÓN PARA ELIMINAR UN CLIENTE DE FORMA PERMANENTE
+        '|-----------------------------------------------------
         Public Function DeleteClientPermanently(idCli As Integer) As Boolean
 
             Dim sqlDeletePayments As String = "DELETE FROM pagos WHERE id_cli = @id"

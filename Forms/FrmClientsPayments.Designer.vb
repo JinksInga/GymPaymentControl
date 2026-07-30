@@ -86,7 +86,7 @@ Partial Class FrmClientsPayments
         Me.BtnCancelSearch = New System.Windows.Forms.Button()
         Me.ToolTip = New System.Windows.Forms.ToolTip(Me.components)
         Me.LblLetrero = New System.Windows.Forms.Label()
-        Me.PnlBotonera = New System.Windows.Forms.Panel()
+        Me.PnlButtonPanel = New System.Windows.Forms.Panel()
         Me.BtnCloseWindow = New System.Windows.Forms.Button()
         Me.BtnDeleteClient = New System.Windows.Forms.Button()
         Me.BtnCollectMonth = New System.Windows.Forms.Button()
@@ -110,7 +110,7 @@ Partial Class FrmClientsPayments
         Me.GbState.SuspendLayout()
         Me.PnlBuscar.SuspendLayout()
         Me.GbDataClient.SuspendLayout()
-        Me.PnlBotonera.SuspendLayout()
+        Me.PnlButtonPanel.SuspendLayout()
         CType(Me.DgvPaymentList, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -775,24 +775,24 @@ Partial Class FrmClientsPayments
     "cciona un registro de la lista. Podrás cobrar mensualidades y ver el historial d" &
     "e pagos del cliente seleccionado."
         '
-        'PnlBotonera
+        'PnlButtonPanel
         '
-        Me.PnlBotonera.AutoSize = True
-        Me.PnlBotonera.BackColor = System.Drawing.Color.Silver
-        Me.PnlBotonera.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
-        Me.PnlBotonera.Controls.Add(Me.BtnCloseWindow)
-        Me.PnlBotonera.Controls.Add(Me.BtnDeleteClient)
-        Me.PnlBotonera.Controls.Add(Me.BtnCollectMonth)
-        Me.PnlBotonera.Controls.Add(Me.BtnNewPayment)
-        Me.PnlBotonera.Controls.Add(Me.BtnModifyData)
-        Me.PnlBotonera.Controls.Add(Me.BtnNewClient)
-        Me.PnlBotonera.Dock = System.Windows.Forms.DockStyle.Right
-        Me.PnlBotonera.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.PnlBotonera.Location = New System.Drawing.Point(1131, 0)
-        Me.PnlBotonera.Margin = New System.Windows.Forms.Padding(0)
-        Me.PnlBotonera.Name = "PnlBotonera"
-        Me.PnlBotonera.Size = New System.Drawing.Size(182, 805)
-        Me.PnlBotonera.TabIndex = 89
+        Me.PnlButtonPanel.AutoSize = True
+        Me.PnlButtonPanel.BackColor = System.Drawing.Color.Silver
+        Me.PnlButtonPanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
+        Me.PnlButtonPanel.Controls.Add(Me.BtnCloseWindow)
+        Me.PnlButtonPanel.Controls.Add(Me.BtnDeleteClient)
+        Me.PnlButtonPanel.Controls.Add(Me.BtnCollectMonth)
+        Me.PnlButtonPanel.Controls.Add(Me.BtnNewPayment)
+        Me.PnlButtonPanel.Controls.Add(Me.BtnModifyData)
+        Me.PnlButtonPanel.Controls.Add(Me.BtnNewClient)
+        Me.PnlButtonPanel.Dock = System.Windows.Forms.DockStyle.Right
+        Me.PnlButtonPanel.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.PnlButtonPanel.Location = New System.Drawing.Point(1131, 0)
+        Me.PnlButtonPanel.Margin = New System.Windows.Forms.Padding(0)
+        Me.PnlButtonPanel.Name = "PnlButtonPanel"
+        Me.PnlButtonPanel.Size = New System.Drawing.Size(182, 805)
+        Me.PnlButtonPanel.TabIndex = 89
         '
         'BtnCloseWindow
         '
@@ -1110,7 +1110,7 @@ Partial Class FrmClientsPayments
         Me.Controls.Add(Me.PictureBox)
         Me.Controls.Add(Me.GbDataClient)
         Me.Controls.Add(Me.LblLetrero)
-        Me.Controls.Add(Me.PnlBotonera)
+        Me.Controls.Add(Me.PnlButtonPanel)
         Me.Controls.Add(Me.DgvPaymentList)
         Me.Controls.Add(Me.GbPaymentList)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
@@ -1125,7 +1125,7 @@ Partial Class FrmClientsPayments
         Me.PnlBuscar.PerformLayout()
         Me.GbDataClient.ResumeLayout(False)
         Me.GbDataClient.PerformLayout()
-        Me.PnlBotonera.ResumeLayout(False)
+        Me.PnlButtonPanel.ResumeLayout(False)
         CType(Me.DgvPaymentList, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PictureBox, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
@@ -1179,7 +1179,7 @@ Partial Class FrmClientsPayments
     Friend WithEvents BtnNewPayment As Button
     Friend WithEvents BtnModifyData As Button
     Friend WithEvents BtnNewClient As Button
-    Friend WithEvents PnlBotonera As Panel
+    Friend WithEvents PnlButtonPanel As Panel
     Friend WithEvents GbPaymentList As GroupBox
     Friend WithEvents DgvPaymentList As DataGridView
     Friend WithEvents fdi_pgs As DataGridViewTextBoxColumn

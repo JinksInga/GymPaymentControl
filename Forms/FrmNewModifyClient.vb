@@ -937,7 +937,7 @@ Public Class FrmNewModifyClient
             ' Suscribimos el evento GotFocus (Cambio a Beige)
             AddHandler textBox.GotFocus, Sub(s, e) DirectCast(s, TextBox).BackColor = Color.Beige
             ' Suscribimos el evento LostFocus (Validación y Azure)
-            AddHandler textBox.LostFocus, Sub(s, e) ValidateRequiredFieldUI(DirectCast(s, TextBox), Me.ErrorProvider)
+            AddHandler textBox.LostFocus, Sub(s, e) ValidateCustomerNameUI(DirectCast(s, TextBox), Me.ErrorProvider)
         Next
 
         For Each textBox In optionalFields
