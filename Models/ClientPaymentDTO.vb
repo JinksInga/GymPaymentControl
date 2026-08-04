@@ -1,4 +1,6 @@
-﻿Namespace Models
+﻿Imports GymPaymentControl.Enums
+
+Namespace Models
     Public Class ClientPaymentDTO
 
         ' ======================
@@ -13,7 +15,7 @@
         Public Property Address As String
         Public Property PaymentMethod As String
         Public Property RegistrationDate As Date
-        Public Property State As String
+        Public Property State As EntityStatus 'As Byte
 
         ' ======================
         ' GRUPO FAMILIAR

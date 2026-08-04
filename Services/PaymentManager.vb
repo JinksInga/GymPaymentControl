@@ -78,7 +78,7 @@ Namespace Services
                                     .FdiPgs = dataReader.GetDateTime("fdi_pgs")
                                 }
                             ' Formato de fecha largo para presentación
-                            dto.LongFdiPgs = ConvertLongDate(dto.FdiPgs)
+                            dto.LongFdiPgs = FormatDateUppercase(dto.FdiPgs)
 
                             listIndividualPayment.Add(dto)
 
@@ -186,7 +186,7 @@ Namespace Services
                                     .DscPgs = Convert.ToDecimal(dataReader("dsc_pgs")),
                                     .FdiPgs = dataReader.GetDateTime("fdi_pgs")
                                 }
-                            dto.LongDate = ConvertLongDate(dto.FdiPgs)
+                            dto.LongDate = FormatDateUppercase(dto.FdiPgs)
                             listGroupPayment.Add(dto)
 
                         End While
@@ -386,9 +386,9 @@ Namespace Services
                                             {
                                                 .IdPgs = dr.GetInt32("id_pgs"),
                                                 .FdiPgs = dr.GetDateTime("fdi_pgs"),
-                                                .LongFdiPgs = ConvertLongDate(dr.GetDateTime("fdi_pgs")),
+                                                .LongFdiPgs = FormatDateUppercase(dr.GetDateTime("fdi_pgs")),
                                                 .FdpPgs = If(dr.IsDBNull(dr.GetOrdinal("fdp_pgs")), Date.MinValue, dr.GetDateTime("fdp_pgs")),
-                                                .LongFdpPgs = If(dr.GetDateTime("fdp_pgs") = Date.MinValue, "SIN FECHA", ConvertLongDate(dr.GetDateTime("fdp_pgs"))),
+                                                .LongFdpPgs = If(dr.GetDateTime("fdp_pgs") = Date.MinValue, "SIN FECHA", FormatDateUppercase(dr.GetDateTime("fdp_pgs"))),
                                                 .MtdPgs = dr.GetString("mtd_pgs"),
                                                 .FrmPgs = If(dr.IsDBNull(dr.GetOrdinal("frm_pgs")), "IMPAGO", dr.GetString("frm_pgs")),
                                                 .HasDebtCustomer = (strFrmPgs = "IMPAGO"),

@@ -219,6 +219,39 @@ Namespace UIHelpers
 
 
         ''' <summary>
+        ''' Establece el color de fondo de uno o varios controles.
+        ''' </summary>
+        ''' <param name="backColor">
+        ''' Color que se aplicará a todos los controles especificados.
+        ''' </param>
+        ''' <param name="controls">
+        ''' Colección de controles a los que se les actualizará el color de fondo.
+        ''' </param>
+        Public Sub SetBackColor(backColor As Color, ParamArray controls() As Control)
+
+            For Each ctrl As Control In controls
+                ctrl.BackColor = backColor
+            Next
+
+        End Sub
+
+
+        ''' <summary>
+        ''' Actualiza el estado visual de una Label o Control genérico (Color y ErrorProvider).
+        ''' </summary>
+        Public Sub UpdateValidationState(control As Control, isValid As Boolean,
+                                         errorMessage As String, errorProvider As ErrorProvider)
+            If isValid Then
+                control.BackColor = Color.Azure
+                errorProvider.SetError(control, String.Empty)
+            Else
+                control.BackColor = Color.MistyRose
+                errorProvider.SetError(control, errorMessage)
+            End If
+        End Sub
+
+
+        ''' <summary>
         ''' Valida el nombre introducido en el control y actualiza su estado
         ''' visual según el resultado de la validación.
         ''' </summary>

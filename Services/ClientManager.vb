@@ -1,5 +1,6 @@
 ﻿Imports GymPaymentControl.Constants
 Imports GymPaymentControl.Data
+Imports GymPaymentControl.Enums
 Imports GymPaymentControl.FrmCollectMembership
 Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
@@ -152,7 +153,7 @@ Namespace Services
                 command.Parameters.Add("@dir", MySqlDbType.VarChar).Value = data.Address
                 command.Parameters.Add("@mpg", MySqlDbType.VarChar).Value = data.PaymentMethod
                 command.Parameters.Add("@fdi", MySqlDbType.Date).Value = data.RegistrationDate
-                command.Parameters.Add("@std", MySqlDbType.VarChar).Value = data.State
+                command.Parameters.Add("@std", MySqlDbType.Byte).Value = CByte(data.State)
 
                 ' 3. Manejo del Grupo: Si es grupo, pasamos el ID; si no, pasamos DBNull
                 If data.IsGroup AndAlso data.IdGroup.HasValue Then
@@ -218,7 +219,7 @@ Namespace Services
                 command.Parameters.AddWithValue("@dir", client.Address)
                 command.Parameters.AddWithValue("@mpg", client.PaymentMethod)
                 command.Parameters.AddWithValue("@fdi", client.RegistrationDate)
-                command.Parameters.AddWithValue("@std", client.State)
+                command.Parameters.AddWithValue("@std", CByte(client.State))
                 command.Parameters.AddWithValue("@id", client.IdNewClient)
 
                 ' Lógica de grupo consistente con tu InsertClient
@@ -447,7 +448,6 @@ Namespace Services
 
             Dim customerList As New List(Of IndividualPaymentDTO)
 
-            ' La consulta debe traer TODOS los campos que antes tenías en columnas ocultas
             Dim sqlQuery As String = "SELECT * FROM clientes"
 
             Try
@@ -473,7 +473,7 @@ Namespace Services
                                     .Address = dataReader.GetString("dir_cli"),
                                     .PaymentMethod = dataReader.GetString("mpg_cli"),
                                     .RegistrationDate = dataReader.GetDateTime("fdi_cli"),
-                                    .State = dataReader.GetString("std_cli"),
+                                    .State = CType(Convert.ToByte(dataReader("std_cli")), EntityStatus),
                                     .IdGroup = If(dataReader.IsDBNull(dataReader.GetOrdinal("id_grp")), Nothing, dataReader.GetInt32("id_grp"))
                                 }
                             customerList.Add(customerData)

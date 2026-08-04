@@ -1,4 +1,5 @@
 ﻿Imports GymPaymentControl.Constants
+Imports GymPaymentControl.Enums
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
 Imports GymPaymentControl.UIHelpers
@@ -48,6 +49,20 @@ Public Class FrmNewModifyClient
         '| * Activamos las "luces" de los campos y limpieza del ErrorProvider
         SetupTextBoxEvents()
         ErrorProvider.Clear()
+
+    End Sub
+    Private Sub FrmNewModifyClient_Activated(sender As Object, e As EventArgs) Handles Me.Activated
+
+        Dim frmGroup = FrmMdiMain.MdiChildren.OfType(Of FrmFamilyGroup)().FirstOrDefault()
+
+        If frmGroup IsNot Nothing Then
+            If Not String.IsNullOrWhiteSpace(frmGroup.NewGroupName) Then
+
+                TxtListGroupsDailyPayment.Text = frmGroup.NewGroupName
+                frmGroup.NewGroupName = String.Empty
+
+            End If
+        End If
 
     End Sub
     Private Sub FrmNewModifyClient_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
@@ -623,7 +638,7 @@ Public Class FrmNewModifyClient
         _customerData.IdGroup = clientData.IdGroup
 
         ' 2. Estado (Activo/Inactivo)
-        If clientData.State = CustomerStates.Active Then
+        If clientData.State = EntityStatus.Active Then
             RbActiveStatus.Checked = True
         Else
             RbInactiveState.Checked = True
@@ -689,7 +704,7 @@ Public Class FrmNewModifyClient
                 .Email = TxtEmail.Text.Trim(),
                 .Address = TxtAddress.Text.Trim(),
                 .RegistrationDate = DtpRegistrationDate.Value,
-                .State = If(RbActiveStatus.Checked, CustomerStates.Active, CustomerStates.Inactive),
+                .State = If(RbActiveStatus.Checked, EntityStatus.Active, EntityStatus.Inactive),
                 .IdGroup = _selectedGroupId ' Lo asignamos siempre, sea 0 o un ID real
             }
 
@@ -751,7 +766,7 @@ Public Class FrmNewModifyClient
 
         ' --- Estado (RadioButtons / Toggle) ---
         ' Asumiendo que _originalData.IsActive es un Booleano
-        Dim currentStatus As String = If(RbActiveStatus.Checked, CustomerStates.Active, CustomerStates.Inactive)
+        Dim currentStatus As String = If(RbActiveStatus.Checked, EntityStatus.Active, EntityStatus.Inactive)
         If currentStatus <> _originalDataCustomer.State Then Return True
 
         ' --- Método de Pago ---

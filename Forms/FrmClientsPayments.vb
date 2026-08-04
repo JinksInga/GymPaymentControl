@@ -1,5 +1,5 @@
 ﻿Imports GymPaymentControl.Constants
-Imports GymPaymentControl.FrmCollectMembership
+Imports GymPaymentControl.Enums
 Imports GymPaymentControl.Interfaces
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
@@ -162,7 +162,7 @@ Public Class FrmClientsPayments
         '| | MOSTRAR CLIENTES ACTIVOS / INACTIVOS |
         '| ----------------------------------------
 
-        _currentState = If(RbActive.Checked, CustomerStates.Active, CustomerStates.Inactive)
+        _currentState = If(RbActive.Checked, EntityStatus.Active, EntityStatus.Inactive)
 
         If RbActive.Checked Then
 
@@ -297,7 +297,7 @@ Public Class FrmClientsPayments
 
                 _selectedClient.IdNewClient = _selectedClient.IdCli
 
-                _selectedClient.State = CustomerStates.Inactive
+                _selectedClient.State = EntityStatus.Inactive
 
                 Dim exito As Boolean = _clientManager.UpdateClientProcess(_selectedClient, False, False)
 
@@ -311,7 +311,7 @@ Public Class FrmClientsPayments
                                            Sub(label) label.ForeColor = Color.DarkRed)
                 Else
                     ' Si falló la BBDD, revertimos el cambio en memoria.
-                    _selectedClient.State = CustomerStates.Active
+                    _selectedClient.State = EntityStatus.Active
 
                     MessageBox.Show("No se pudo actualizar el estado en la base de datos.", "Error",
                                     MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -604,17 +604,20 @@ Public Class FrmClientsPayments
 
         LblNomCli.Text = client.FirstName
         LblApeCli.Text = client.LastName
-        LblFdnCli.Text = ConvertVeryLongDate(client.BirthDate)
+        LblFdnCli.Text = FormatLongDate(client.BirthDate)
         LblEdadCli.Text = client.AgeText
         LblTlfCli.Text = client.Phone
         LblEmlCli.Text = client.Email
         LblDirCli.Text = client.Address
         LblMtdPgoCli.Text = client.PaymentMethod
-        LblFdiCli.Text = ConvertVeryLongDate(client.RegistrationDate)
-        LblEstCli.Text = client.State
+        LblFdiCli.Text = FormatLongDate(client.RegistrationDate)
+        LblEstCli.Text = GetStatusDescription(client.State)
         LblGrpFamCli.Text = client.IdGroup
 
     End Sub
+
+
+
 
 #End Region
 

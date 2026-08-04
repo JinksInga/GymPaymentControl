@@ -122,6 +122,7 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\EntityStatus.vb" />
     <Compile Include="Constants\CustomerStates.vb" />
     <Compile Include="Constants\PaymentForms.vb" />
     <Compile Include="Constants\PaymentMethods.vb" />
@@ -201,6 +202,7 @@
     <Compile Include="UIHelpers\FormHelpers.vb" />
     <Compile Include="UIHelpers\InputValidators.vb" />
     <Compile Include="UIHelpers\AppTexts.vb" />
+    <Compile Include="UIHelpers\StatusHelper.vb" />
     <Compile Include="UIHelpers\TariffMessages.vb" />
     <Compile Include="UIHelpers\ValidationMessages.vb" />
     <Compile Include="UIHelpers\DialogMessages.vb" />

@@ -23,13 +23,14 @@ Partial Class FrmFamilyGroup
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle5 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle6 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle7 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle17 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle18 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle19 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle20 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle21 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle22 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle23 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle24 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.LblNumberMembers = New System.Windows.Forms.Label()
         Me.NudNumberMembers = New System.Windows.Forms.NumericUpDown()
         Me.TxtFamilyGroupName = New System.Windows.Forms.TextBox()
@@ -40,14 +41,14 @@ Partial Class FrmFamilyGroup
         Me.SearchFullName = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.SearchGroupId = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.PnlButtonPanel = New System.Windows.Forms.Panel()
-        Me.BtnCerrar = New System.Windows.Forms.Button()
-        Me.BtnModifyGroup = New System.Windows.Forms.Button()
-        Me.BtnNewGroup = New System.Windows.Forms.Button()
-        Me.BtnDelete = New System.Windows.Forms.Button()
-        Me.BtnCancel = New System.Windows.Forms.Button()
         Me.BtnDeleteGroup = New System.Windows.Forms.Button()
-        Me.BtnSaveGroup = New System.Windows.Forms.Button()
         Me.BtnUpdateGroup = New System.Windows.Forms.Button()
+        Me.BtnCloseWindow = New System.Windows.Forms.Button()
+        Me.BtnCancel = New System.Windows.Forms.Button()
+        Me.BtnSaveGroup = New System.Windows.Forms.Button()
+        Me.BtnNewGroup = New System.Windows.Forms.Button()
+        Me.BtnModifyGroup = New System.Windows.Forms.Button()
+        Me.BtnDelete = New System.Windows.Forms.Button()
         Me.ChkEmptyGroup = New System.Windows.Forms.CheckBox()
         Me.BtnRemoveMember = New System.Windows.Forms.Button()
         Me.Label1 = New System.Windows.Forms.Label()
@@ -97,7 +98,7 @@ Partial Class FrmFamilyGroup
         Me.NudNumberMembers.Maximum = New Decimal(New Integer() {9, 0, 0, 0})
         Me.NudNumberMembers.Name = "NudNumberMembers"
         Me.NudNumberMembers.Size = New System.Drawing.Size(70, 26)
-        Me.NudNumberMembers.TabIndex = 1
+        Me.NudNumberMembers.TabIndex = 0
         Me.NudNumberMembers.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'TxtFamilyGroupName
@@ -138,7 +139,7 @@ Partial Class FrmFamilyGroup
         Me.TxtSearchMembers.MaxLength = 30
         Me.TxtSearchMembers.Name = "TxtSearchMembers"
         Me.TxtSearchMembers.Size = New System.Drawing.Size(481, 26)
-        Me.TxtSearchMembers.TabIndex = 4
+        Me.TxtSearchMembers.TabIndex = 0
         Me.TxtSearchMembers.WordWrap = False
         '
         'DgvSearchMembers
@@ -147,8 +148,8 @@ Partial Class FrmFamilyGroup
         Me.DgvSearchMembers.AllowUserToDeleteRows = False
         Me.DgvSearchMembers.AllowUserToResizeColumns = False
         Me.DgvSearchMembers.AllowUserToResizeRows = False
-        DataGridViewCellStyle1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DgvSearchMembers.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle1
+        DataGridViewCellStyle17.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DgvSearchMembers.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle17
         Me.DgvSearchMembers.ColumnHeadersHeight = 4
         Me.DgvSearchMembers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
         Me.DgvSearchMembers.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.SearchClientId, Me.SearchFullName, Me.SearchGroupId})
@@ -164,7 +165,7 @@ Partial Class FrmFamilyGroup
         Me.DgvSearchMembers.RowTemplate.Height = 25
         Me.DgvSearchMembers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect
         Me.DgvSearchMembers.Size = New System.Drawing.Size(481, 214)
-        Me.DgvSearchMembers.TabIndex = 5
+        Me.DgvSearchMembers.TabIndex = 3
         Me.ToolTip.SetToolTip(Me.DgvSearchMembers, "DOBLE CLICK PARA SELECCIONAR UN CLIENTE")
         Me.DgvSearchMembers.Visible = False
         '
@@ -200,102 +201,20 @@ Partial Class FrmFamilyGroup
         Me.PnlButtonPanel.AutoSize = True
         Me.PnlButtonPanel.BackColor = System.Drawing.Color.Silver
         Me.PnlButtonPanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
-        Me.PnlButtonPanel.Controls.Add(Me.BtnCerrar)
-        Me.PnlButtonPanel.Controls.Add(Me.BtnModifyGroup)
+        Me.PnlButtonPanel.Controls.Add(Me.BtnCloseWindow)
         Me.PnlButtonPanel.Controls.Add(Me.BtnNewGroup)
+        Me.PnlButtonPanel.Controls.Add(Me.BtnModifyGroup)
         Me.PnlButtonPanel.Controls.Add(Me.BtnDelete)
         Me.PnlButtonPanel.Controls.Add(Me.BtnCancel)
         Me.PnlButtonPanel.Controls.Add(Me.BtnDeleteGroup)
-        Me.PnlButtonPanel.Controls.Add(Me.BtnSaveGroup)
         Me.PnlButtonPanel.Controls.Add(Me.BtnUpdateGroup)
+        Me.PnlButtonPanel.Controls.Add(Me.BtnSaveGroup)
         Me.PnlButtonPanel.Dock = System.Windows.Forms.DockStyle.Right
         Me.PnlButtonPanel.Location = New System.Drawing.Point(621, 0)
         Me.PnlButtonPanel.Margin = New System.Windows.Forms.Padding(0)
         Me.PnlButtonPanel.Name = "PnlButtonPanel"
         Me.PnlButtonPanel.Size = New System.Drawing.Size(156, 543)
         Me.PnlButtonPanel.TabIndex = 0
-        '
-        'BtnCerrar
-        '
-        Me.BtnCerrar.BackColor = System.Drawing.SystemColors.Control
-        Me.BtnCerrar.FlatAppearance.BorderColor = System.Drawing.Color.Red
-        Me.BtnCerrar.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(128, Byte), Integer), CType(CType(128, Byte), Integer))
-        Me.BtnCerrar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(192, Byte), Integer))
-        Me.BtnCerrar.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.BtnCerrar.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnCerrar.ForeColor = System.Drawing.Color.Brown
-        Me.BtnCerrar.Image = Global.GymPaymentControl.My.Resources.Resources.ic_close_22x22
-        Me.BtnCerrar.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnCerrar.Location = New System.Drawing.Point(8, 414)
-        Me.BtnCerrar.Margin = New System.Windows.Forms.Padding(8, 0, 8, 48)
-        Me.BtnCerrar.Name = "BtnCerrar"
-        Me.BtnCerrar.Padding = New System.Windows.Forms.Padding(0, 4, 0, 4)
-        Me.BtnCerrar.Size = New System.Drawing.Size(136, 64)
-        Me.BtnCerrar.TabIndex = 7
-        Me.BtnCerrar.Text = "Cerrar &ventana"
-        Me.BtnCerrar.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnCerrar.UseVisualStyleBackColor = False
-        '
-        'BtnModifyGroup
-        '
-        Me.BtnModifyGroup.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnModifyGroup.Image = Global.GymPaymentControl.My.Resources.Resources.ic_modify_28x32
-        Me.BtnModifyGroup.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnModifyGroup.Location = New System.Drawing.Point(8, 128)
-        Me.BtnModifyGroup.Margin = New System.Windows.Forms.Padding(8, 16, 8, 0)
-        Me.BtnModifyGroup.Name = "BtnModifyGroup"
-        Me.BtnModifyGroup.Padding = New System.Windows.Forms.Padding(0, 4, 0, 4)
-        Me.BtnModifyGroup.Size = New System.Drawing.Size(136, 64)
-        Me.BtnModifyGroup.TabIndex = 1
-        Me.BtnModifyGroup.Text = "&Modificar grupo"
-        Me.BtnModifyGroup.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnModifyGroup.UseVisualStyleBackColor = True
-        '
-        'BtnNewGroup
-        '
-        Me.BtnNewGroup.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnNewGroup.Image = Global.GymPaymentControl.My.Resources.Resources.ic_new_24x32
-        Me.BtnNewGroup.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnNewGroup.Location = New System.Drawing.Point(8, 48)
-        Me.BtnNewGroup.Margin = New System.Windows.Forms.Padding(8, 48, 8, 0)
-        Me.BtnNewGroup.Name = "BtnNewGroup"
-        Me.BtnNewGroup.Padding = New System.Windows.Forms.Padding(0, 4, 0, 4)
-        Me.BtnNewGroup.Size = New System.Drawing.Size(136, 64)
-        Me.BtnNewGroup.TabIndex = 0
-        Me.BtnNewGroup.Text = "&Nuevo grupo"
-        Me.BtnNewGroup.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnNewGroup.UseVisualStyleBackColor = True
-        '
-        'BtnDelete
-        '
-        Me.BtnDelete.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnDelete.Image = Global.GymPaymentControl.My.Resources.Resources.ic_delete_28x32
-        Me.BtnDelete.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnDelete.Location = New System.Drawing.Point(8, 208)
-        Me.BtnDelete.Margin = New System.Windows.Forms.Padding(8, 16, 8, 0)
-        Me.BtnDelete.Name = "BtnDelete"
-        Me.BtnDelete.Padding = New System.Windows.Forms.Padding(0, 4, 0, 4)
-        Me.BtnDelete.Size = New System.Drawing.Size(136, 64)
-        Me.BtnDelete.TabIndex = 2
-        Me.BtnDelete.Text = "&Eliminar grupo"
-        Me.BtnDelete.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnDelete.UseVisualStyleBackColor = True
-        '
-        'BtnCancel
-        '
-        Me.BtnCancel.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnCancel.Image = Global.GymPaymentControl.My.Resources.Resources.ic_cancel_28x28
-        Me.BtnCancel.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnCancel.Location = New System.Drawing.Point(8, 128)
-        Me.BtnCancel.Margin = New System.Windows.Forms.Padding(8, 16, 8, 0)
-        Me.BtnCancel.Name = "BtnCancel"
-        Me.BtnCancel.Padding = New System.Windows.Forms.Padding(0, 4, 0, 4)
-        Me.BtnCancel.Size = New System.Drawing.Size(136, 64)
-        Me.BtnCancel.TabIndex = 6
-        Me.BtnCancel.Text = "&Cancelar"
-        Me.BtnCancel.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnCancel.UseVisualStyleBackColor = True
-        Me.BtnCancel.Visible = False
         '
         'BtnDeleteGroup
         '
@@ -312,23 +231,6 @@ Partial Class FrmFamilyGroup
         Me.BtnDeleteGroup.TextAlign = System.Drawing.ContentAlignment.BottomCenter
         Me.BtnDeleteGroup.UseVisualStyleBackColor = True
         Me.BtnDeleteGroup.Visible = False
-        '
-        'BtnSaveGroup
-        '
-        Me.BtnSaveGroup.Enabled = False
-        Me.BtnSaveGroup.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnSaveGroup.Image = Global.GymPaymentControl.My.Resources.Resources.ic_save_28x28
-        Me.BtnSaveGroup.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnSaveGroup.Location = New System.Drawing.Point(8, 48)
-        Me.BtnSaveGroup.Margin = New System.Windows.Forms.Padding(8, 48, 8, 0)
-        Me.BtnSaveGroup.Name = "BtnSaveGroup"
-        Me.BtnSaveGroup.Padding = New System.Windows.Forms.Padding(0, 4, 0, 4)
-        Me.BtnSaveGroup.Size = New System.Drawing.Size(136, 64)
-        Me.BtnSaveGroup.TabIndex = 3
-        Me.BtnSaveGroup.Text = "&Guardar grupo"
-        Me.BtnSaveGroup.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnSaveGroup.UseVisualStyleBackColor = True
-        Me.BtnSaveGroup.Visible = False
         '
         'BtnUpdateGroup
         '
@@ -347,6 +249,105 @@ Partial Class FrmFamilyGroup
         Me.BtnUpdateGroup.UseVisualStyleBackColor = True
         Me.BtnUpdateGroup.Visible = False
         '
+        'BtnCloseWindow
+        '
+        Me.BtnCloseWindow.BackColor = System.Drawing.SystemColors.Control
+        Me.BtnCloseWindow.FlatAppearance.BorderColor = System.Drawing.Color.Red
+        Me.BtnCloseWindow.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(128, Byte), Integer), CType(CType(128, Byte), Integer))
+        Me.BtnCloseWindow.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(192, Byte), Integer))
+        Me.BtnCloseWindow.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.BtnCloseWindow.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnCloseWindow.ForeColor = System.Drawing.Color.Brown
+        Me.BtnCloseWindow.Image = Global.GymPaymentControl.My.Resources.Resources.ic_close_22x22
+        Me.BtnCloseWindow.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnCloseWindow.Location = New System.Drawing.Point(8, 414)
+        Me.BtnCloseWindow.Margin = New System.Windows.Forms.Padding(8, 0, 8, 48)
+        Me.BtnCloseWindow.Name = "BtnCloseWindow"
+        Me.BtnCloseWindow.Padding = New System.Windows.Forms.Padding(0, 4, 0, 4)
+        Me.BtnCloseWindow.Size = New System.Drawing.Size(136, 64)
+        Me.BtnCloseWindow.TabIndex = 7
+        Me.BtnCloseWindow.Text = "Cerrar &ventana"
+        Me.BtnCloseWindow.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnCloseWindow.UseVisualStyleBackColor = False
+        '
+        'BtnCancel
+        '
+        Me.BtnCancel.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnCancel.Image = Global.GymPaymentControl.My.Resources.Resources.ic_cancel_28x28
+        Me.BtnCancel.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnCancel.Location = New System.Drawing.Point(8, 127)
+        Me.BtnCancel.Margin = New System.Windows.Forms.Padding(8, 16, 8, 0)
+        Me.BtnCancel.Name = "BtnCancel"
+        Me.BtnCancel.Padding = New System.Windows.Forms.Padding(0, 4, 0, 4)
+        Me.BtnCancel.Size = New System.Drawing.Size(136, 64)
+        Me.BtnCancel.TabIndex = 6
+        Me.BtnCancel.Text = "&Cancelar"
+        Me.BtnCancel.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnCancel.UseVisualStyleBackColor = True
+        Me.BtnCancel.Visible = False
+        '
+        'BtnSaveGroup
+        '
+        Me.BtnSaveGroup.Enabled = False
+        Me.BtnSaveGroup.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnSaveGroup.Image = Global.GymPaymentControl.My.Resources.Resources.ic_save_28x28
+        Me.BtnSaveGroup.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnSaveGroup.Location = New System.Drawing.Point(8, 47)
+        Me.BtnSaveGroup.Margin = New System.Windows.Forms.Padding(8, 48, 8, 0)
+        Me.BtnSaveGroup.Name = "BtnSaveGroup"
+        Me.BtnSaveGroup.Padding = New System.Windows.Forms.Padding(0, 4, 0, 4)
+        Me.BtnSaveGroup.Size = New System.Drawing.Size(136, 64)
+        Me.BtnSaveGroup.TabIndex = 3
+        Me.BtnSaveGroup.Text = "&Guardar grupo"
+        Me.BtnSaveGroup.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnSaveGroup.UseVisualStyleBackColor = True
+        Me.BtnSaveGroup.Visible = False
+        '
+        'BtnNewGroup
+        '
+        Me.BtnNewGroup.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnNewGroup.Image = Global.GymPaymentControl.My.Resources.Resources.ic_new_24x32
+        Me.BtnNewGroup.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnNewGroup.Location = New System.Drawing.Point(8, 48)
+        Me.BtnNewGroup.Margin = New System.Windows.Forms.Padding(8, 48, 8, 0)
+        Me.BtnNewGroup.Name = "BtnNewGroup"
+        Me.BtnNewGroup.Padding = New System.Windows.Forms.Padding(0, 4, 0, 4)
+        Me.BtnNewGroup.Size = New System.Drawing.Size(136, 64)
+        Me.BtnNewGroup.TabIndex = 0
+        Me.BtnNewGroup.Text = "&Nuevo grupo"
+        Me.BtnNewGroup.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnNewGroup.UseVisualStyleBackColor = True
+        '
+        'BtnModifyGroup
+        '
+        Me.BtnModifyGroup.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnModifyGroup.Image = Global.GymPaymentControl.My.Resources.Resources.ic_modify_28x32
+        Me.BtnModifyGroup.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnModifyGroup.Location = New System.Drawing.Point(8, 128)
+        Me.BtnModifyGroup.Margin = New System.Windows.Forms.Padding(8, 16, 8, 0)
+        Me.BtnModifyGroup.Name = "BtnModifyGroup"
+        Me.BtnModifyGroup.Padding = New System.Windows.Forms.Padding(0, 4, 0, 4)
+        Me.BtnModifyGroup.Size = New System.Drawing.Size(136, 64)
+        Me.BtnModifyGroup.TabIndex = 1
+        Me.BtnModifyGroup.Text = "&Modificar grupo"
+        Me.BtnModifyGroup.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnModifyGroup.UseVisualStyleBackColor = True
+        '
+        'BtnDelete
+        '
+        Me.BtnDelete.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BtnDelete.Image = Global.GymPaymentControl.My.Resources.Resources.ic_delete_28x32
+        Me.BtnDelete.ImageAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.BtnDelete.Location = New System.Drawing.Point(8, 208)
+        Me.BtnDelete.Margin = New System.Windows.Forms.Padding(8, 16, 8, 0)
+        Me.BtnDelete.Name = "BtnDelete"
+        Me.BtnDelete.Padding = New System.Windows.Forms.Padding(0, 4, 0, 4)
+        Me.BtnDelete.Size = New System.Drawing.Size(136, 64)
+        Me.BtnDelete.TabIndex = 2
+        Me.BtnDelete.Text = "&Eliminar grupo"
+        Me.BtnDelete.TextAlign = System.Drawing.ContentAlignment.BottomCenter
+        Me.BtnDelete.UseVisualStyleBackColor = True
+        '
         'ChkEmptyGroup
         '
         Me.ChkEmptyGroup.AutoSize = True
@@ -355,7 +356,7 @@ Partial Class FrmFamilyGroup
         Me.ChkEmptyGroup.Margin = New System.Windows.Forms.Padding(24, 16, 16, 0)
         Me.ChkEmptyGroup.Name = "ChkEmptyGroup"
         Me.ChkEmptyGroup.Size = New System.Drawing.Size(352, 25)
-        Me.ChkEmptyGroup.TabIndex = 3
+        Me.ChkEmptyGroup.TabIndex = 1
         Me.ChkEmptyGroup.Text = "Guardar el nuevo grupo SIN INTEGRANTES."
         Me.ChkEmptyGroup.UseVisualStyleBackColor = True
         '
@@ -368,7 +369,7 @@ Partial Class FrmFamilyGroup
         Me.BtnRemoveMember.Margin = New System.Windows.Forms.Padding(8, 144, 0, 0)
         Me.BtnRemoveMember.Name = "BtnRemoveMember"
         Me.BtnRemoveMember.Size = New System.Drawing.Size(35, 35)
-        Me.BtnRemoveMember.TabIndex = 7
+        Me.BtnRemoveMember.TabIndex = 2
         Me.ToolTip.SetToolTip(Me.BtnRemoveMember, "QUITAR FAMILIAR DE LA LISTA")
         Me.BtnRemoveMember.UseVisualStyleBackColor = True
         '
@@ -390,48 +391,48 @@ Partial Class FrmFamilyGroup
         Me.DgvListOfMembers.AllowUserToDeleteRows = False
         Me.DgvListOfMembers.AllowUserToResizeColumns = False
         Me.DgvListOfMembers.AllowUserToResizeRows = False
-        DataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window
-        DataGridViewCellStyle2.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DgvListOfMembers.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle2
-        DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control
-        DataGridViewCellStyle3.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!)
-        DataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText
-        DataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        Me.DgvListOfMembers.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle3
+        DataGridViewCellStyle18.BackColor = System.Drawing.SystemColors.Window
+        DataGridViewCellStyle18.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DgvListOfMembers.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle18
+        DataGridViewCellStyle19.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle19.BackColor = System.Drawing.SystemColors.Control
+        DataGridViewCellStyle19.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!)
+        DataGridViewCellStyle19.ForeColor = System.Drawing.SystemColors.WindowText
+        DataGridViewCellStyle19.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle19.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        Me.DgvListOfMembers.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle19
         Me.DgvListOfMembers.ColumnHeadersHeight = 30
         Me.DgvListOfMembers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
         Me.DgvListOfMembers.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.ListClientID, Me.ListFullName, Me.ListGroupId})
-        DataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        DataGridViewCellStyle4.BackColor = System.Drawing.Color.PaleTurquoise
-        DataGridViewCellStyle4.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!)
-        DataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText
-        DataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        DataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.DgvListOfMembers.DefaultCellStyle = DataGridViewCellStyle4
+        DataGridViewCellStyle20.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle20.BackColor = System.Drawing.Color.PaleTurquoise
+        DataGridViewCellStyle20.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!)
+        DataGridViewCellStyle20.ForeColor = System.Drawing.SystemColors.ControlText
+        DataGridViewCellStyle20.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle20.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        DataGridViewCellStyle20.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.DgvListOfMembers.DefaultCellStyle = DataGridViewCellStyle20
         Me.DgvListOfMembers.Location = New System.Drawing.Point(24, 123)
         Me.DgvListOfMembers.Margin = New System.Windows.Forms.Padding(0, 8, 0, 24)
         Me.DgvListOfMembers.MultiSelect = False
         Me.DgvListOfMembers.Name = "DgvListOfMembers"
         Me.DgvListOfMembers.ReadOnly = True
-        DataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control
-        DataGridViewCellStyle5.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!)
-        DataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText
-        DataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        Me.DgvListOfMembers.RowHeadersDefaultCellStyle = DataGridViewCellStyle5
+        DataGridViewCellStyle21.BackColor = System.Drawing.SystemColors.Control
+        DataGridViewCellStyle21.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!)
+        DataGridViewCellStyle21.ForeColor = System.Drawing.SystemColors.WindowText
+        DataGridViewCellStyle21.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle21.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        Me.DgvListOfMembers.RowHeadersDefaultCellStyle = DataGridViewCellStyle21
         Me.DgvListOfMembers.RowHeadersWidth = 4
         Me.DgvListOfMembers.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
-        DataGridViewCellStyle6.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DgvListOfMembers.RowsDefaultCellStyle = DataGridViewCellStyle6
+        DataGridViewCellStyle22.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DgvListOfMembers.RowsDefaultCellStyle = DataGridViewCellStyle22
         Me.DgvListOfMembers.RowTemplate.DefaultCellStyle.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.DgvListOfMembers.RowTemplate.DividerHeight = 2
         Me.DgvListOfMembers.RowTemplate.Height = 30
         Me.DgvListOfMembers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect
         Me.DgvListOfMembers.Size = New System.Drawing.Size(481, 176)
-        Me.DgvListOfMembers.TabIndex = 6
+        Me.DgvListOfMembers.TabIndex = 1
         Me.ToolTip.SetToolTip(Me.DgvListOfMembers, "CLICK PARA SELECCIONAR UN FAMILIAR")
         '
         'ListClientID
@@ -465,11 +466,20 @@ Partial Class FrmFamilyGroup
         '
         Me.DgvListFamilyGroups.AllowUserToAddRows = False
         Me.DgvListFamilyGroups.AllowUserToDeleteRows = False
-        DataGridViewCellStyle7.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DgvListFamilyGroups.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle7
+        DataGridViewCellStyle23.BackColor = System.Drawing.SystemColors.Window
+        DataGridViewCellStyle23.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DgvListFamilyGroups.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle23
         Me.DgvListFamilyGroups.ColumnHeadersHeight = 4
         Me.DgvListFamilyGroups.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
         Me.DgvListFamilyGroups.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.ColGroupId, Me.ColGroupName, Me.ColNumberMembers})
+        DataGridViewCellStyle24.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle24.BackColor = System.Drawing.SystemColors.GradientInactiveCaption
+        DataGridViewCellStyle24.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle24.ForeColor = System.Drawing.SystemColors.ControlText
+        DataGridViewCellStyle24.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle24.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        DataGridViewCellStyle24.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.DgvListFamilyGroups.DefaultCellStyle = DataGridViewCellStyle24
         Me.DgvListFamilyGroups.Location = New System.Drawing.Point(57, 82)
         Me.DgvListFamilyGroups.Margin = New System.Windows.Forms.Padding(0, 2, 0, 0)
         Me.DgvListFamilyGroups.MultiSelect = False
@@ -482,7 +492,7 @@ Partial Class FrmFamilyGroup
         Me.DgvListFamilyGroups.RowTemplate.Height = 25
         Me.DgvListFamilyGroups.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect
         Me.DgvListFamilyGroups.Size = New System.Drawing.Size(524, 220)
-        Me.DgvListFamilyGroups.TabIndex = 2
+        Me.DgvListFamilyGroups.TabIndex = 3
         Me.ToolTip.SetToolTip(Me.DgvListFamilyGroups, "DOBLE CLICK PARA SELECCIONAR UN GRUPO")
         Me.DgvListFamilyGroups.Visible = False
         '
@@ -540,7 +550,7 @@ Partial Class FrmFamilyGroup
         Me.GbNumberMembers.Name = "GbNumberMembers"
         Me.GbNumberMembers.Padding = New System.Windows.Forms.Padding(0)
         Me.GbNumberMembers.Size = New System.Drawing.Size(564, 75)
-        Me.GbNumberMembers.TabIndex = 8
+        Me.GbNumberMembers.TabIndex = 1
         Me.GbNumberMembers.TabStop = False
         Me.GbNumberMembers.Text = "Número de integrantes"
         '
@@ -559,7 +569,7 @@ Partial Class FrmFamilyGroup
         Me.GbMembersOfGroup.Name = "GbMembersOfGroup"
         Me.GbMembersOfGroup.Padding = New System.Windows.Forms.Padding(0)
         Me.GbMembersOfGroup.Size = New System.Drawing.Size(564, 323)
-        Me.GbMembersOfGroup.TabIndex = 9
+        Me.GbMembersOfGroup.TabIndex = 2
         Me.GbMembersOfGroup.TabStop = False
         Me.GbMembersOfGroup.Text = "Integrantes del grupo familiar"
         '
@@ -599,7 +609,7 @@ Partial Class FrmFamilyGroup
     Friend WithEvents TxtFamilyGroupName As TextBox
     Friend WithEvents LblBuscarIntgrntes As Label
     Friend WithEvents TxtSearchMembers As TextBox
-    Friend WithEvents BtnCerrar As Button
+    Friend WithEvents BtnCloseWindow As Button
     Friend WithEvents DgvSearchMembers As DataGridView
     Friend WithEvents PnlButtonPanel As Panel
     Friend WithEvents ChkEmptyGroup As CheckBox

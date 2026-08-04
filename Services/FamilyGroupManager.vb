@@ -1,4 +1,5 @@
 ﻿Imports GymPaymentControl.Data
+Imports GymPaymentControl.Enums
 Imports MySql.Data.MySqlClient
 
 Namespace Services
@@ -75,6 +76,7 @@ Namespace Services
 
             Using connection As MySqlConnection = GetConnection()
                 connection.Open()
+
                 Using transaction As MySqlTransaction = connection.BeginTransaction()
 
                     Try
@@ -122,10 +124,12 @@ Namespace Services
 
                         transaction.Commit()
                         Return True
+
                     Catch ex As Exception
                         transaction.Rollback()
-                        Throw ex
+                        Throw 'ex
                     End Try
+
                 End Using
             End Using
         End Function
@@ -134,11 +138,14 @@ Namespace Services
         ''' <summary>
         ''' Actualiza los datos de un grupo familiar existente y reestructura sus integrantes de manera transaccional.
         ''' </summary>
-        Public Function UpdateFamilyGroup(groupId As Integer, groupName As String, totalMembers As Integer, memberIds As List(Of Integer)) As Boolean
+        Public Function UpdateFamilyGroup(groupId As Integer, groupName As String, totalMembers As Integer,
+                                          memberIds As List(Of Integer)) As Boolean
 
             Using connection As MySqlConnection = GetConnection()
                 connection.Open()
+
                 Using transaction As MySqlTransaction = connection.BeginTransaction()
+
                     Try
                         ' REUTILIZACIÓN DIRECTA: Misma validación usando tu PaymentGenerator
                         Dim paymentGen As New Services.PaymentGenerator()
@@ -191,10 +198,93 @@ Namespace Services
                         Return True
                     Catch ex As Exception
                         transaction.Rollback()
-                        Throw ex
+                        Throw 'ex
                     End Try
+
                 End Using
             End Using
+        End Function
+
+
+        ''' <summary>
+        ''' Elimina un grupo familiar de la base de datos y libera a sus integrantes a modalidad MENSUAL.
+        ''' </summary>
+        Public Function DeleteFamilyGroup(groupId As Integer) As Boolean
+
+            Using connection As MySqlConnection = GetConnection()
+                connection.Open()
+
+                Using transaction As MySqlTransaction = connection.BeginTransaction()
+
+                    Try
+                        ' 1. Liberamos masivamente a todos los clientes del grupo cambiando modalidad a MENSUAL
+                        Dim sqlReleaseClients As String = "UPDATE clientes SET mpg_cli = 'MENSUAL', id_grp = NULL WHERE id_grp = @GroupId;"
+                        Using cmdRelease As New MySqlCommand(sqlReleaseClients, connection, transaction)
+                            cmdRelease.Parameters.AddWithValue("@GroupId", groupId)
+                            cmdRelease.ExecuteNonQuery()
+                        End Using
+
+                        ' 2. Eliminamos la cabecera del grupo en grp_familiar
+                        Dim sqlDeleteGroup As String = "DELETE FROM grp_familiar WHERE id_grp = @GroupId;"
+                        Using cmdDelete As New MySqlCommand(sqlDeleteGroup, connection, transaction)
+                            cmdDelete.Parameters.AddWithValue("@GroupId", groupId)
+                            cmdDelete.ExecuteNonQuery()
+                        End Using
+
+                        ' Si ambas consultas salieron bien, confirmamos cambios
+                        transaction.Commit()
+                        Return True
+
+                    Catch ex As Exception
+                        transaction.Rollback()
+                        Throw
+                    End Try
+
+                End Using
+            End Using
+        End Function
+
+
+        ''' <summary>
+        ''' Cambia el estado del grupo (ACTIVO/INACTIVO) y sincroniza exactamente el mismo estado en todos sus integrantes.
+        ''' </summary>
+        Public Function SetGroupStatus(groupId As Integer, newStatus As EntityStatus) As Boolean
+
+            Using connection As MySqlConnection = GetConnection()
+                connection.Open()
+                Using transaction As MySqlTransaction = connection.BeginTransaction()
+
+                    Try
+                        ' 1. Desactivar/Activar Grupo
+                        Dim sqlGroup As String = "UPDATE grp_familiar SET std_grp = @Status WHERE id_grp = @GroupId;"
+
+                        Using cmd As New MySqlCommand(sqlGroup, connection, transaction)
+                            cmd.Parameters.AddWithValue("@Status", newStatus)
+                            cmd.Parameters.AddWithValue("@GroupId", groupId)
+                            cmd.ExecuteNonQuery()
+                        End Using
+
+                        ' 2. Sincronizar Clientes del Grupo
+                        Dim sqlClients As String = "UPDATE clientes SET std_cli = @Status WHERE id_grp = @GroupId;"
+
+                        Using cmd As New MySqlCommand(sqlClients, connection, transaction)
+                            cmd.Parameters.AddWithValue("@Status", newStatus) ' Pasa 1 o 0
+                            cmd.Parameters.AddWithValue("@GroupId", groupId)
+                            cmd.ExecuteNonQuery()
+                        End Using
+
+                        transaction.Commit()
+
+                        Return True
+
+                    Catch ex As Exception
+                        transaction.Rollback()
+                        Throw
+                    End Try
+
+                End Using
+            End Using
+
         End Function
 
 
