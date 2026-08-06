@@ -1,4 +1,5 @@
-﻿Imports GymPaymentControl.Data
+﻿Imports GymPaymentControl.Constants
+Imports GymPaymentControl.Data
 Imports GymPaymentControl.Enums
 Imports MySql.Data.MySqlClient
 
@@ -15,13 +16,15 @@ Namespace Services
         ''' </summary>
         Public Function GetGroupsByNameMatch(groupName As String) As DataTable
 
-            Dim sqlQuery As String = "SELECT id_grp, nom_grp, num_intgrntes_grp FROM grp_familiar
-                                        WHERE nom_grp LIKE @GroupName ORDER BY nom_grp"
+            Dim sqlQuery As String = "SELECT * " &
+                                     "FROM grp_familiar " &
+                                     "WHERE nom_grp LIKE @nom_grp " &
+                                     "ORDER BY nom_grp"
 
             ' Preparamos el parámetro de forma segura para evitar inyección SQL y el fallo de la comilla (')
             Dim parameters As New List(Of MySqlParameter) From
                 {
-                    New MySqlParameter("@GroupName", $"%{groupName}%")
+                    New MySqlParameter("@nom_grp", $"%{groupName}%")
                 }
 
             ' Delegamos la ejecución completa a la infraestructura del búnker
@@ -34,30 +37,28 @@ Namespace Services
         ''' Obtiene los miembros (clientes) asociados a un grupo familiar específico mediante su ID.
         ''' </summary>
         Public Function GetMembersByGroupId(groupId As Integer) As DataTable
-            ' 1. La consulta SQL parametrizada
-            Dim sqlQuery As String = "SELECT id_cli, nom_cli, ape_cli, id_grp FROM clientes WHERE id_grp = @GroupId"
 
-            ' 2. Creamos la lista de parámetros usando la clase nativa MySqlParameter que requiere tu BaseRepository
+            Dim sqlQuery As String = "SELECT id_cli, nom_cli, ape_cli, id_grp " &
+                                     "FROM clientes " &
+                                     "WHERE id_grp = @id_grp"
+
             Dim parameterList As New List(Of MySqlParameter) From
                 {
-                    New MySqlParameter("@GroupId", MySqlDbType.Int32) With {.Value = groupId}
+                    New MySqlParameter("@id_grp", MySqlDbType.Int32) With {.Value = groupId}
                 }
 
-            ' 3. Ejecutamos la consulta heredada de BaseRepository de forma directa y segura
             Return ExecuteDataTable(sqlQuery, parameterList)
+
         End Function
 
 
         Public Function SearchAvailableMembersByName(searchText As String) As DataTable
 
-            ' Concatenamos Nombre y Apellido con un espacio desde MySQL y filtramos solo los que no tienen grupo asignado
-            Dim sqlQuery As String = "SELECT id_cli, CONCAT(nom_cli, ' ', ape_cli) AS full_name, id_grp
-                                      FROM clientes
-                                      WHERE CONCAT(nom_cli, ' ', ape_cli) LIKE @SearchText
-                                      AND id_grp IS NULL
-                                      ORDER BY nom_cli"
+            Dim sqlQuery As String = "SELECT id_cli, CONCAT(nom_cli, ' ', ape_cli) AS full_name " &
+                                     "FROM clientes " &
+                                     "WHERE CONCAT(nom_cli, ' ', ape_cli) LIKE @SearchText AND id_grp IS NULL " &
+                                     "ORDER BY nom_cli"
 
-            ' Buscamos que empiece por el texto ingresado (tal como tenías tu lógica con %)
             Dim parameters As New List(Of MySqlParameter) From
                 {
                     New MySqlParameter("@SearchText", $"{searchText}%")
@@ -71,55 +72,68 @@ Namespace Services
         ''' <summary>
         ''' Registra un nuevo grupo familiar en el sistema y vincula a sus integrantes en una transacción única.
         ''' </summary>
-        Public Function InsertFamilyGroup(groupName As String, totalMembers As Integer,
-                                          memberIds As List(Of Integer)) As Boolean
+        Public Function InsertFamilyGroup(groupName As String, numberMembers As Integer,
+                                          registeredMembers As List(Of Integer),
+                                          groupStatus As EntityStatus) As Boolean
 
             Using connection As MySqlConnection = GetConnection()
+
                 connection.Open()
 
                 Using transaction As MySqlTransaction = connection.BeginTransaction()
 
                     Try
-                        ' REUTILIZACIÓN DIRECTA: Usamos tu PaymentGenerator existente
+                        ' Reutiliazación del PaymentGenerator.
                         Dim paymentGen As New Services.PaymentGenerator()
-                        Dim tariffRow As DataRow = paymentGen.GetGroupRate(connection, transaction, totalMembers)
+                        Dim tariffRow As DataRow = paymentGen.GetGroupRate(connection, transaction, numberMembers)
 
-                        ' Si no devuelve fila, es que no existe esa cantidad de integrantes en trfa_dscto
                         If tariffRow Is Nothing Then
-                            Throw New InvalidOperationException($"No existe ninguna tarifa registrada para {totalMembers} integrantes.")
+                            Throw New InvalidOperationException($"No existe ninguna tarifa registrada para {numberMembers} integrantes.")
                         End If
 
-                        ' =========================================================================
-                        ' INSERCIÓN DEL GRUPO
-                        ' =========================================================================
-                        Dim sqlGroup As String = "INSERT INTO grp_familiar (nom_grp, num_intgrntes_grp, intgrntes_reg_grp) " &
-                                                 "VALUES (@GroupName, @TotalMembers, @RegisteredMembers);"
+                        ' ============================
+                        ' INSERCIÓN DEL GRUPO FAMILIAR
+                        ' ============================
+                        Dim sqlInsertGroup As String = "INSERT INTO grp_familiar " &
+                                                       "(nom_grp, num_intgrntes_grp, intgrntes_reg_grp, std_grp) " &
+                                                       "VALUES " &
+                                                       "(@nom_grp, @num_intgrntes_grp, @intgrntes_reg_grp, @std_grp);"
+
                         Dim generatedGroupId As Integer
 
-                        Using cmd As New MySqlCommand(sqlGroup, connection, transaction)
-                            cmd.Parameters.AddWithValue("@GroupName", groupName)
-                            cmd.Parameters.AddWithValue("@TotalMembers", totalMembers)
-                            cmd.Parameters.AddWithValue("@RegisteredMembers", memberIds.Count)
-                            cmd.ExecuteNonQuery()
+                        Using command As New MySqlCommand(sqlInsertGroup, connection, transaction)
+                            command.Parameters.Add("@nom_grp", MySqlDbType.VarChar).Value = groupName
+                            command.Parameters.Add("@num_intgrntes_grp", MySqlDbType.Int32).Value = numberMembers
+                            command.Parameters.Add("@intgrntes_reg_grp", MySqlDbType.Int32).Value = registeredMembers.Count
+                            command.Parameters.Add("@std_grp", MySqlDbType.Byte).Value = CByte(groupStatus)
+                            command.ExecuteNonQuery()
 
-                            cmd.CommandText = "SELECT LAST_INSERT_ID();"
-                            generatedGroupId = Convert.ToInt32(cmd.ExecuteScalar())
+                            command.CommandText = "SELECT LAST_INSERT_ID();"
+                            generatedGroupId = Convert.ToInt32(command.ExecuteScalar())
                         End Using
 
-                        ' =========================================================================
+                        ' ==========================
                         ' VINCULACIÓN DE INTEGRANTES
-                        ' =========================================================================
-                        If memberIds.Count > 0 Then
-                            Dim sqlUpdateClients As String = "UPDATE clientes SET mpg_cli = 'GRUPAL', id_grp = @GroupId WHERE id_cli = @ClientId;"
-                            Using cmd As New MySqlCommand(sqlUpdateClients, connection, transaction)
-                                cmd.Parameters.AddWithValue("@GroupId", generatedGroupId)
-                                Dim clientParam As MySqlParameter = cmd.Parameters.Add(New MySqlParameter("@ClientId", MySqlDbType.Int32))
+                        ' ==========================
+                        If registeredMembers.Count > 0 Then
 
-                                For Each id As Integer In memberIds
+                            Dim sqlUpdateClients As String = "UPDATE clientes " &
+                                                             "SET mpg_cli = @mpg_cli, id_grp = @id_grp " &
+                                                             "WHERE id_cli = @id_cli;"
+
+                            Using command As New MySqlCommand(sqlUpdateClients, connection, transaction)
+
+                                command.Parameters.Add("@mpg_cli", MySqlDbType.VarChar).Value = PaymentMethods.Grupal
+                                command.Parameters.Add("@id_grp", MySqlDbType.Int32).Value = generatedGroupId
+                                Dim clientParam As MySqlParameter = command.Parameters.Add(New MySqlParameter("@id_cli", MySqlDbType.Int32))
+
+                                For Each id As Integer In registeredMembers
                                     clientParam.Value = id
-                                    cmd.ExecuteNonQuery()
+                                    command.ExecuteNonQuery()
                                 Next
+
                             End Using
+
                         End If
 
                         transaction.Commit()
@@ -127,82 +141,104 @@ Namespace Services
 
                     Catch ex As Exception
                         transaction.Rollback()
-                        Throw 'ex
+                        Throw
                     End Try
 
                 End Using
             End Using
+
         End Function
 
 
         ''' <summary>
         ''' Actualiza los datos de un grupo familiar existente y reestructura sus integrantes de manera transaccional.
         ''' </summary>
-        Public Function UpdateFamilyGroup(groupId As Integer, groupName As String, totalMembers As Integer,
-                                          memberIds As List(Of Integer)) As Boolean
+        Public Function UpdateFamilyGroup(groupId As Integer,
+                                          groupName As String, numberMembers As Integer,
+                                          registeredMembers As List(Of Integer),
+                                          groupStatus As EntityStatus) As Boolean
 
             Using connection As MySqlConnection = GetConnection()
+
                 connection.Open()
 
                 Using transaction As MySqlTransaction = connection.BeginTransaction()
 
                     Try
-                        ' REUTILIZACIÓN DIRECTA: Misma validación usando tu PaymentGenerator
-                        Dim paymentGen As New Services.PaymentGenerator()
-                        Dim tariffRow As DataRow = paymentGen.GetGroupRate(connection, transaction, totalMembers)
+                        ' Reutilización del PaymentGenerator
+                        Dim paymentGenerator As New Services.PaymentGenerator()
+                        Dim tariffRow As DataRow = paymentGenerator.GetGroupRate(connection, transaction, numberMembers)
 
                         If tariffRow Is Nothing Then
-                            Throw New InvalidOperationException($"No existe ninguna tarifa registrada para {totalMembers} integrantes.")
+                            Throw New InvalidOperationException($"No existe ninguna tarifa registrada para {numberMembers} integrantes.")
                         End If
 
-                        ' =========================================================================
+                        ' ============================
                         ' ACTUALIZACIÓN DEL ENCABEZADO
-                        ' =========================================================================
-                        Dim sqlUpdateGroup As String = "UPDATE grp_familiar SET nom_grp = @GroupName, " &
-                                                       "num_intgrntes_grp = @TotalMembers, intgrntes_reg_grp = @RegisteredMembers " &
-                                                       "WHERE id_grp = @GroupId;"
-                        Using cmd As New MySqlCommand(sqlUpdateGroup, connection, transaction)
-                            cmd.Parameters.AddWithValue("@GroupName", groupName)
-                            cmd.Parameters.AddWithValue("@TotalMembers", totalMembers)
-                            cmd.Parameters.AddWithValue("@RegisteredMembers", memberIds.Count)
-                            cmd.Parameters.AddWithValue("@GroupId", groupId)
-                            cmd.ExecuteNonQuery()
+                        ' ============================
+                        Dim sqlUpdateGroup As String = "UPDATE grp_familiar " &
+                                                       "SET nom_grp = @nom_grp, num_intgrntes_grp = @num_intgrntes_grp, " &
+                                                       "intgrntes_reg_grp = @intgrntes_reg_grp, std_grp = @std_grp " &
+                                                       "WHERE id_grp = @id_grp;"
+
+                        Using command As New MySqlCommand(sqlUpdateGroup, connection, transaction)
+                            command.Parameters.Add("@nom_grp", MySqlDbType.VarChar).Value = groupName
+                            command.Parameters.Add("@num_intgrntes_grp", MySqlDbType.Int32).Value = numberMembers
+                            command.Parameters.Add("@intgrntes_reg_grp", MySqlDbType.Int32).Value = registeredMembers.Count
+                            command.Parameters.Add("@std_grp", MySqlDbType.Byte).Value = CByte(groupStatus)
+                            command.Parameters.Add("@id_grp", MySqlDbType.Int32).Value = groupId
+                            command.ExecuteNonQuery()
                         End Using
 
-                        ' =========================================================================
+                        ' ===============================
                         ' REESTRUCTURACIÓN DE INTEGRANTES
-                        ' =========================================================================
-                        Dim sqlRelease As String = "UPDATE clientes SET mpg_cli = 'MENSUAL', id_grp = NULL WHERE id_grp = @GroupId;"
+                        ' ===============================
+                        Dim sqlReleaseClients As String = "UPDATE clientes " &
+                                                          "SET mpg_cli = @mpg_cli, std_cli = @std_cli, id_grp = NULL " &
+                                                          "WHERE id_grp = @id_grp;"
 
-                        Using cmd As New MySqlCommand(sqlRelease, connection, transaction)
-                            cmd.Parameters.AddWithValue("@GroupId", groupId)
-                            cmd.ExecuteNonQuery()
+                        Using command As New MySqlCommand(sqlReleaseClients, connection, transaction)
+
+                            command.Parameters.Add("@mpg_cli", MySqlDbType.VarChar).Value = PaymentMethods.Monthly
+                            command.Parameters.Add("@std_cli", MySqlDbType.Byte).Value = CByte(EntityStatus.Active)
+                            command.Parameters.Add("@id_grp", MySqlDbType.Int32).Value = groupId
+                            command.ExecuteNonQuery()
+
                         End Using
 
-                        If memberIds.Count > 0 Then
+                        If registeredMembers.Count > 0 Then
 
-                            Dim sqlUpdateClients As String = "UPDATE clientes SET mpg_cli = 'GRUPAL', id_grp = @GroupId WHERE id_cli = @ClientId;"
+                            Dim sqlUpdateClients As String = "UPDATE clientes " &
+                                                             "SET mpg_cli = @mpg_cli, std_cli = @std_cli , id_grp = @id_grp " &
+                                                             "WHERE id_cli = @id_cli;"
 
-                            Using cmd As New MySqlCommand(sqlUpdateClients, connection, transaction)
-                                cmd.Parameters.AddWithValue("@GroupId", groupId)
-                                Dim clientParam As MySqlParameter = cmd.Parameters.Add(New MySqlParameter("@ClientId", MySqlDbType.Int32))
+                            Using command As New MySqlCommand(sqlUpdateClients, connection, transaction)
 
-                                For Each id As Integer In memberIds
+                                command.Parameters.Add("@mpg_cli", MySqlDbType.VarChar).Value = PaymentMethods.Grupal
+                                command.Parameters.Add("@id_grp", MySqlDbType.Int32).Value = groupId
+                                command.Parameters.Add("@std_cli", MySqlDbType.Byte).Value = CByte(groupStatus)
+                                Dim clientParam As MySqlParameter = command.Parameters.Add(New MySqlParameter("@id_cli", MySqlDbType.Int32))
+
+                                For Each id As Integer In registeredMembers
                                     clientParam.Value = id
-                                    cmd.ExecuteNonQuery()
+                                    command.ExecuteNonQuery()
                                 Next
+
                             End Using
+
                         End If
 
                         transaction.Commit()
                         Return True
+
                     Catch ex As Exception
                         transaction.Rollback()
-                        Throw 'ex
+                        Throw
                     End Try
 
                 End Using
             End Using
+
         End Function
 
 
@@ -212,26 +248,37 @@ Namespace Services
         Public Function DeleteFamilyGroup(groupId As Integer) As Boolean
 
             Using connection As MySqlConnection = GetConnection()
+
                 connection.Open()
 
                 Using transaction As MySqlTransaction = connection.BeginTransaction()
 
                     Try
                         ' 1. Liberamos masivamente a todos los clientes del grupo cambiando modalidad a MENSUAL
-                        Dim sqlReleaseClients As String = "UPDATE clientes SET mpg_cli = 'MENSUAL', id_grp = NULL WHERE id_grp = @GroupId;"
-                        Using cmdRelease As New MySqlCommand(sqlReleaseClients, connection, transaction)
-                            cmdRelease.Parameters.AddWithValue("@GroupId", groupId)
-                            cmdRelease.ExecuteNonQuery()
+                        Dim sqlUpdateGroup As String = "UPDATE clientes " &
+                                                       "SET mpg_cli = @mpg_cli, std_cli = @std_cli, id_grp = NULL " &
+                                                       "WHERE id_grp = @id_grp;"
+
+                        Using command As New MySqlCommand(sqlUpdateGroup, connection, transaction)
+
+                            command.Parameters.Add("@mpg_cli", MySqlDbType.VarChar).Value = PaymentMethods.Monthly
+                            command.Parameters.Add("@std_cli", MySqlDbType.Byte).Value = CByte(EntityStatus.Active)
+                            command.Parameters.Add("@id_grp", MySqlDbType.Int32).Value = groupId
+                            command.ExecuteNonQuery()
+
                         End Using
 
                         ' 2. Eliminamos la cabecera del grupo en grp_familiar
-                        Dim sqlDeleteGroup As String = "DELETE FROM grp_familiar WHERE id_grp = @GroupId;"
-                        Using cmdDelete As New MySqlCommand(sqlDeleteGroup, connection, transaction)
-                            cmdDelete.Parameters.AddWithValue("@GroupId", groupId)
-                            cmdDelete.ExecuteNonQuery()
+                        Dim sqlDeleteGroup As String = "DELETE FROM grp_familiar " &
+                                                       "WHERE id_grp = @id_grp;"
+
+                        Using command As New MySqlCommand(sqlDeleteGroup, connection, transaction)
+
+                            command.Parameters.Add("@id_grp", MySqlDbType.Int32).Value = groupId
+                            command.ExecuteNonQuery()
+
                         End Using
 
-                        ' Si ambas consultas salieron bien, confirmamos cambios
                         transaction.Commit()
                         Return True
 
@@ -242,49 +289,6 @@ Namespace Services
 
                 End Using
             End Using
-        End Function
-
-
-        ''' <summary>
-        ''' Cambia el estado del grupo (ACTIVO/INACTIVO) y sincroniza exactamente el mismo estado en todos sus integrantes.
-        ''' </summary>
-        Public Function SetGroupStatus(groupId As Integer, newStatus As EntityStatus) As Boolean
-
-            Using connection As MySqlConnection = GetConnection()
-                connection.Open()
-                Using transaction As MySqlTransaction = connection.BeginTransaction()
-
-                    Try
-                        ' 1. Desactivar/Activar Grupo
-                        Dim sqlGroup As String = "UPDATE grp_familiar SET std_grp = @Status WHERE id_grp = @GroupId;"
-
-                        Using cmd As New MySqlCommand(sqlGroup, connection, transaction)
-                            cmd.Parameters.AddWithValue("@Status", newStatus)
-                            cmd.Parameters.AddWithValue("@GroupId", groupId)
-                            cmd.ExecuteNonQuery()
-                        End Using
-
-                        ' 2. Sincronizar Clientes del Grupo
-                        Dim sqlClients As String = "UPDATE clientes SET std_cli = @Status WHERE id_grp = @GroupId;"
-
-                        Using cmd As New MySqlCommand(sqlClients, connection, transaction)
-                            cmd.Parameters.AddWithValue("@Status", newStatus) ' Pasa 1 o 0
-                            cmd.Parameters.AddWithValue("@GroupId", groupId)
-                            cmd.ExecuteNonQuery()
-                        End Using
-
-                        transaction.Commit()
-
-                        Return True
-
-                    Catch ex As Exception
-                        transaction.Rollback()
-                        Throw
-                    End Try
-
-                End Using
-            End Using
-
         End Function
 
 

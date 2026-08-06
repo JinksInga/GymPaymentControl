@@ -1,4 +1,5 @@
-﻿Imports GymPaymentControl.Services
+﻿Imports GymPaymentControl.Enums
+Imports GymPaymentControl.Services
 Imports GymPaymentControl.UIHelpers
 
 Public Class FrmFamilyGroup
@@ -17,8 +18,7 @@ Public Class FrmFamilyGroup
     ' --- Variables de Validación (Estado del Botón Guardar) ---
     Private _isLoadingData As Boolean
     Private _isGroupNameValid As Boolean
-    Private _isNumberMembersValid As Boolean
-    Private _isGridMembersCountValid As Boolean
+    Private _isGroupSelected As Boolean
 
     '
     Public Property NewGroupName As String
@@ -63,20 +63,10 @@ Public Class FrmFamilyGroup
         If Not IsGroupConfigurationValid() Then Exit Sub
 
         Try
-            ' Extraemos los IDs de los integrantes.
-            Dim listMemberIDs As New List(Of Integer)
+            Dim statusToSave As EntityStatus = If(RbActiveState.Checked, EntityStatus.Active, EntityStatus.Inactive)
 
-            For Each row As DataGridViewRow In DgvListOfMembers.Rows
-
-                If row.Cells("ListClientID").Value IsNot Nothing Then
-                    listMemberIDs.Add(Convert.ToInt32(row.Cells("ListClientID").Value))
-                End If
-
-            Next
-
-            Dim success As Boolean = _familyGroupManager.InsertFamilyGroup(TxtFamilyGroupName.Text,
-                                                                           CInt(NudNumberMembers.Value),
-                                                                           listMemberIDs)
+            Dim success As Boolean = _familyGroupManager.InsertFamilyGroup(TxtFamilyGroupName.Text, CInt(NudNumberMembers.Value),
+                                                                           GetRegisteredMemberIds(), statusToSave)
             If success Then
 
                 _currentMode = Nothing
@@ -118,6 +108,8 @@ Public Class FrmFamilyGroup
 
             UpdateSaveButtonState()
 
+            FormHelpers.UpdateValidationState(LblNumberMembers, True, String.Empty, ErrorProvider)
+
         Catch ex As Exception
             MsgBox($"ERROR AL MODIFICAR EL GRUPO :{vbCrLf}{ex.Message}")
         End Try
@@ -130,19 +122,11 @@ Public Class FrmFamilyGroup
         If Not IsGroupConfigurationValid() Then Exit Sub
 
         Try
-            ' Extraemos los IDs de los integrantes.
-            Dim listMemberIDs As New List(Of Integer)
-
-            For Each row As DataGridViewRow In DgvListOfMembers.Rows
-                If row.Cells("ListClientID").Value IsNot Nothing Then
-                    listMemberIDs.Add(Convert.ToInt32(row.Cells("ListClientID").Value))
-                End If
-
-            Next
+            Dim statusToSave As EntityStatus = If(RbActiveState.Checked, EntityStatus.Active, EntityStatus.Inactive)
 
             Dim success As Boolean = _familyGroupManager.UpdateFamilyGroup(_currentGroupId, TxtFamilyGroupName.Text,
                                                                            CInt(NudNumberMembers.Value),
-                                                                           listMemberIDs)
+                                                                           GetRegisteredMemberIds(), statusToSave)
             If success Then
 
                 _currentMode = Nothing
@@ -154,6 +138,7 @@ Public Class FrmFamilyGroup
             End If
 
         Catch ex As InvalidOperationException
+
             If MessageBox.Show($"{ex.Message}{vbCrLf}¿Deseas registrar una tarifa de descuento para esta cantidad de personas ahora?",
                             "Tarifa No Encontrada", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) = DialogResult.Yes Then
                 FrmPricesAndDiscounts.Show()
@@ -202,14 +187,17 @@ Public Class FrmFamilyGroup
 
         Try
             Select Case result
-                Case DialogResult.Yes ' PASAR A INACTIVO (Grupo + Clientes)
-                    If _familyGroupManager.SetGroupStatus(_currentGroupId, "INACTIVO") Then
-                        MessageBox.Show("El grupo y todos sus integrantes han pasado a estado INACTIVO. El generador de deudas los ignorará automáticamente.",
-                                        "Baja Temporal Registrada", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                        ConfigureStandbyMode()
-                    End If
 
-                Case DialogResult.No ' BORRADO DEFINITIVO (Disolver grupo)
+                'Case DialogResult.Yes ' PASAR A INACTIVO (Grupo + Clientes)
+
+                    'If _familyGroupManager.SetGroupStatus(_currentGroupId, "INACTIVO") Then
+                    'MessageBox.Show("El grupo y todos sus integrantes han pasado a estado INACTIVO. El generador de deudas los ignorará automáticamente.",
+                    '                    "Baja Temporal Registrada", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                    '    ConfigureStandbyMode()
+                    'End If
+
+                Case DialogResult.Yes ' BORRADO DEFINITIVO (Disolver grupo)
+
                     If _familyGroupManager.DeleteFamilyGroup(_currentGroupId) Then
                         MessageBox.Show("El grupo ha sido eliminado y sus miembros pasaron a modalidad Mensual.",
                                         "Eliminación Completa", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -218,6 +206,7 @@ Public Class FrmFamilyGroup
 
                 Case DialogResult.Cancel
                     Exit Sub
+
             End Select
 
         Catch ex As Exception
@@ -252,9 +241,19 @@ Public Class FrmFamilyGroup
         Select Case _currentMode
 
             Case TransactionMode.NewRecord
+
                 ValidateAndRenderGroupDuplicates(TxtFamilyGroupName.Text)
 
-            Case TransactionMode.EditRecord, TransactionMode.DeleteRecord
+            Case TransactionMode.EditRecord
+
+                If Not _isGroupSelected Then
+                    RefreshGroupSearch(TxtFamilyGroupName.Text)
+                Else
+                    ValidateAndRenderGroupDuplicates(TxtFamilyGroupName.Text)
+                End If
+
+            Case TransactionMode.DeleteRecord
+                'If Not _isGroupSelected Then RefreshGroupSearch(TxtFamilyGroupName.Text)
                 RefreshGroupSearch(TxtFamilyGroupName.Text)
 
         End Select
@@ -292,6 +291,10 @@ Public Class FrmFamilyGroup
         FormHelpers.UpdateValidationState(TxtFamilyGroupName, _isGroupNameValid, errorMessage, ErrorProvider)
 
         UpdateSaveButtonState()
+
+        If _currentMode = TransactionMode.EditRecord Then
+            FormHelpers.UpdateValidationState(LblNumberMembers, True, String.Empty, ErrorProvider)
+        End If
 
     End Sub
     Private Sub TxtFamilyGroupName_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TxtFamilyGroupName.KeyPress
@@ -349,41 +352,45 @@ Public Class FrmFamilyGroup
         Try
             _isLoadingData = True
 
-            _currentGroupId = CInt(DgvListFamilyGroups.CurrentRow.Cells("ColGroupId").Value)
-            Dim groupName As String = DgvListFamilyGroups.CurrentRow.Cells("ColGroupName").Value.ToString()
-            Dim numberMembers As Integer = CInt(DgvListFamilyGroups.CurrentRow.Cells("ColNumberMembers").Value)
+            '| Extraemos la fila subyacente del DataTable mediante DataRowView
+            Dim rowView As DataRowView = CType(DgvListFamilyGroups.CurrentRow.DataBoundItem, DataRowView)
+
+            _currentGroupId = CInt(rowView("id_grp"))
+            Dim groupName As String = rowView("nom_grp").ToString()
+            Dim numberMembers As Integer = CInt(rowView("num_intgrntes_grp"))
+            Dim groupStatus As EntityStatus = CType(Convert.ToByte(rowView("std_grp")), EntityStatus)
+
             Dim dtMembers As DataTable = _familyGroupManager.GetMembersByGroupId(_currentGroupId)
 
             DgvListOfMembers.Rows.Clear()
+
             For Each row As DataRow In dtMembers.Rows
 
-                Dim nRow As Integer = DgvListOfMembers.Rows.Add()
                 Dim fullName As String = $"{row("nom_cli")} {row("ape_cli")}"
-
-                DgvListOfMembers.Rows(nRow).Cells("ListClientID").Value = row("id_cli").ToString()
-                DgvListOfMembers.Rows(nRow).Cells("ListFullName").Value = fullName
-                DgvListOfMembers.Rows(nRow).Cells("ListGroupId").Value = row("id_grp").ToString()
+                Dim nRow As Integer = DgvListOfMembers.Rows.Add(fullName)
+                DgvListOfMembers.Rows(nRow).Tag = CInt(row("id_cli"))
 
             Next
+
             DgvListOfMembers.CurrentCell = Nothing
 
             TxtFamilyGroupName.Text = groupName
             NudNumberMembers.Value = numberMembers
             LblNumberMembers.Text = $"{DgvListOfMembers.Rows.Count} de {NudNumberMembers.Value}"
+            RbActiveState.Checked = (groupStatus = EntityStatus.Active)
+            RbInactiveState.Checked = Not RbActiveState.Checked '(groupStatus = EntityStatus.Inactive)
 
             FormHelpers.UpdateValidationState(TxtFamilyGroupName, True, String.Empty, ErrorProvider)
 
             If _currentMode = TransactionMode.EditRecord Then
 
-                GbNumberMembers.Enabled = True
+                EnableGroupInformationControls()
                 GbMembersOfGroup.Enabled = True
                 TxtSearchMembers.Focus()
 
             ElseIf _currentMode = TransactionMode.DeleteRecord Then
 
-                GbNumberMembers.Enabled = False
-                GbMembersOfGroup.Enabled = False
-                BtnDeleteGroup.Focus()
+                TxtFamilyGroupName.Focus()
 
             End If
 
@@ -393,6 +400,7 @@ Public Class FrmFamilyGroup
 
             UpdateSaveButtonState()
 
+            _isGroupSelected = True
             _isLoadingData = False
 
         Catch ex As Exception
@@ -403,10 +411,9 @@ Public Class FrmFamilyGroup
 
 
     Private Sub TxtSearchMembers_TextChanged(sender As Object, e As EventArgs) Handles TxtSearchMembers.TextChanged
-        ' Si el formulario está en reposo, ignoramos cambios accidentales
+
         If _currentMode Is Nothing Then Exit Sub
 
-        ' Delegamos la búsqueda y el renderizado a su función dedicada
         SearchAndRenderMembersPredictive(TxtSearchMembers.Text.Trim())
 
     End Sub
@@ -426,31 +433,27 @@ Public Class FrmFamilyGroup
 
         ErrorProvider.SetError(TxtSearchMembers, String.Empty)
 
-        Dim clientId As String = DgvSearchMembers.CurrentRow.Cells("SearchClientId").Value.ToString()
-        Dim fullName As String = DgvSearchMembers.CurrentRow.Cells("SearchFullName").Value.ToString()
+        '| Leemos los datos directamente desde el DataRowView subyacente
+        Dim rowView As DataRowView = CType(DgvSearchMembers.CurrentRow.DataBoundItem, DataRowView)
+        Dim clientId As Integer = CInt(rowView("id_cli"))
+        Dim fullName As String = rowView("full_name").ToString()
 
+        '| Validar si el cliente ya está agregado (revisando el .Tag de las filas)
         For Each row As DataGridViewRow In DgvListOfMembers.Rows
 
-            If row.Cells("ListClientID").Value IsNot Nothing AndAlso row.Cells("ListClientID").Value.ToString() = clientId Then
+            If row.Tag IsNot Nothing AndAlso CInt(row.Tag) = clientId Then
 
                 ErrorProvider.SetError(TxtSearchMembers, $"{fullName} ya se encuentra agregado en este grupo.")
-
                 TxtSearchMembers.Focus()
-
                 TxtSearchMembers.SelectAll()
 
                 Exit Sub
-
             End If
-
         Next
 
-        Dim groupId As String = If(DgvSearchMembers.CurrentRow.Cells("SearchGroupId").Value IsNot Nothing,
-                                   DgvSearchMembers.CurrentRow.Cells("SearchGroupId").Value.ToString(),
-                                   String.Empty)
+        Dim rowIndex As Integer = DgvListOfMembers.Rows.Add(fullName)
 
-        DgvListOfMembers.Rows.Add(clientId, fullName, groupId)
-
+        DgvListOfMembers.Rows(rowIndex).Tag = clientId
         LblNumberMembers.Text = $"{DgvListOfMembers.RowCount} de {NudNumberMembers.Value}"
 
         BeginInvoke(Sub()
@@ -460,7 +463,6 @@ Public Class FrmFamilyGroup
         UpdateSaveButtonState()
 
         TxtSearchMembers.Clear()
-
         TxtSearchMembers.Focus()
 
     End Sub
@@ -476,38 +478,34 @@ Public Class FrmFamilyGroup
     Private Sub BtnRemoveMember_Click(sender As Object, e As EventArgs) Handles BtnRemoveMember.Click
 
         If DgvListOfMembers.CurrentRow Is Nothing OrElse DgvListOfMembers.CurrentRow.IsNewRow Then
-            MessageBox.Show("Selecciona un integrante de la lista para poder quitarlo.", "Lista de Integrantes",
-                            MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Selecciona un integrante de la lista para poder quitarlo.", "Lista de Integrantes", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Exit Sub
         End If
 
-        Dim clientId As String = DgvListOfMembers.CurrentRow.Cells("ListClientID").Value.ToString()
-        Dim fullName As String = DgvListOfMembers.CurrentRow.Cells("ListFullName").Value.ToString()
+        Dim fullName As String = DgvListOfMembers.CurrentRow.Cells("ListFullName").Value?.ToString()
 
         Dim messageBody As String = $"Grupo: {TxtFamilyGroupName.Text}{vbCrLf}" &
-                            $"Integrante: {fullName}{vbCrLf}" &
-                            $"__________________________________________{vbCrLf}{vbCrLf}" &
-                            $"¿Seguro que quieres quitar a este integrante de la lista?"
+                                $"Integrante: {fullName}{vbCrLf}" &
+                                $"__________________________________________{vbCrLf}{vbCrLf}" &
+                                $"¿Seguro que quieres quitar a este integrante de la lista?"
 
         Dim msgBoxResponse As DialogResult = MessageBox.Show(messageBody, "Quitar Integrante",
-                                                    MessageBoxButtons.YesNo,
-                                                    MessageBoxIcon.Question,
-                                                    MessageBoxDefaultButton.Button2)
+                                                         MessageBoxButtons.YesNo,
+                                                         MessageBoxIcon.Question,
+                                                         MessageBoxDefaultButton.Button2)
 
         If msgBoxResponse = DialogResult.Yes Then
-
+            ' 1. Al remover la fila, el .Tag asignado a esta se desecha automáticamente
             DgvListOfMembers.Rows.Remove(DgvListOfMembers.CurrentRow)
-
             DgvListOfMembers.CurrentCell = Nothing
 
-            LblNumberMembers.Text = $"{DgvListOfMembers.RowCount} de {NudNumberMembers.Value}"
+            ' 2. Actualizamos la etiqueta con la nueva cantidad de filas
+            LblNumberMembers.Text = $"{DgvListOfMembers.Rows.Count} de {NudNumberMembers.Value}"
 
+            ' 3. Refrescamos UI y botones
             TxtSearchMembers.Focus()
-
             UpdateSaveButtonState()
-
-            BtnRemoveMember.Enabled = (DgvListOfMembers.RowCount > 0)
-
+            BtnRemoveMember.Enabled = (DgvListOfMembers.Rows.Count > 0)
         End If
 
     End Sub
@@ -606,6 +604,19 @@ Public Class FrmFamilyGroup
 
 
 #Region " ??. LOGICA DE CARGA Y RENDERIZADO DE DATOS (Backend Bridge) "
+
+
+    Private Function GetRegisteredMemberIds() As List(Of Integer)
+
+        Dim memberIds As New List(Of Integer)
+
+        For Each row As DataGridViewRow In DgvListOfMembers.Rows
+            If row.Tag IsNot Nothing Then memberIds.Add(CInt(row.Tag))
+        Next
+
+        Return memberIds
+
+    End Function
 
 
     ''' <summary>
@@ -779,11 +790,14 @@ Public Class FrmFamilyGroup
 
         If _currentMode = TransactionMode.NewRecord Then
             NudNumberMembers.Value = 3
+            RbActiveState.Checked = True
 
         Else
             NudNumberMembers.Value = 0
             LblNumberMembers.Text = String.Empty
             ErrorProvider.SetError(LblNumberMembers, String.Empty)
+            RbActiveState.Checked = False
+            RbInactiveState.Checked = False
 
         End If
 
@@ -818,14 +832,17 @@ Public Class FrmFamilyGroup
         BtnModifyGroup.Enabled = hasRecords
         BtnDelete.Enabled = hasRecords
 
-        TxtFamilyGroupName.Enabled = False
-        GbNumberMembers.Enabled = False
+        GbGroupInformation.Enabled = False
         GbMembersOfGroup.Enabled = False
+
+        EnableGroupInformationControls()
         ChkEmptyGroup.Enabled = True
 
         BtnNewGroup.Focus()
 
         FormHelpers.SetBackColor(Color.Azure, TxtFamilyGroupName, NudNumberMembers, LblNumberMembers, TxtSearchMembers)
+
+        _isGroupSelected = False
 
     End Sub
 
@@ -851,8 +868,7 @@ Public Class FrmFamilyGroup
         ConfigureActionButtons()
         BtnSaveGroup.Visible = True
 
-        TxtFamilyGroupName.Enabled = True
-        GbNumberMembers.Enabled = True
+        GbGroupInformation.Enabled = True
         GbMembersOfGroup.Enabled = True
 
         TxtFamilyGroupName.Focus()
@@ -878,9 +894,36 @@ Public Class FrmFamilyGroup
     ''' </summary>
     Private Sub EnableGroupSelection()
 
-        TxtFamilyGroupName.Enabled = True
+        GbGroupInformation.Enabled = True
         ShowFamilyGroupList()
         TxtFamilyGroupName.Focus()
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Habilita los controles de información del grupos.
+    ''' </summary>
+    Private Sub EnableGroupInformationControls()
+
+        NudNumberMembers.Enabled = True
+        RbActiveState.Enabled = True
+        RbInactiveState.Enabled = True
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Deshabilita los controles de información del grupos.
+    ''' </summary>
+    Private Sub DisableGroupInformationControls()
+
+        NudNumberMembers.Enabled = False
+        RbActiveState.Enabled = False
+        RbInactiveState.Enabled = False
+        ChkEmptyGroup.Enabled = False
+
+        GbMembersOfGroup.Enabled = False
 
     End Sub
 
@@ -893,8 +936,8 @@ Public Class FrmFamilyGroup
 
         ConfigureActionButtons()
         BtnUpdateGroup.Visible = True
-        ChkEmptyGroup.Enabled = False
         EnableGroupSelection()
+        DisableGroupInformationControls()
 
     End Sub
 
@@ -908,6 +951,7 @@ Public Class FrmFamilyGroup
         ConfigureActionButtons()
         BtnDeleteGroup.Visible = True
         EnableGroupSelection()
+        DisableGroupInformationControls()
 
     End Sub
 
@@ -926,20 +970,5 @@ Public Class FrmFamilyGroup
 
 #End Region
 
-
-    ' Método rápido para reactivar desde la UI
-    Private Sub ReactivateGroupProcess()
-        If _currentGroupId <= 0 Then Exit Sub
-
-        If MessageBox.Show($"¿Deseas REACTIVAR el grupo '{TxtFamilyGroupName.Text.Trim()}' y a todos sus integrantes?",
-                           "Reactivación de Grupo", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
-
-            If _familyGroupManager.SetGroupStatus(_currentGroupId, "ACTIVO") Then
-                MessageBox.Show("¡El grupo y sus integrantes vuelven a estar ACTIVOS! Volverán a figurar en el cobro de mensualidades.",
-                                "Reactivación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                ConfigureStandbyMode()
-            End If
-        End If
-    End Sub
 
 End Class
