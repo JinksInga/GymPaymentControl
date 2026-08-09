@@ -2,6 +2,43 @@
 
     Public Module DialogMessages
 
+#Region " Mensajes Genéricos"
+
+        ''' <summary>
+        ''' Genera el mensaje de confirmación mostrado después de registrar
+        ''' o actualizar correctamente una entidad.
+        ''' </summary>
+        ''' <param name="entityType">
+        ''' Tipo de entidad sobre la que se realizó la operación (ej: CLIENTE, GRUPO).
+        ''' </param>
+        ''' <param name="entityName">
+        ''' Nombre de la entidad.
+        ''' </param>
+        ''' <param name="entityCode">
+        ''' Código o identificador formateado de la entidad.
+        ''' </param>
+        ''' <param name="actionText">
+        ''' Texto que describe el resultado de la operación (ej: GUARDADOS, ACTUALIZADOS).
+        ''' </param>
+        ''' <returns>
+        ''' Cadena formateada lista para mostrarse en un cuadro de diálogo de confirmación.
+        ''' </returns>
+        Public Function OperationSuccessMessage(entityType As String,
+                                                entityName As String,
+                                                entityCode As String,
+                                                actionText As String) As String
+
+            Return $"DATOS DEL {entityType}" & Environment.NewLine & Environment.NewLine &
+                   $"   NOMBRE   :  {entityName}" & Environment.NewLine &
+                   $"   CÓDIGO   :  {entityCode}" & Environment.NewLine &
+                   "   -----------------------------------------------" & Environment.NewLine &
+                   $"   Datos {actionText} correctamente."
+
+        End Function
+
+#End Region
+
+
 #Region " Mensajes de FrmClientsPayments "
 
         ''' <summary>
@@ -153,22 +190,6 @@
         End Function
 
         ''' <summary>
-        ''' Genera el mensaje de confirmación mostrado después de registrar o actualizar un cliente.
-        ''' </summary>
-        Public Function ClientOperationSuccess(firstName As String,
-                                               lastName As String,
-                                               idClientFormatted As String,
-                                               actionText As String) As String
-
-            Return "DATOS DEL CLIENTE" & Environment.NewLine & Environment.NewLine &
-                   "   NOMBRE   :  " & firstName & " " & lastName & Environment.NewLine &
-                   "   CÓDIGO   :  " & idClientFormatted & Environment.NewLine &
-                   "   -----------------------------------------------" & Environment.NewLine &
-                   "   Datos " & actionText & " correctamente."
-
-        End Function
-
-        ''' <summary>
         ''' Mensaje mostrado para informar al usuario que se va a expandir
         ''' el límite de vacantes de un grupo familiar.
         ''' </summary>
@@ -308,6 +329,81 @@
                    "   registro duplicado."
 
         End Function
+
+#End Region
+
+
+#Region " Mensajes de FrmFamilyGroup "
+
+        ' Constantes relacionados con las operaciones de grupos familiares.
+        Public Const FamilyGroupDeletedSuccessfully As String = "El grupo familiar se ha eliminado correctamente."
+        Public Const SelectMemberFromListRemove As String = "Selecciona un integrante de la lista para poder quitarlo."
+
+        ''' <summary>
+        ''' Genera el mensaje de confirmación mostrado antes de eliminar
+        ''' un grupo familiar, indicando los datos afectados y las consecuencias
+        ''' de la operación.
+        ''' </summary>
+        ''' <param name="groupName">
+        ''' Nombre del grupo familiar que se va a eliminar.
+        ''' </param>
+        ''' <param name="numberMembers">
+        ''' Número de integrantes asociados al grupo.
+        ''' </param>
+        ''' <returns>
+        ''' Mensaje de confirmación listo para mostrarse al usuario.
+        ''' </returns>
+        Public Function FamilyGroupDeletionConfirmation(groupName As String, numberMembers As String) As String
+
+            Return "                             !!! ADVERTENCIA !!!" & Environment.NewLine & Environment.NewLine &
+                   "   Vas a eliminar el siguiente grupo familiar:" & Environment.NewLine & Environment.NewLine &
+                   $"       Nombre del grupo : {groupName}" & Environment.NewLine &
+                   $"       Nº de integrantes  : {numberMembers}" & Environment.NewLine &
+                   "   -------------------------------------------------------------------------------" & Environment.NewLine & Environment.NewLine &
+                   "   Los integrantes NO serán eliminados." & Environment.NewLine &
+                   "   Serán desvinculados del grupo y pasarán a:" & Environment.NewLine & Environment.NewLine &
+                   "       Método de pago : MENSUAL" & Environment.NewLine &
+                   "       Estado                  : ACTIVO" & Environment.NewLine &
+                   "   -------------------------------------------------------------------------------" & Environment.NewLine & Environment.NewLine &
+                   "   Esta operación no se puede deshacer." & Environment.NewLine & Environment.NewLine &
+                   "   ¿Desea continuar con esta operación?"
+
+        End Function
+
+
+        ''' <summary>
+        ''' Mensaje mostrado para informar al usuario que se va
+        ''' a quitar de la lista un integrante del grupo familiar.
+        ''' </summary>
+        ''' <param name="fullName">
+        ''' Nombre del integrante o miembro que pertenece al grupo.
+        ''' </param>
+        Public Function ConfirmRemoveGroupMember(fullName As String) As String
+
+            Return "   Vas a quitar de la lista a :" & Environment.NewLine & Environment.NewLine &
+                   $"   {fullName}" & Environment.NewLine & Environment.NewLine &
+                   "  -----------------------------------------------------------------------" & Environment.NewLine & Environment.NewLine &
+                   "                                 ¿Desea continuar con la operación?"
+
+        End Function
+
+
+        ''' <summary>
+        ''' Pregunta al usuario si está seguro de crear
+        ''' una nueva tarifa con la cantidad de miembros para el nuevo grupo.
+        ''' </summary>
+        ''' <param name="numberMembers">
+        ''' Número de integrantes para crear la nueva tarifa.
+        ''' </param>
+        Public Function AskBeforeRegisterNewRate(numberMembers As String) As String
+
+            Return "    No existe ninguna tarifa registrada para :" & Environment.NewLine & Environment.NewLine &
+                   $"    Número de integrantes : {numberMembers}" & Environment.NewLine & Environment.NewLine &
+                   "  --------------------------------------------------------" & Environment.NewLine & Environment.NewLine &
+                   "                  ¿Deseas registrar la tarifa ahora?"
+
+        End Function
+
 
 #End Region
 

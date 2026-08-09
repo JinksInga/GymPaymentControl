@@ -18,7 +18,8 @@ Imports GymPaymentControl.Utils
 ''' </summary>
 Public Class FrmNewModifyClient
 
-#Region "Campos privados"
+#Region " VARIABLES DE ESTADO Y CONSTANTES "
+
     ' Herramientas
     Private ReadOnly _clientManager As New ClientManager()
     Private _customerData As New ClientPaymentDTO()
@@ -38,7 +39,11 @@ Public Class FrmNewModifyClient
     Private _groupName As String
     Private _groupMemberLimit As Integer
     Private _registeredMembers As Integer
+
 #End Region
+
+
+#Region " EVENTOS DEL FORMULARIO (Handlers) "
 
     Private Sub FrmNewModifyClient_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
@@ -521,10 +526,12 @@ Public Class FrmNewModifyClient
     End Sub
 
 
+#End Region
 
-    '| ---------------------------------------------------------------- |'
-    '| ---------->>>>>>>>>> SUBRUTINAS Y FUNCIONES <<<<<<<<<<---------- |'
-    '| ---------------------------------------------------------------- |'
+
+    '| ============================================================ |'
+    '|                FUNCIONES Y MÉTODOS AUXILIARES                |'
+    '| ============================================================ |'
 
     ''' <summary>
     ''' Método para recibir la acción desde el módulo
@@ -933,7 +940,7 @@ Public Class FrmNewModifyClient
         ErrorProvider.Clear()
 
         LblNumberMembers.ForeColor = Color.FromArgb(0, 64, 0) 'COLOR VERDE
-        LblNumberMembers.Text = If(clearLabel, "", AppTexts.SearchingGroup)
+        LblNumberMembers.Text = If(clearLabel, "", AppMessages.SearchingGroup)
 
     End Sub
 
@@ -976,18 +983,19 @@ Public Class FrmNewModifyClient
     ''' </param>
     Private Sub ShowSuccessMessage(customerCode As Integer)
 
-        ' 1. Preparamos el texto del cuerpo (Guardado vs Actualizado)
+        '| Cuerpo del texto.
+        Dim fullName As String = $"{TxtFirstName.Text} {TxtLastName.Text}"
         Dim idFormatted As String = $"CLI - {customerCode:000}"
         Dim actionText As String = If(BtnSaveCustomerData.Enabled, "GUARDADOS", "ACTUALIZADOS")
 
-        ' 2. Construimos el "Ticket" de confirmación (usando los datos que ya tenemos en los campos)
-        MessageBox.Show(ClientOperationSuccess(TxtFirstName.Text, TxtLastName.Text, idFormatted, actionText),
+        '| Mensaje de confirmación.
+        MessageBox.Show(OperationSuccessMessage(EntityNames.Client, fullName, idFormatted, actionText),
                         "Operación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
-        ' 3. Notificamos al formulario que debe refrescarse, esto ejecutará la función que pasamos por AddressOf
+        '| Notificar al formulario, esto ejecutará la función que pasamos por AddressOf.
         _onSuccessAction?.Invoke(customerCode)
 
-        ' 4. Cerramos el formulario
+        '| Cerrar el formulario
         _isSaving = True
         Me.Close()
 

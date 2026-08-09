@@ -347,7 +347,7 @@ Public Class FrmListDebtors
         '|
         ' Si estamos buscando, no queremos que aparezcan iconos de error
         If _isFiltering Then Exit Sub
-        CheckRowDataGridView(DgvIndividual, LblErrorProvider, BtnCollectMonth, ErrorProvider, ValidationMessages.SelectRecord)
+        CheckRowDataGridView(DgvIndividual, LblErrorProvider, BtnCollectMonth, ErrorProvider, AppMessages.SelectRecord)
 
     End Sub
     ''
@@ -421,7 +421,7 @@ Public Class FrmListDebtors
         ' Si estamos buscando, no queremos que aparezcan iconos de error
         If _isFiltering Then Exit Sub
 
-        CheckRowDataGridView(DgvFamilyGroup, LblErrorProvider, BtnCollectMonth, ErrorProvider, ValidationMessages.SelectRecord)
+        CheckRowDataGridView(DgvFamilyGroup, LblErrorProvider, BtnCollectMonth, ErrorProvider, AppMessages.SelectRecord)
 
     End Sub
     ''

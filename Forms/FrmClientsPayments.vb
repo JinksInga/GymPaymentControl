@@ -82,7 +82,7 @@ Public Class FrmClientsPayments
         If String.IsNullOrWhiteSpace(CmbFilter.Text) Then
 
             '| Mensaje informativo.
-            TxtSearch.Text = AppTexts.SelectSearchFilter
+            TxtSearch.Text = AppMessages.SelectSearchFilter
 
             UpdateSearchVisualFeedback(0)
             DgvClientList.DataSource = Nothing
@@ -106,7 +106,7 @@ Public Class FrmClientsPayments
         If String.IsNullOrWhiteSpace(CmbFilter.Text) Then
 
             '| Mensaje informativo.
-            TxtSearch.Text = AppTexts.SelectSearchFilter
+            TxtSearch.Text = AppMessages.SelectSearchFilter
 
             UpdateSearchVisualFeedback(0)
         Else
@@ -713,8 +713,8 @@ Public Class FrmClientsPayments
         LblResult.ForeColor = If(hasResults, Color.Gray, Color.Red)
 
         Dim resultText As String = If(resultCount = 1,
-                                        AppTexts.SearchSingleResult,
-                                        AppTexts.SearchMultipleResults)
+                                        AppMessages.SearchSingleResult,
+                                        AppMessages.SearchMultipleResults)
 
         LblResult.Text = $"{resultCount} - {resultText}"
 

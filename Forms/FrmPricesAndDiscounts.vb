@@ -62,6 +62,10 @@ Public Class FrmPricesAndDiscounts
     ' --- Avisamos cuántas tarifas quedan al cerrar ---
     Public Event TariffClosingValidation(sender As Object, totalRows As Integer)
 
+    ' --- Parámetros de Apertura desde Otros Formularios ---
+    Public Property IsGroupRateRequest As Boolean
+    Public Property SuggestedNumberMembers As Integer?
+
 #End Region
 
 #Region " EVENTOS DEL FORMULARIO (Handlers) "
@@ -567,12 +571,27 @@ Public Class FrmPricesAndDiscounts
 
                 Dim currentPrice = _currentPrice.ToString("C2")
 
-                messageBody = TariffTransactionReport(currentPrice, TariffMessages.GeneralPriceDescription,
+                messageBody = TariffTransactionReport(currentPrice, AppMessages.GeneralPriceDescription,
                                                       DialogMessages.RecordSavedSuccessfully)
 
         End Select
 
         MessageBox.Show(messageBody, "Nuevo registro", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+        ' =======================================================
+        ' | SI LA TARIFA FUE SOLICITADA DESDE GRUPOS FAMILIARES |
+        ' =======================================================
+        If IsGroupRateRequest Then
+
+            Me.DialogResult = DialogResult.OK
+            Me.Close()
+            Return
+
+        End If
+
+        ' =====================================================
+        ' | CONTINUA EL FLUJO NORMAL DE FrmPricesAndDiscounts |
+        ' =====================================================
 
         _currentMode = Nothing
 
@@ -634,8 +653,8 @@ Public Class FrmPricesAndDiscounts
 
             Case PaymentMethods.Monthly
 
-                Dim messageBody = TariffTransactionReport(TxtPrice.Text, TariffMessages.ModifyRelatedRatesWarning,
-                                                          TariffMessages.BasePriceModificationConfirmation)
+                Dim messageBody = TariffTransactionReport(TxtPrice.Text, AppMessages.ModifyRelatedRatesWarning,
+                                                          AppMessages.BasePriceModificationConfirmation)
 
                 Dim userResponse As MsgBoxResult = MessageBox.Show(messageBody, "Advertencia", MessageBoxButtons.YesNo,
                                                                    MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2)
@@ -726,7 +745,7 @@ Public Class FrmPricesAndDiscounts
 
                 Dim currentPrice = _currentPrice.ToString("C2")
 
-                messageBody = TariffTransactionReport(currentPrice, TariffMessages.GeneralPriceDescription,
+                messageBody = TariffTransactionReport(currentPrice, AppMessages.GeneralPriceDescription,
                                                       DialogMessages.RecordUpdatedSuccessfully)
 
         End Select
@@ -785,8 +804,8 @@ Public Class FrmPricesAndDiscounts
 
                 Case PaymentMethods.Monthly
 
-                    messageBody = TariffTransactionReport(TxtTotal.Text, TariffMessages.BaseRateCannotBeDeleted,
-                                                          TariffMessages.BaseRateCanBeModified)
+                    messageBody = TariffTransactionReport(TxtTotal.Text, AppMessages.BaseRateCannotBeDeleted,
+                                                          AppMessages.BaseRateCanBeModified)
 
                     MessageBox.Show(messageBody, "Operación Restringida", MessageBoxButtons.OK, MessageBoxIcon.Error)
                     DgvPriceList.Focus()
@@ -1248,7 +1267,6 @@ Public Class FrmPricesAndDiscounts
 
         TxtDiscount.Enabled = True
         TxtDiscount.Text = 0
-        TxtDiscount.Focus()
 
         TxtToPay.Enabled = True
 
@@ -1256,14 +1274,26 @@ Public Class FrmPricesAndDiscounts
 
         NudNumberMembers.Enabled = True
         NudNumberMembers.Minimum = 3
-        NudNumberMembers.Value = 3
+
+        ' NÚMERO DE INTEGRANTES POR DEFECTO O SUGERIDO DESDE OTRO FORMULARIO
+        Dim suggestedMembers As Integer = If(SuggestedNumberMembers.HasValue, SuggestedNumberMembers.Value, CInt(NudNumberMembers.Minimum))
+
+        If suggestedMembers < NudNumberMembers.Minimum Then suggestedMembers = CInt(NudNumberMembers.Minimum)
+
+        If suggestedMembers > NudNumberMembers.Maximum Then suggestedMembers = CInt(NudNumberMembers.Maximum)
+
+        NudNumberMembers.Value = suggestedMembers
+        ' NudNumberMembers.Value = 3
 
         ConfigureValidationState(PaymentMethods.FamilyGroup, TransactionMode.NewRecord)
 
         ' El botón solo se encenderá si la tarifa es correcta.
         Dim isFormValid As Boolean = IsTariffConfigurationValid()
+
         BtnSaveRate.Enabled = isFormValid
         BtnUpdateRate.Enabled = isFormValid
+
+        TxtDiscount.Focus()
 
     End Sub
 

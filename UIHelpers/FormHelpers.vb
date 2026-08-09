@@ -269,7 +269,7 @@ Namespace UIHelpers
         Public Sub ValidateCustomerNameUI(textBox As TextBox, errorProvider As ErrorProvider)
 
             Dim isValid As Boolean = Validations.IsCustomerNameValid(textBox.Text)
-            Dim message As String = If(isValid, String.Empty, ValidationMessages.EmptyField)
+            Dim message As String = If(isValid, String.Empty, AppMessages.EmptyField)
 
             UpdateValidationState(textBox, isValid, message, errorProvider)
 

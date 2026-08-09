@@ -9,14 +9,12 @@ Public Class FrmUserPassword
     '|
     '| * Variable temporal que almacena el ID del usuario mientras crea su clave de acceso.
     Private idUserTemp As Integer = 0
-    ''
-    ''
-    ''
+
+
     Private Sub FrmUserPassword_Load(sender As Object, e As EventArgs) Handles MyBase.Load
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub BtnStart_Click(sender As Object, e As EventArgs) Handles BtnStart.Click
 
         '|-----------------------------------------------------------------------------
@@ -89,9 +87,8 @@ Public Class FrmUserPassword
         Me.Close()
 
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub BtnSave_Click(sender As Object, e As EventArgs) Handles BtnSave.Click
 
         '|---------------------------------------------------------------------------
@@ -143,9 +140,8 @@ Public Class FrmUserPassword
         End Try
 
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub BtnCancel_Click(sender As Object, e As EventArgs) Handles BtnCancel.Click
 
         '|-------------------------------------------------------------------------------
@@ -158,9 +154,8 @@ Public Class FrmUserPassword
         SaveOrCancel()
 
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub BtnClose_Click(sender As Object, e As EventArgs) Handles BtnClose.Click
 
         '|-----------------------------------------------------------------------------
@@ -175,9 +170,8 @@ Public Class FrmUserPassword
         Application.Exit()
 
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub SaveOrCancel()
 
         '|-------------------------------------------------------------------------------

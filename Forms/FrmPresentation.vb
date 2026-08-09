@@ -2,10 +2,8 @@
 Imports MySql.Data.MySqlClient
 
 Public Class FrmPresentation
-    ''
-    ''
-    ''
-    ''
+
+
     '| Se declara Async para permitir operaciones no bloqueantes (Await)
     Private Async Sub FrmPresentation_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
@@ -49,9 +47,8 @@ Public Class FrmPresentation
         Me.Hide()
 
     End Sub
-    ''
-    ''
-    ''
+
+
     Public Function CheckConnection() As Boolean
 
         '|---------------------------------------------------------------------------------
@@ -90,9 +87,8 @@ Public Class FrmPresentation
         End Try
 
     End Function
-    ''
-    ''
-    ''
+
+
     Private Sub SetProgress(value As Integer, text As String, color As Color)
 
         '|-------------------------------------------------------------------
@@ -111,9 +107,8 @@ Public Class FrmPresentation
         LblBarra.Refresh()
 
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub ShowCriticalError()
 
         '|---------------------------------------------------------------------

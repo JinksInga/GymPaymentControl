@@ -1,4 +1,5 @@
-﻿Imports GymPaymentControl.Enums
+﻿Imports GymPaymentControl.Constants
+Imports GymPaymentControl.Enums
 Imports GymPaymentControl.Services
 Imports GymPaymentControl.UIHelpers
 
@@ -12,17 +13,16 @@ Public Class FrmFamilyGroup
     ' --- Control de Flujo y Modos de Pantalla ---
     Private _currentMode As TransactionMode?
 
-    '
+    ' --- Variable de Memoría ---
     Private _currentGroupId As Integer
 
-    ' --- Variables de Validación (Estado del Botón Guardar) ---
+    ' --- Variables de Validación (Estado del botón) ---
     Private _isLoadingData As Boolean
     Private _isGroupNameValid As Boolean
     Private _isGroupSelected As Boolean
 
-    '
+    ' --- Propiedad pública de salida ---
     Public Property NewGroupName As String
-
 
 #End Region
 
@@ -62,35 +62,7 @@ Public Class FrmFamilyGroup
 
         If Not IsGroupConfigurationValid() Then Exit Sub
 
-        Try
-            Dim statusToSave As EntityStatus = If(RbActiveState.Checked, EntityStatus.Active, EntityStatus.Inactive)
-
-            Dim success As Boolean = _familyGroupManager.InsertFamilyGroup(TxtFamilyGroupName.Text, CInt(NudNumberMembers.Value),
-                                                                           GetRegisteredMemberIds(), statusToSave)
-            If success Then
-
-                _currentMode = Nothing
-
-                NewGroupName = TxtFamilyGroupName.Text
-
-                UpdateGroupList()
-
-                ConfigureStandbyMode()
-
-                MessageBox.Show("El nuevo grupo familiar se ha registrado correctamente.", "Guardado Exitoso",
-                                MessageBoxButtons.OK, MessageBoxIcon.Information)
-            End If
-
-        Catch ex As InvalidOperationException
-            ' No hay tarifa asociada al número de integrantes
-            If MessageBox.Show($"{ex.Message}{vbCrLf}¿Deseas registrar una tarifa de descuento para esta cantidad de personas ahora?",
-                            "Tarifa No Encontrada", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) = DialogResult.Yes Then
-                FrmPricesAndDiscounts.Show()
-            End If
-
-        Catch ex As Exception
-            MsgBox($"ERROR AL GUARDAR EL GRUPO :{vbCrLf}{ex.Message}")
-        End Try
+        SaveFamilyGroup()
 
     End Sub
 
@@ -121,32 +93,7 @@ Public Class FrmFamilyGroup
 
         If Not IsGroupConfigurationValid() Then Exit Sub
 
-        Try
-            Dim statusToSave As EntityStatus = If(RbActiveState.Checked, EntityStatus.Active, EntityStatus.Inactive)
-
-            Dim success As Boolean = _familyGroupManager.UpdateFamilyGroup(_currentGroupId, TxtFamilyGroupName.Text,
-                                                                           CInt(NudNumberMembers.Value),
-                                                                           GetRegisteredMemberIds(), statusToSave)
-            If success Then
-
-                _currentMode = Nothing
-
-                ConfigureStandbyMode()
-
-                MessageBox.Show("El grupo familiar se ha actualizado correctamente.", "Actualización Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
-            End If
-
-        Catch ex As InvalidOperationException
-
-            If MessageBox.Show($"{ex.Message}{vbCrLf}¿Deseas registrar una tarifa de descuento para esta cantidad de personas ahora?",
-                            "Tarifa No Encontrada", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) = DialogResult.Yes Then
-                FrmPricesAndDiscounts.Show()
-            End If
-
-        Catch ex As Exception
-            MsgBox($"ERROR AL ACTUALIZAR EL GRUPO :{vbCrLf}{ex.Message}")
-        End Try
+        SaveFamilyGroup()
 
     End Sub
 
@@ -175,42 +122,28 @@ Public Class FrmFamilyGroup
 
         If _currentGroupId <= 0 Then Exit Sub
 
-        Dim msg As String = $"¿Qué acción deseas realizar con el grupo '{TxtFamilyGroupName.Text.Trim()}'?{vbCrLf}{vbCrLf}" &
-                             $"• [SÍ] - PASAR A INACTIVO (Pausa el grupo y a TODOS sus miembros por vacaciones).{vbCrLf}" &
-                             $"• [NO] - ELIMINAR DEFINITIVAMENTE (Disuelve el grupo y pasa sus integrantes a Mensual Activo).{vbCrLf}" &
-                             $"• [CANCELAR] - Salir sin realizar cambios."
-
-        Dim result As DialogResult = MessageBox.Show(msg, "Gestión del Estado del Grupo",
-                                                     MessageBoxButtons.YesNoCancel,
-                                                     MessageBoxIcon.Question,
-                                                     MessageBoxDefaultButton.Button1)
+        Dim result As DialogResult = MessageBox.Show(FamilyGroupDeletionConfirmation(TxtFamilyGroupName.Text, NudNumberMembers.Value),
+                                                     "Eliminar grupo familiar",
+                                                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2)
 
         Try
-            Select Case result
+            If result = DialogResult.Yes Then
 
-                'Case DialogResult.Yes ' PASAR A INACTIVO (Grupo + Clientes)
+                If _familyGroupManager.DeleteFamilyGroup(_currentGroupId) Then
 
-                    'If _familyGroupManager.SetGroupStatus(_currentGroupId, "INACTIVO") Then
-                    'MessageBox.Show("El grupo y todos sus integrantes han pasado a estado INACTIVO. El generador de deudas los ignorará automáticamente.",
-                    '                    "Baja Temporal Registrada", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                    '    ConfigureStandbyMode()
-                    'End If
+                    MessageBox.Show(DialogMessages.FamilyGroupDeletedSuccessfully, "Operación completada",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Information)
 
-                Case DialogResult.Yes ' BORRADO DEFINITIVO (Disolver grupo)
+                    ResetFamilyGroupForm()
 
-                    If _familyGroupManager.DeleteFamilyGroup(_currentGroupId) Then
-                        MessageBox.Show("El grupo ha sido eliminado y sus miembros pasaron a modalidad Mensual.",
-                                        "Eliminación Completa", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                        ConfigureStandbyMode()
-                    End If
+                    ConfigureStandbyMode()
 
-                Case DialogResult.Cancel
-                    Exit Sub
+                End If
 
-            End Select
+            End If
 
         Catch ex As Exception
-            MsgBox($"ERROR AL ELIMINAR EL GRUPO O CAMBIO DE ESTADO : {vbCrLf}{ex.Message}")
+            MsgBox($"ERROR AL ELIMINAR EL GRUPO : {vbCrLf}{ex.Message}")
         End Try
 
     End Sub
@@ -253,7 +186,7 @@ Public Class FrmFamilyGroup
                 End If
 
             Case TransactionMode.DeleteRecord
-                'If Not _isGroupSelected Then RefreshGroupSearch(TxtFamilyGroupName.Text)
+
                 RefreshGroupSearch(TxtFamilyGroupName.Text)
 
         End Select
@@ -274,16 +207,18 @@ Public Class FrmFamilyGroup
 
             If String.IsNullOrWhiteSpace(TxtFamilyGroupName.Text) Then
 
-                errorMessage = "El nombre del grupo es obligatorio."
+                errorMessage = AppMessages.FamilyGroupNameRequired
+
             ElseIf Not _isGroupNameValid Then
-                errorMessage = "El nombre de este grupo familiar ya existe."
+
+                errorMessage = AppMessages.FamilyGroupNameAlreadyExists
 
             End If
 
         Else
 
             If String.IsNullOrWhiteSpace(TxtFamilyGroupName.Text) Then
-                errorMessage = "Debe ingresar o seleccionar un grupo válido."
+                errorMessage = AppMessages.InvalidFamilyGroupSelection
             End If
 
         End If
@@ -298,8 +233,11 @@ Public Class FrmFamilyGroup
 
     End Sub
     Private Sub TxtFamilyGroupName_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TxtFamilyGroupName.KeyPress
-        'AL PRESIONAR LA TECLA DE RETROCESO CAMBIAMOS DE COLOR EL TEXTBOX
-        'If e.KeyChar = ControlChars.Back Then TxtListNomGrupo.BackColor = Color.Beige
+
+        Dim strAllowKey As String = " "
+        Dim strLockKey As String = "ºª"
+        AllowOnlyLetters(e, strAllowKey, strLockKey)
+
     End Sub
 
 
@@ -317,6 +255,11 @@ Public Class FrmFamilyGroup
     End Sub
     Private Sub NudNumberMembers_LostFocus(sender As Object, e As EventArgs) Handles NudNumberMembers.LostFocus
         NudNumberMembers.BackColor = If(NudNumberMembers.Value < 3, Color.MistyRose, Color.Azure)
+    End Sub
+
+
+    Private Sub RbInactiveState_CheckedChanged(sender As Object, e As EventArgs) Handles RbInactiveState.CheckedChanged
+        LblWarning.Visible = RbInactiveState.Checked
     End Sub
 
 
@@ -378,7 +321,7 @@ Public Class FrmFamilyGroup
             NudNumberMembers.Value = numberMembers
             LblNumberMembers.Text = $"{DgvListOfMembers.Rows.Count} de {NudNumberMembers.Value}"
             RbActiveState.Checked = (groupStatus = EntityStatus.Active)
-            RbInactiveState.Checked = Not RbActiveState.Checked '(groupStatus = EntityStatus.Inactive)
+            RbInactiveState.Checked = Not RbActiveState.Checked
 
             FormHelpers.UpdateValidationState(TxtFamilyGroupName, True, String.Empty, ErrorProvider)
 
@@ -423,6 +366,13 @@ Public Class FrmFamilyGroup
     Private Sub TxtSearchMembers_LostFocus(sender As Object, e As EventArgs) Handles TxtSearchMembers.LostFocus
         TxtSearchMembers.BackColor = Color.Azure
     End Sub
+    Private Sub TxtSearchMembers_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TxtSearchMembers.KeyPress
+
+        Dim strAllowKey As String = " "
+        Dim strLockKey As String = "ºª"
+        AllowOnlyLetters(e, strAllowKey, strLockKey)
+
+    End Sub
 
 
     Private Sub DgvSearchMembers_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvSearchMembers.CellContentClick
@@ -443,7 +393,7 @@ Public Class FrmFamilyGroup
 
             If row.Tag IsNot Nothing AndAlso CInt(row.Tag) = clientId Then
 
-                ErrorProvider.SetError(TxtSearchMembers, $"{fullName} ya se encuentra agregado en este grupo.")
+                ErrorProvider.SetError(TxtSearchMembers, $"{fullName} {AppMessages.CientAlreadyAddedToGroup}")
                 TxtSearchMembers.Focus()
                 TxtSearchMembers.SelectAll()
 
@@ -478,46 +428,40 @@ Public Class FrmFamilyGroup
     Private Sub BtnRemoveMember_Click(sender As Object, e As EventArgs) Handles BtnRemoveMember.Click
 
         If DgvListOfMembers.CurrentRow Is Nothing OrElse DgvListOfMembers.CurrentRow.IsNewRow Then
-            MessageBox.Show("Selecciona un integrante de la lista para poder quitarlo.", "Lista de Integrantes", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show(DialogMessages.SelectMemberFromListRemove, "Seleccionar integrante",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Exit Sub
         End If
 
         Dim fullName As String = DgvListOfMembers.CurrentRow.Cells("ListFullName").Value?.ToString()
 
-        Dim messageBody As String = $"Grupo: {TxtFamilyGroupName.Text}{vbCrLf}" &
-                                $"Integrante: {fullName}{vbCrLf}" &
-                                $"__________________________________________{vbCrLf}{vbCrLf}" &
-                                $"¿Seguro que quieres quitar a este integrante de la lista?"
+        Dim response As DialogResult = MessageBox.Show(ConfirmRemoveGroupMember(fullName), "Quitar integrante",
+                                                             MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                                                             MessageBoxDefaultButton.Button2)
 
-        Dim msgBoxResponse As DialogResult = MessageBox.Show(messageBody, "Quitar Integrante",
-                                                         MessageBoxButtons.YesNo,
-                                                         MessageBoxIcon.Question,
-                                                         MessageBoxDefaultButton.Button2)
+        If response = DialogResult.Yes Then
 
-        If msgBoxResponse = DialogResult.Yes Then
-            ' 1. Al remover la fila, el .Tag asignado a esta se desecha automáticamente
+            '| Al remover la fila, el .Tag asignado a esta se desecha automáticamente
             DgvListOfMembers.Rows.Remove(DgvListOfMembers.CurrentRow)
             DgvListOfMembers.CurrentCell = Nothing
 
-            ' 2. Actualizamos la etiqueta con la nueva cantidad de filas
             LblNumberMembers.Text = $"{DgvListOfMembers.Rows.Count} de {NudNumberMembers.Value}"
 
-            ' 3. Refrescamos UI y botones
             TxtSearchMembers.Focus()
             UpdateSaveButtonState()
             BtnRemoveMember.Enabled = (DgvListOfMembers.Rows.Count > 0)
+
         End If
 
     End Sub
 
 #End Region
 
-
     '| ============================================================ |'
     '|                FUNCIONES Y MÉTODOS AUXILIARES                |'
     '| ============================================================ |'
 
-#Region " ??. METODOS DE VALIDACION Y REGLAS DE NEGOCIO "
+#Region " 1. METODOS DE VALIDACION Y REGLAS DE NEGOCIO "
 
     ''' <summary>
     ''' Comprueba que la configuración de integrantes del grupo cumple
@@ -560,8 +504,7 @@ Public Class FrmFamilyGroup
 
         Dim isMembersSectionValid As Boolean = IsMembersConfigurationValid()
 
-        Dim errorMessage As String = If(isMembersSectionValid, String.Empty,
-            "La cantidad de integrantes no coincide con la lista de integrantes.")
+        Dim errorMessage As String = If(isMembersSectionValid, String.Empty, AppMessages.NumberMembersNotMatchListMembers)
 
         FormHelpers.UpdateValidationState(LblNumberMembers, isMembersSectionValid, errorMessage, ErrorProvider)
 
@@ -600,10 +543,48 @@ Public Class FrmFamilyGroup
 
     End Sub
 
+
+
+    ''' <summary>
+    ''' Solicita al usuario autorización para registrar una tarifa de grupo
+    ''' que no existe para la cantidad de integrantes indicada.
+    ''' 
+    ''' Abre <see cref="FrmPricesAndDiscounts"/> en modo de solicitud de tarifa,
+    ''' indicando el número de integrantes que debe utilizarse como referencia.
+    ''' 
+    ''' Devuelve <see langword="True"/> cuando la tarifa ha sido registrada
+    ''' correctamente y el formulario de tarifas devuelve <see cref="DialogResult.OK"/>.
+    ''' </summary>
+    ''' <returns>
+    ''' <see langword="True"/> si la tarifa fue registrada correctamente;
+    ''' en caso contrario, <see langword="False"/>.
+    ''' </returns>
+    Private Function AskToCreateGroupRate() As Boolean
+
+        Dim numberMembers As Integer = CInt(NudNumberMembers.Value)
+
+        Dim response As DialogResult = MessageBox.Show(DialogMessages.AskBeforeRegisterNewRate(numberMembers), "Tarifa no encontrada",
+                                                       MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
+
+        If response <> DialogResult.Yes Then Return False
+
+        Using frm As New FrmPricesAndDiscounts()
+
+            frm.IsGroupRateRequest = True
+            frm.SuggestedNumberMembers = numberMembers
+
+            Dim dialogResult As DialogResult = frm.ShowDialog(Me)
+
+            Return dialogResult = DialogResult.OK
+
+        End Using
+
+    End Function
+
 #End Region
 
 
-#Region " ??. LOGICA DE CARGA Y RENDERIZADO DE DATOS (Backend Bridge) "
+#Region " 2. OPERACIONES DE DATOS Y BACKEND BRIDGE "
 
 
     Private Function GetRegisteredMemberIds() As List(Of Integer)
@@ -644,7 +625,7 @@ Public Class FrmFamilyGroup
         If String.IsNullOrWhiteSpace(groupName) Then
 
             _isGroupNameValid = False
-            FormHelpers.UpdateValidationState(TxtFamilyGroupName, False, "El nombre del grupo es obligatorio.", ErrorProvider)
+            FormHelpers.UpdateValidationState(TxtFamilyGroupName, False, AppMessages.FamilyGroupNameRequired, ErrorProvider)
             UpdateSaveButtonState()
             Exit Sub
 
@@ -665,12 +646,8 @@ Public Class FrmFamilyGroup
 
             If exactMatch Then
 
-                Dim textErrorProvider As String = $"NOMBRE DUPLICADO : {groupName}" & Environment.NewLine &
-                                                  "El nombre de este grupo familiar ya existe." & Environment.NewLine &
-                                                  "Elija otro nombre para continuar."
-
                 _isGroupNameValid = False
-                FormHelpers.UpdateValidationState(TxtFamilyGroupName, False, textErrorProvider, ErrorProvider)
+                FormHelpers.UpdateValidationState(TxtFamilyGroupName, False, FamilyGroupNameDuplicated(groupName), ErrorProvider)
 
             Else
 
@@ -714,13 +691,13 @@ Public Class FrmFamilyGroup
                 DgvListFamilyGroups.BringToFront()
                 DgvListFamilyGroups.CurrentCell = Nothing
                 isValid = Not String.IsNullOrWhiteSpace(groupName)
-                warningMessage = If(isValid, String.Empty, "Debe ingresar o seleccionar un nombre de grupo.")
+                warningMessage = If(isValid, String.Empty, AppMessages.InvalidFamilyGroupSelection)
 
             Else
 
                 DgvListFamilyGroups.DataSource = Nothing
                 isValid = False
-                warningMessage = "El nombre del grupo ingresado no existe."
+                warningMessage = AppMessages.FamilyGroupNameNotExist
 
             End If
 
@@ -776,10 +753,80 @@ Public Class FrmFamilyGroup
     End Sub
 
 
+
+    ''' <summary>
+    ''' Guarda los datos del grupo familiar según el modo de operación actual.
+    ''' 
+    ''' En modo <see cref="TransactionMode.NewRecord"/> crea un nuevo grupo,
+    ''' mientras que en modo <see cref="TransactionMode.EditRecord"/> actualiza
+    ''' el grupo seleccionado.
+    ''' 
+    ''' Si no existe una tarifa para la cantidad de integrantes indicada,
+    ''' solicita al usuario la creación de dicha tarifa y, una vez creada,
+    ''' reintenta la operación de guardado conservando el modo de transacción actual.
+    ''' </summary>
+    Private Sub SaveFamilyGroup()
+
+        Try
+
+            Dim statusToSave As EntityStatus = If(RbActiveState.Checked, EntityStatus.Active, EntityStatus.Inactive)
+
+            Dim result As FamilyGroupSaveResult
+
+            Select Case _currentMode
+
+                Case TransactionMode.NewRecord
+                    result = _familyGroupManager.InsertFamilyGroup(TxtFamilyGroupName.Text, CInt(NudNumberMembers.Value),
+                                                                   GetRegisteredMemberIds(), statusToSave, _currentGroupId)
+                Case TransactionMode.EditRecord
+                    result = _familyGroupManager.UpdateFamilyGroup(_currentGroupId, TxtFamilyGroupName.Text,
+                                                                   CInt(NudNumberMembers.Value),
+                                                                   GetRegisteredMemberIds(), statusToSave)
+                Case Else
+                    Return
+
+            End Select
+
+
+            Select Case result
+
+                Case FamilyGroupSaveResult.Success
+
+                    Select Case _currentMode
+
+                        Case TransactionMode.NewRecord
+
+                            NewGroupName = TxtFamilyGroupName.Text 'Propiedad para pasar el nombre en otro formulario.
+                            UpdateGroupList()
+                            ConfigureStandbyMode()
+                            ShowSuccessMessage(_currentGroupId)
+
+                        Case TransactionMode.EditRecord
+
+                            ConfigureStandbyMode()
+                            ShowSuccessMessage(_currentGroupId)
+
+                    End Select
+
+                    _currentMode = Nothing
+
+                Case FamilyGroupSaveResult.GroupRateNotFound
+                    ' La tarifa ya existe. Volvemos a intentar la operación original.
+                    If AskToCreateGroupRate() Then SaveFamilyGroup()
+
+            End Select
+
+        Catch ex As Exception
+            MsgBox($"ERROR AL GUARDAR / ACTUALIZAR EL GRUPO :{vbCrLf}{ex.Message}")
+        End Try
+
+    End Sub
+
+
 #End Region
 
 
-#Region " ??. METODOS DE LIMPIEZA Y CONTROL VISUAL (UI) "
+#Region " 3. METODOS DE LIMPIEZA Y CONTROL DE INTERFAZ (UI) "
 
     ''' <summary>
     ''' Restablece los controles del formulario a su estado inicial.
@@ -788,6 +835,11 @@ Public Class FrmFamilyGroup
     ''' </summary>
     Private Sub ResetFamilyGroupForm()
 
+        TxtFamilyGroupName.Clear()
+        TxtSearchMembers.Clear()
+        DgvListOfMembers.Rows.Clear()
+        ChkEmptyGroup.Checked = False
+
         If _currentMode = TransactionMode.NewRecord Then
             NudNumberMembers.Value = 3
             RbActiveState.Checked = True
@@ -795,16 +847,14 @@ Public Class FrmFamilyGroup
         Else
             NudNumberMembers.Value = 0
             LblNumberMembers.Text = String.Empty
-            ErrorProvider.SetError(LblNumberMembers, String.Empty)
+
             RbActiveState.Checked = False
             RbInactiveState.Checked = False
 
-        End If
+            ErrorProvider.SetError(TxtFamilyGroupName, String.Empty)
+            ErrorProvider.SetError(LblNumberMembers, String.Empty)
 
-        TxtFamilyGroupName.Clear()
-        TxtSearchMembers.Clear()
-        DgvListOfMembers.Rows.Clear()
-        ChkEmptyGroup.Checked = False
+        End If
 
     End Sub
 
@@ -956,11 +1006,26 @@ Public Class FrmFamilyGroup
     End Sub
 
 
+    ''' <summary>
+    ''' Muestra un mensaje de confirmación después
+    ''' de registrar o actualizar correctamente un grupo familiar.
+    ''' </summary>
+    ''' <param name="groupCode">
+    ''' Identificador del grupo familiar procesado.
+    ''' </param>
+    Private Sub ShowSuccessMessage(groupCode As Integer)
+
+        Dim idFormatted As String = $"GRP - {groupCode:000}"
+        Dim actionText As String = If(_currentMode = TransactionMode.NewRecord, "GUARDADOS", "ACTUALIZADOS")
+
+        MessageBox.Show(OperationSuccessMessage(EntityNames.FamilyGroup, TxtFamilyGroupName.Text, idFormatted, actionText),
+                        "Operación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information)
+    End Sub
+
 #End Region
 
 
-#Region " ?? ESTRUCTURAS Y ENUMS AUXILIARES "
-    ' Tipos de datos personalizados que definen los estados y reglas del formulario.
+#Region " 4. ESTRUCTURAS Y ENUMS AUXILIARES "
 
     Public Enum TransactionMode
         NewRecord
@@ -969,6 +1034,10 @@ Public Class FrmFamilyGroup
     End Enum
 
 #End Region
+
+
+
+
 
 
 End Class

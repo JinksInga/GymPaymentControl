@@ -23,20 +23,21 @@ Partial Class FrmFamilyGroup
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle5 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle6 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle7 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle8 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle25 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle26 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle27 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle28 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle29 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle30 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle31 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle32 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.LblNumberMembers = New System.Windows.Forms.Label()
         Me.NudNumberMembers = New System.Windows.Forms.NumericUpDown()
         Me.TxtFamilyGroupName = New System.Windows.Forms.TextBox()
         Me.LblSearchMembers = New System.Windows.Forms.Label()
         Me.TxtSearchMembers = New System.Windows.Forms.TextBox()
         Me.DgvSearchMembers = New System.Windows.Forms.DataGridView()
+        Me.SearchFullName = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.PnlButtonPanel = New System.Windows.Forms.Panel()
         Me.BtnCloseWindow = New System.Windows.Forms.Button()
         Me.BtnNewGroup = New System.Windows.Forms.Button()
@@ -50,20 +51,20 @@ Partial Class FrmFamilyGroup
         Me.BtnRemoveMember = New System.Windows.Forms.Button()
         Me.LblListOfMembers = New System.Windows.Forms.Label()
         Me.DgvListOfMembers = New System.Windows.Forms.DataGridView()
+        Me.ListFullName = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.DgvListFamilyGroups = New System.Windows.Forms.DataGridView()
+        Me.ColGroupName = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.LblFamilyGroupName = New System.Windows.Forms.Label()
         Me.ToolTip = New System.Windows.Forms.ToolTip(Me.components)
         Me.ErrorProvider = New System.Windows.Forms.ErrorProvider(Me.components)
         Me.GbGroupInformation = New System.Windows.Forms.GroupBox()
+        Me.LblWarning = New System.Windows.Forms.Label()
         Me.GbEmptyGroup = New System.Windows.Forms.GroupBox()
         Me.RbInactiveState = New System.Windows.Forms.RadioButton()
         Me.RbActiveState = New System.Windows.Forms.RadioButton()
         Me.LblStatusGroup = New System.Windows.Forms.Label()
         Me.LblIntegrantes = New System.Windows.Forms.Label()
         Me.GbMembersOfGroup = New System.Windows.Forms.GroupBox()
-        Me.ColGroupName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.ListFullName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.SearchFullName = New System.Windows.Forms.DataGridViewTextBoxColumn()
         CType(Me.NudNumberMembers, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.DgvSearchMembers, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.PnlButtonPanel.SuspendLayout()
@@ -81,7 +82,7 @@ Partial Class FrmFamilyGroup
         Me.LblNumberMembers.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.LblNumberMembers.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.LblNumberMembers.ForeColor = System.Drawing.Color.MediumBlue
-        Me.LblNumberMembers.Location = New System.Drawing.Point(120, 128)
+        Me.LblNumberMembers.Location = New System.Drawing.Point(120, 179)
         Me.LblNumberMembers.Margin = New System.Windows.Forms.Padding(16, 8, 24, 0)
         Me.LblNumberMembers.Name = "LblNumberMembers"
         Me.LblNumberMembers.Size = New System.Drawing.Size(80, 26)
@@ -93,7 +94,7 @@ Partial Class FrmFamilyGroup
         Me.NudNumberMembers.BackColor = System.Drawing.SystemColors.Window
         Me.NudNumberMembers.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.NudNumberMembers.ForeColor = System.Drawing.Color.MediumBlue
-        Me.NudNumberMembers.Location = New System.Drawing.Point(24, 128)
+        Me.NudNumberMembers.Location = New System.Drawing.Point(24, 179)
         Me.NudNumberMembers.Margin = New System.Windows.Forms.Padding(24, 8, 0, 0)
         Me.NudNumberMembers.Maximum = New Decimal(New Integer() {9, 0, 0, 0})
         Me.NudNumberMembers.Name = "NudNumberMembers"
@@ -147,8 +148,8 @@ Partial Class FrmFamilyGroup
         Me.DgvSearchMembers.AllowUserToDeleteRows = False
         Me.DgvSearchMembers.AllowUserToResizeColumns = False
         Me.DgvSearchMembers.AllowUserToResizeRows = False
-        DataGridViewCellStyle1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DgvSearchMembers.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle1
+        DataGridViewCellStyle25.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DgvSearchMembers.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle25
         Me.DgvSearchMembers.ColumnHeadersHeight = 4
         Me.DgvSearchMembers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
         Me.DgvSearchMembers.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.SearchFullName})
@@ -167,6 +168,17 @@ Partial Class FrmFamilyGroup
         Me.DgvSearchMembers.TabIndex = 3
         Me.ToolTip.SetToolTip(Me.DgvSearchMembers, "DOBLE CLICK PARA SELECCIONAR UN CLIENTE")
         Me.DgvSearchMembers.Visible = False
+        '
+        'SearchFullName
+        '
+        Me.SearchFullName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.SearchFullName.DataPropertyName = "full_name"
+        Me.SearchFullName.HeaderText = "SearchFullName"
+        Me.SearchFullName.Name = "SearchFullName"
+        Me.SearchFullName.ReadOnly = True
+        Me.SearchFullName.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.SearchFullName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.SearchFullName.Width = 327
         '
         'PnlButtonPanel
         '
@@ -324,8 +336,8 @@ Partial Class FrmFamilyGroup
         '
         Me.ChkEmptyGroup.AutoSize = True
         Me.ChkEmptyGroup.Font = New System.Drawing.Font("Linux Biolinum G", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.ChkEmptyGroup.Location = New System.Drawing.Point(8, 21)
-        Me.ChkEmptyGroup.Margin = New System.Windows.Forms.Padding(8, 8, 8, 16)
+        Me.ChkEmptyGroup.Location = New System.Drawing.Point(7, 17)
+        Me.ChkEmptyGroup.Margin = New System.Windows.Forms.Padding(8, 4, 8, 8)
         Me.ChkEmptyGroup.Name = "ChkEmptyGroup"
         Me.ChkEmptyGroup.Size = New System.Drawing.Size(335, 21)
         Me.ChkEmptyGroup.TabIndex = 1
@@ -363,42 +375,42 @@ Partial Class FrmFamilyGroup
         Me.DgvListOfMembers.AllowUserToDeleteRows = False
         Me.DgvListOfMembers.AllowUserToResizeColumns = False
         Me.DgvListOfMembers.AllowUserToResizeRows = False
-        DataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window
-        DataGridViewCellStyle2.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DgvListOfMembers.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle2
-        DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control
-        DataGridViewCellStyle3.Font = New System.Drawing.Font("Malgun Gothic", 11.25!)
-        DataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText
-        DataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        Me.DgvListOfMembers.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle3
+        DataGridViewCellStyle26.BackColor = System.Drawing.SystemColors.Window
+        DataGridViewCellStyle26.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DgvListOfMembers.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle26
+        DataGridViewCellStyle27.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle27.BackColor = System.Drawing.SystemColors.Control
+        DataGridViewCellStyle27.Font = New System.Drawing.Font("Malgun Gothic", 11.25!)
+        DataGridViewCellStyle27.ForeColor = System.Drawing.SystemColors.WindowText
+        DataGridViewCellStyle27.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle27.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        Me.DgvListOfMembers.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle27
         Me.DgvListOfMembers.ColumnHeadersHeight = 30
         Me.DgvListOfMembers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
         Me.DgvListOfMembers.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.ListFullName})
-        DataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        DataGridViewCellStyle4.BackColor = System.Drawing.Color.PaleTurquoise
-        DataGridViewCellStyle4.Font = New System.Drawing.Font("Malgun Gothic", 11.25!)
-        DataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText
-        DataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        DataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.DgvListOfMembers.DefaultCellStyle = DataGridViewCellStyle4
+        DataGridViewCellStyle28.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle28.BackColor = System.Drawing.Color.PaleTurquoise
+        DataGridViewCellStyle28.Font = New System.Drawing.Font("Malgun Gothic", 11.25!)
+        DataGridViewCellStyle28.ForeColor = System.Drawing.SystemColors.ControlText
+        DataGridViewCellStyle28.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle28.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        DataGridViewCellStyle28.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.DgvListOfMembers.DefaultCellStyle = DataGridViewCellStyle28
         Me.DgvListOfMembers.Location = New System.Drawing.Point(24, 128)
         Me.DgvListOfMembers.Margin = New System.Windows.Forms.Padding(24, 8, 0, 24)
         Me.DgvListOfMembers.MultiSelect = False
         Me.DgvListOfMembers.Name = "DgvListOfMembers"
         Me.DgvListOfMembers.ReadOnly = True
-        DataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control
-        DataGridViewCellStyle5.Font = New System.Drawing.Font("Malgun Gothic", 11.25!)
-        DataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText
-        DataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        Me.DgvListOfMembers.RowHeadersDefaultCellStyle = DataGridViewCellStyle5
+        DataGridViewCellStyle29.BackColor = System.Drawing.SystemColors.Control
+        DataGridViewCellStyle29.Font = New System.Drawing.Font("Malgun Gothic", 11.25!)
+        DataGridViewCellStyle29.ForeColor = System.Drawing.SystemColors.WindowText
+        DataGridViewCellStyle29.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle29.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        Me.DgvListOfMembers.RowHeadersDefaultCellStyle = DataGridViewCellStyle29
         Me.DgvListOfMembers.RowHeadersWidth = 4
         Me.DgvListOfMembers.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
-        DataGridViewCellStyle6.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DgvListOfMembers.RowsDefaultCellStyle = DataGridViewCellStyle6
+        DataGridViewCellStyle30.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DgvListOfMembers.RowsDefaultCellStyle = DataGridViewCellStyle30
         Me.DgvListOfMembers.RowTemplate.DefaultCellStyle.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.DgvListOfMembers.RowTemplate.DividerHeight = 2
         Me.DgvListOfMembers.RowTemplate.Height = 30
@@ -407,24 +419,35 @@ Partial Class FrmFamilyGroup
         Me.DgvListOfMembers.TabIndex = 1
         Me.ToolTip.SetToolTip(Me.DgvListOfMembers, "CLICK PARA SELECCIONAR UN FAMILIAR")
         '
+        'ListFullName
+        '
+        Me.ListFullName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.ListFullName.DataPropertyName = "full_name"
+        Me.ListFullName.HeaderText = "Nombre y Apellido"
+        Me.ListFullName.Name = "ListFullName"
+        Me.ListFullName.ReadOnly = True
+        Me.ListFullName.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.ListFullName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.ListFullName.Width = 327
+        '
         'DgvListFamilyGroups
         '
         Me.DgvListFamilyGroups.AllowUserToAddRows = False
         Me.DgvListFamilyGroups.AllowUserToDeleteRows = False
-        DataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window
-        DataGridViewCellStyle7.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DgvListFamilyGroups.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle7
+        DataGridViewCellStyle31.BackColor = System.Drawing.SystemColors.Window
+        DataGridViewCellStyle31.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DgvListFamilyGroups.AlternatingRowsDefaultCellStyle = DataGridViewCellStyle31
         Me.DgvListFamilyGroups.ColumnHeadersHeight = 4
         Me.DgvListFamilyGroups.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing
         Me.DgvListFamilyGroups.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.ColGroupName})
-        DataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        DataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.GradientInactiveCaption
-        DataGridViewCellStyle8.Font = New System.Drawing.Font("Malgun Gothic", 11.25!)
-        DataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.ControlText
-        DataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        DataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.DgvListFamilyGroups.DefaultCellStyle = DataGridViewCellStyle8
+        DataGridViewCellStyle32.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle32.BackColor = System.Drawing.SystemColors.GradientInactiveCaption
+        DataGridViewCellStyle32.Font = New System.Drawing.Font("Malgun Gothic", 11.25!)
+        DataGridViewCellStyle32.ForeColor = System.Drawing.SystemColors.ControlText
+        DataGridViewCellStyle32.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle32.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        DataGridViewCellStyle32.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.DgvListFamilyGroups.DefaultCellStyle = DataGridViewCellStyle32
         Me.DgvListFamilyGroups.Location = New System.Drawing.Point(24, 89)
         Me.DgvListFamilyGroups.Margin = New System.Windows.Forms.Padding(24, 2, 24, 24)
         Me.DgvListFamilyGroups.MultiSelect = False
@@ -440,6 +463,17 @@ Partial Class FrmFamilyGroup
         Me.DgvListFamilyGroups.TabIndex = 3
         Me.ToolTip.SetToolTip(Me.DgvListFamilyGroups, "DOBLE CLICK PARA SELECCIONAR UN GRUPO")
         Me.DgvListFamilyGroups.Visible = False
+        '
+        'ColGroupName
+        '
+        Me.ColGroupName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
+        Me.ColGroupName.DataPropertyName = "nom_grp"
+        Me.ColGroupName.HeaderText = "ColGroupName"
+        Me.ColGroupName.Name = "ColGroupName"
+        Me.ColGroupName.ReadOnly = True
+        Me.ColGroupName.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.ColGroupName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.ColGroupName.Width = 327
         '
         'LblFamilyGroupName
         '
@@ -458,6 +492,7 @@ Partial Class FrmFamilyGroup
         '
         'GbGroupInformation
         '
+        Me.GbGroupInformation.Controls.Add(Me.LblWarning)
         Me.GbGroupInformation.Controls.Add(Me.GbEmptyGroup)
         Me.GbGroupInformation.Controls.Add(Me.RbInactiveState)
         Me.GbGroupInformation.Controls.Add(Me.LblFamilyGroupName)
@@ -479,15 +514,28 @@ Partial Class FrmFamilyGroup
         Me.GbGroupInformation.TabStop = False
         Me.GbGroupInformation.Text = "Información del grupo familiar"
         '
+        'LblWarning
+        '
+        Me.LblWarning.Font = New System.Drawing.Font("Malgun Gothic", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblWarning.ForeColor = System.Drawing.Color.DarkOrange
+        Me.LblWarning.Location = New System.Drawing.Point(28, 290)
+        Me.LblWarning.Margin = New System.Windows.Forms.Padding(28, 8, 0, 0)
+        Me.LblWarning.Name = "LblWarning"
+        Me.LblWarning.Size = New System.Drawing.Size(292, 41)
+        Me.LblWarning.TabIndex = 14
+        Me.LblWarning.Text = "⚠ Advertencia : El grupo familiar y todos sus      integrantes pasarán a estado I" &
+    "nactivo. ⚠"
+        Me.LblWarning.Visible = False
+        '
         'GbEmptyGroup
         '
         Me.GbEmptyGroup.Controls.Add(Me.ChkEmptyGroup)
         Me.GbEmptyGroup.Font = New System.Drawing.Font("Arial", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.GbEmptyGroup.Location = New System.Drawing.Point(24, 235)
-        Me.GbEmptyGroup.Margin = New System.Windows.Forms.Padding(24, 8, 24, 0)
+        Me.GbEmptyGroup.Location = New System.Drawing.Point(24, 88)
+        Me.GbEmptyGroup.Margin = New System.Windows.Forms.Padding(25, 0, 25, 0)
         Me.GbEmptyGroup.Name = "GbEmptyGroup"
         Me.GbEmptyGroup.Padding = New System.Windows.Forms.Padding(0)
-        Me.GbEmptyGroup.Size = New System.Drawing.Size(351, 58)
+        Me.GbEmptyGroup.Size = New System.Drawing.Size(349, 46)
         Me.GbEmptyGroup.TabIndex = 13
         Me.GbEmptyGroup.TabStop = False
         '
@@ -496,7 +544,7 @@ Partial Class FrmFamilyGroup
         Me.RbInactiveState.Appearance = System.Windows.Forms.Appearance.Button
         Me.RbInactiveState.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.RbInactiveState.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.RbInactiveState.Location = New System.Drawing.Point(192, 195)
+        Me.RbInactiveState.Location = New System.Drawing.Point(192, 250)
         Me.RbInactiveState.Margin = New System.Windows.Forms.Padding(8, 8, 0, 0)
         Me.RbInactiveState.Name = "RbInactiveState"
         Me.RbInactiveState.Padding = New System.Windows.Forms.Padding(30, 0, 30, 0)
@@ -511,7 +559,7 @@ Partial Class FrmFamilyGroup
         Me.RbActiveState.Appearance = System.Windows.Forms.Appearance.Button
         Me.RbActiveState.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.RbActiveState.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.RbActiveState.Location = New System.Drawing.Point(24, 195)
+        Me.RbActiveState.Location = New System.Drawing.Point(24, 250)
         Me.RbActiveState.Margin = New System.Windows.Forms.Padding(24, 8, 0, 0)
         Me.RbActiveState.Name = "RbActiveState"
         Me.RbActiveState.Padding = New System.Windows.Forms.Padding(30, 0, 30, 0)
@@ -525,8 +573,8 @@ Partial Class FrmFamilyGroup
         '
         Me.LblStatusGroup.AutoSize = True
         Me.LblStatusGroup.Font = New System.Drawing.Font("Linux Biolinum G", 11.25!, System.Drawing.FontStyle.Bold)
-        Me.LblStatusGroup.Location = New System.Drawing.Point(28, 170)
-        Me.LblStatusGroup.Margin = New System.Windows.Forms.Padding(28, 16, 0, 0)
+        Me.LblStatusGroup.Location = New System.Drawing.Point(28, 225)
+        Me.LblStatusGroup.Margin = New System.Windows.Forms.Padding(28, 20, 0, 0)
         Me.LblStatusGroup.Name = "LblStatusGroup"
         Me.LblStatusGroup.Size = New System.Drawing.Size(123, 17)
         Me.LblStatusGroup.TabIndex = 10
@@ -537,8 +585,8 @@ Partial Class FrmFamilyGroup
         '
         Me.LblIntegrantes.AutoSize = True
         Me.LblIntegrantes.Font = New System.Drawing.Font("Linux Biolinum G", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblIntegrantes.Location = New System.Drawing.Point(28, 103)
-        Me.LblIntegrantes.Margin = New System.Windows.Forms.Padding(28, 16, 0, 0)
+        Me.LblIntegrantes.Location = New System.Drawing.Point(28, 154)
+        Me.LblIntegrantes.Margin = New System.Windows.Forms.Padding(28, 20, 0, 0)
         Me.LblIntegrantes.Name = "LblIntegrantes"
         Me.LblIntegrantes.Size = New System.Drawing.Size(166, 17)
         Me.LblIntegrantes.TabIndex = 3
@@ -549,9 +597,9 @@ Partial Class FrmFamilyGroup
         '
         Me.GbMembersOfGroup.Controls.Add(Me.BtnRemoveMember)
         Me.GbMembersOfGroup.Controls.Add(Me.LblSearchMembers)
-        Me.GbMembersOfGroup.Controls.Add(Me.DgvListOfMembers)
         Me.GbMembersOfGroup.Controls.Add(Me.LblListOfMembers)
         Me.GbMembersOfGroup.Controls.Add(Me.TxtSearchMembers)
+        Me.GbMembersOfGroup.Controls.Add(Me.DgvListOfMembers)
         Me.GbMembersOfGroup.Controls.Add(Me.DgvSearchMembers)
         Me.GbMembersOfGroup.Enabled = False
         Me.GbMembersOfGroup.Font = New System.Drawing.Font("Malgun Gothic", 11.25!)
@@ -563,39 +611,6 @@ Partial Class FrmFamilyGroup
         Me.GbMembersOfGroup.TabIndex = 2
         Me.GbMembersOfGroup.TabStop = False
         Me.GbMembersOfGroup.Text = "Integrantes del grupo familiar"
-        '
-        'ColGroupName
-        '
-        Me.ColGroupName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.ColGroupName.DataPropertyName = "nom_grp"
-        Me.ColGroupName.HeaderText = "ColGroupName"
-        Me.ColGroupName.Name = "ColGroupName"
-        Me.ColGroupName.ReadOnly = True
-        Me.ColGroupName.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.ColGroupName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.ColGroupName.Width = 327
-        '
-        'ListFullName
-        '
-        Me.ListFullName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.ListFullName.DataPropertyName = "full_name"
-        Me.ListFullName.HeaderText = "Nombre y Apellido"
-        Me.ListFullName.Name = "ListFullName"
-        Me.ListFullName.ReadOnly = True
-        Me.ListFullName.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.ListFullName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.ListFullName.Width = 327
-        '
-        'SearchFullName
-        '
-        Me.SearchFullName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None
-        Me.SearchFullName.DataPropertyName = "full_name"
-        Me.SearchFullName.HeaderText = "SearchFullName"
-        Me.SearchFullName.Name = "SearchFullName"
-        Me.SearchFullName.ReadOnly = True
-        Me.SearchFullName.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
-        Me.SearchFullName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.SearchFullName.Width = 327
         '
         'FrmFamilyGroup
         '
@@ -660,4 +675,5 @@ Partial Class FrmFamilyGroup
     Friend WithEvents ColGroupName As DataGridViewTextBoxColumn
     Friend WithEvents SearchFullName As DataGridViewTextBoxColumn
     Friend WithEvents ListFullName As DataGridViewTextBoxColumn
+    Friend WithEvents LblWarning As Label
 End Class
