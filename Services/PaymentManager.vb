@@ -40,20 +40,74 @@ Namespace Services
 
         End Function
 
+
+        ''' <summary>
+        ''' Determina si un cliente tiene actualmente alguna deuda individual pendiente.
+        ''' Solo se consideran pagos asociados directamente al cliente y no los pagos
+        ''' correspondientes a un grupo familiar.
+        ''' </summary>
+        Public Function HasPendingIndividualDebt(clientId As Integer) As Boolean
+
+            Const sqlQuery As String = "SELECT EXISTS (SELECT 1 " &
+                                       "FROM pagos " &
+                                       "WHERE id_cli = @id_cli " &
+                                       "AND (frm_pgs IS NULL OR frm_pgs = ''))"
+
+            Using connection As MySqlConnection = GetConnection()
+
+                Using command As New MySqlCommand(sqlQuery, connection)
+
+                    command.Parameters.Add("@id_cli", MySqlDbType.Int32).Value = clientId
+
+                    connection.Open()
+
+                    Return Convert.ToBoolean(command.ExecuteScalar())
+
+                End Using
+
+            End Using
+
+        End Function
+
+
+        Public Function HasPendingGroupDebt(groupId As Integer) As Boolean
+
+            Const sqlQuery As String = "SELECT EXISTS (SELECT 1 " &
+                                       "FROM pagos " &
+                                       "WHERE id_grp = @id_grp " &
+                                       "AND (frm_pgs IS NULL OR frm_pgs = ''))"
+
+            Using connection = GetConnection()
+
+                Using command As New MySqlCommand(sqlQuery, connection)
+
+                    command.Parameters.Add("@id_grp", MySqlDbType.Int32).Value = groupId
+
+                    connection.Open()
+
+                    Return Convert.ToBoolean(command.ExecuteScalar())
+
+                End Using
+
+            End Using
+
+        End Function
+
+
         ' Obtiene los pagos individuales pendientes desde la base de datos
         ' (clientes activos, sin grupo, sin pago finalizado)
         Private Function GetBaseDataIndividual() As List(Of IndividualPaymentDTO)
 
             Dim listIndividualPayment As New List(Of IndividualPaymentDTO)
 
-            Dim sqlQuery As String = "SELECT c.nom_cli, c.ape_cli, c.fdn_cli,
-                                        p.id_pgs, p.fdi_pgs, p.mtd_pgs, p.prc_pgs, p.dsc_pgs, p.id_cli
-                                        FROM clientes c
-                                        INNER JOIN pagos p ON c.id_cli = p.id_cli
-                                        WHERE c.std_cli = 'ACTIVO'
-                                        AND (p.frm_pgs IS NULL OR p.frm_pgs = '')
-                                        AND c.id_grp IS NULL
-                                        ORDER BY p.id_cli, p.fdi_pgs"
+            Dim sqlQuery As String =
+    "SELECT c.nom_cli, c.ape_cli, c.fdn_cli, " &
+    "       p.id_pgs, p.fdi_pgs, p.mtd_pgs, " &
+    "       p.prc_pgs, p.dsc_pgs, p.id_cli " &
+    "FROM clientes c " &
+    "INNER JOIN pagos p ON c.id_cli = p.id_cli " &
+    "WHERE (p.frm_pgs IS NULL OR p.frm_pgs = '') " &
+    "ORDER BY p.id_cli, p.fdi_pgs"
 
             Using connection = GetConnection()
 
@@ -155,15 +209,17 @@ Namespace Services
 
             Dim listGroupPayment As New List(Of GroupPaymentDTO)
 
-            Dim sqlQuery As String = "SELECT GROUP_CONCAT(c.nom_cli SEPARATOR ', ') AS INTEGRANTES,
-                                        g.id_grp, g.nom_grp,
-                                        p.fdi_pgs, p.mtd_pgs, p.prc_pgs, p.dsc_pgs, p.id_pgs 
-                                        FROM clientes c
-                                        INNER JOIN grp_familiar g ON c.id_grp = g.id_grp
-                                        INNER JOIN pagos p ON g.id_grp = p.id_grp
-                                        WHERE (p.frm_pgs IS NULL OR p.frm_pgs = '')
-                                        GROUP BY p.id_pgs
-                                        ORDER BY g.id_grp, p.fdi_pgs ASC"
+            Dim sqlQuery As String =
+    "SELECT GROUP_CONCAT(c.nom_cli SEPARATOR ', ') AS INTEGRANTES, " &
+    "       g.id_grp, g.nom_grp, " &
+    "       p.fdi_pgs, p.mtd_pgs, " &
+    "       p.prc_pgs, p.dsc_pgs, p.id_pgs " &
+    "FROM clientes c " &
+    "INNER JOIN grp_familiar g ON c.id_grp = g.id_grp " &
+    "INNER JOIN pagos p ON g.id_grp = p.id_grp " &
+    "WHERE (p.frm_pgs IS NULL OR p.frm_pgs = '') " &
+    "GROUP BY p.id_pgs " &
+    "ORDER BY g.id_grp, p.fdi_pgs ASC"
 
             Using connection = GetConnection()
 
@@ -257,7 +313,6 @@ Namespace Services
                                                Optional externalConn As MySqlConnection = Nothing,
                                                Optional externalTrans As MySqlTransaction = Nothing) As Boolean
 
-            ' Gestionar conexión dinámica (si viene de una transacción externa como el alta de cliente)
             Dim conn = If(externalConn, GetConnection())
             Dim closeConn As Boolean = (externalConn Is Nothing)
 
@@ -271,8 +326,6 @@ Namespace Services
 
                     Dim groupPayment = DirectCast(payment, GroupPaymentDTO)
 
-                    ' Comprobamos si ya existe una deuda/pago para este ID de grupo en el mes y año de la fecha de inicio (FdiPgs)
-                    ' Usamos MONTH(@fdi) en lugar de CURDATE() para que también funcione correctamente en el generador masivo
                     Dim sqlCheck As String = "SELECT COUNT(*) FROM pagos WHERE id_grp = @idGrp
                                               AND MONTH(fdi_pgs) = MONTH(@fdi) AND YEAR(fdi_pgs) = YEAR(@fdi)"
 
@@ -281,9 +334,6 @@ Namespace Services
                         cmdCheck.Parameters.AddWithValue("@idGrp", groupPayment.IdGrp)
                         cmdCheck.Parameters.AddWithValue("@fdi", groupPayment.FdiPgs)
 
-                        ' Si ya existe el pago del grupo para este periodo, salimos retornando True o False.
-                        ' Retornamos True para que el proceso llamador (bucle) piense que se gestionó
-                        ' correctamente y no lance un error.
                         Dim exists As Integer = Convert.ToInt32(cmdCheck.ExecuteScalar())
                         If exists > 0 Then Return True
 
@@ -297,12 +347,10 @@ Namespace Services
                 Dim sqlQuery As String
 
                 If mode = TransactionMode.NewPayment Then
-                    ' SQL COMPLETO
                     sqlQuery = "INSERT INTO pagos (fdi_pgs, fdp_pgs, frm_pgs, mtd_pgs,
                                                    prc_pgs, dsc_pgs, id_cli, id_grp, id_user)
                                 VALUES (@fdi, @fdp, @frm, @mtd, @prc, @dsc, @idCli, @idGrp, @idUser)"
                 Else
-                    ' UPDATE: fdp_pgs y mtd_pgs añadidos por si se corrigen en edición
                     sqlQuery = "UPDATE pagos SET fdi_pgs=@fdi, fdp_pgs=@fdp, frm_pgs=@frm, mtd_pgs=@mtd,
                                 prc_pgs=@prc, dsc_pgs=@dsc, id_user=@idUser WHERE id_pgs=@idPgs"
                 End If
@@ -353,44 +401,46 @@ Namespace Services
 
             Dim historyList As New List(Of IndividualPaymentDTO)
 
-            ' El cerebro decide el SQL: Si hay grupo, prioriza grupo, si no, por cliente
-            Dim sqlQuery As String
-            Dim idForQuery As Integer
-
-            ' Definimos la base de la consulta para no repetir texto
-            Dim sqQueryBase As String = "SELECT p.*, u.nom_user FROM pagos p
-                                         LEFT JOIN usuarios u ON p.id_user = u.id_user "
+            Dim sqlQuery As String = "SELECT p.*, u.nom_user " &
+                                     "FROM pagos p " &
+                                     "LEFT JOIN usuarios u ON p.id_user = u.id_user " &
+                                     "WHERE p.id_cli = @idClient "
 
             If idGroup.HasValue AndAlso idGroup.Value > 0 Then
-                sqlQuery = sqQueryBase & "WHERE p.id_grp = @id ORDER BY p.fdi_pgs DESC"
-                idForQuery = idGroup.Value
-            Else
-                sqlQuery = sqQueryBase & "WHERE p.id_cli = @id ORDER BY p.fdi_pgs DESC"
-                idForQuery = idClient
+                sqlQuery &= "OR p.id_grp = @idGroup "
             End If
+
+            sqlQuery &= "ORDER BY p.fdi_pgs DESC"
 
             Using connection = GetConnection()
 
                 Using command As New MySqlCommand(sqlQuery, connection)
 
-                    command.Parameters.AddWithValue("@id", idForQuery)
+                    command.Parameters.AddWithValue("@idClient", idClient)
+
+                    If idGroup.HasValue AndAlso idGroup.Value > 0 Then
+                        command.Parameters.AddWithValue("@idGroup", idGroup.Value)
+                    End If
+
                     connection.Open()
 
                     Using dr = command.ExecuteReader()
 
                         While dr.Read()
 
-                            Dim strFrmPgs = If(dr.IsDBNull(dr.GetOrdinal("frm_pgs")), "IMPAGO", dr.GetString("frm_pgs"))
+                            Dim fdpOrdinal As Integer = dr.GetOrdinal("fdp_pgs")
+                            Dim fdpDate As Date = If(dr.IsDBNull(fdpOrdinal), Date.MinValue, dr.GetDateTime(fdpOrdinal))
+                            Dim strFrmPgs As String = If(dr.IsDBNull(dr.GetOrdinal("frm_pgs")), "IMPAGO", dr.GetString("frm_pgs"))
 
                             historyList.Add(New IndividualPaymentDTO With
                                             {
                                                 .IdPgs = dr.GetInt32("id_pgs"),
                                                 .FdiPgs = dr.GetDateTime("fdi_pgs"),
                                                 .LongFdiPgs = FormatDateUppercase(dr.GetDateTime("fdi_pgs")),
-                                                .FdpPgs = If(dr.IsDBNull(dr.GetOrdinal("fdp_pgs")), Date.MinValue, dr.GetDateTime("fdp_pgs")),
-                                                .LongFdpPgs = If(dr.GetDateTime("fdp_pgs") = Date.MinValue, "SIN FECHA", FormatDateUppercase(dr.GetDateTime("fdp_pgs"))),
+                                                .FdpPgs = fdpDate,
+                                                .LongFdpPgs = If(fdpDate = Date.MinValue, "SIN FECHA", FormatDateUppercase(fdpDate)),
                                                 .MtdPgs = dr.GetString("mtd_pgs"),
-                                                .FrmPgs = If(dr.IsDBNull(dr.GetOrdinal("frm_pgs")), "IMPAGO", dr.GetString("frm_pgs")),
+                                                .FrmPgs = strFrmPgs,
                                                 .HasDebtCustomer = (strFrmPgs = "IMPAGO"),
                                                 .PrcPgs = dr.GetDecimal("prc_pgs"),
                                                 .DscPgs = dr.GetDecimal("dsc_pgs"),
@@ -402,10 +452,7 @@ Namespace Services
                 End Using
             End Using
 
-            ' ¡AQUÍ REUTILIZAMOS TUS FUNCIONES!
-            ' Al pasar la lista por aquí, se calcularán nDias y TotalToPay para cada registro
             CalculateIndividualPayments(historyList)
-
             Return historyList
 
         End Function

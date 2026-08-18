@@ -7,14 +7,16 @@ Public Class FrmFamilyGroup
 
 #Region " VARIABLES DE ESTADO Y CONSTANTES "
 
-    ' --- Componentes de Negocio y Reglas Fijas ---
+    ' --- Servicios de Negocio (Managers) ---
     Private ReadOnly _familyGroupManager As New FamilyGroupManager()
+    Private ReadOnly _paymentManager As New PaymentManager()
 
     ' --- Control de Flujo y Modos de Pantalla ---
     Private _currentMode As TransactionMode?
 
     ' --- Variable de Memoría ---
     Private _currentGroupId As Integer
+    Private _originalNumberMembers As Integer
 
     ' --- Variables de Validación (Estado del botón) ---
     Private _isLoadingData As Boolean
@@ -92,6 +94,21 @@ Public Class FrmFamilyGroup
     Private Sub BtnUpdateGroup_Click(sender As Object, e As EventArgs) Handles BtnUpdateGroup.Click
 
         If Not IsGroupConfigurationValid() Then Exit Sub
+
+        If _currentMode = TransactionMode.EditRecord Then
+
+            Dim currentCapacity As Integer = DgvListOfMembers.Rows.Count
+
+            If currentCapacity > _originalNumberMembers Then
+
+                Dim result As DialogResult = MessageBox.Show(ShowCapacityExpansionWarning, "Aviso importante",
+                                                             MessageBoxButtons.OKCancel, MessageBoxIcon.Information,
+                                                             MessageBoxDefaultButton.Button2)
+                If result = DialogResult.Cancel Then Exit Sub
+
+            End If
+
+        End If
 
         SaveFamilyGroup()
 
@@ -300,7 +317,7 @@ Public Class FrmFamilyGroup
 
             _currentGroupId = CInt(rowView("id_grp"))
             Dim groupName As String = rowView("nom_grp").ToString()
-            Dim numberMembers As Integer = CInt(rowView("num_intgrntes_grp"))
+            _originalNumberMembers = CInt(rowView("num_intgrntes_grp"))
             Dim groupStatus As EntityStatus = CType(Convert.ToByte(rowView("std_grp")), EntityStatus)
 
             Dim dtMembers As DataTable = _familyGroupManager.GetMembersByGroupId(_currentGroupId)
@@ -318,7 +335,7 @@ Public Class FrmFamilyGroup
             DgvListOfMembers.CurrentCell = Nothing
 
             TxtFamilyGroupName.Text = groupName
-            NudNumberMembers.Value = numberMembers
+            NudNumberMembers.Value = _originalNumberMembers
             LblNumberMembers.Text = $"{DgvListOfMembers.Rows.Count} de {NudNumberMembers.Value}"
             RbActiveState.Checked = (groupStatus = EntityStatus.Active)
             RbInactiveState.Checked = Not RbActiveState.Checked
@@ -385,6 +402,7 @@ Public Class FrmFamilyGroup
 
         '| Leemos los datos directamente desde el DataRowView subyacente
         Dim rowView As DataRowView = CType(DgvSearchMembers.CurrentRow.DataBoundItem, DataRowView)
+
         Dim clientId As Integer = CInt(rowView("id_cli"))
         Dim fullName As String = rowView("full_name").ToString()
 
@@ -393,13 +411,29 @@ Public Class FrmFamilyGroup
 
             If row.Tag IsNot Nothing AndAlso CInt(row.Tag) = clientId Then
 
-                ErrorProvider.SetError(TxtSearchMembers, $"{fullName} {AppMessages.CientAlreadyAddedToGroup}")
+                ErrorProvider.SetError(TxtSearchMembers, $"{fullName}{AppMessages.CientAlreadyAddedToGroup}")
+
                 TxtSearchMembers.Focus()
                 TxtSearchMembers.SelectAll()
 
                 Exit Sub
+
             End If
+
         Next
+
+        '| Validar deuda individual antes de incorporarlo al grupo.
+        If _paymentManager.HasPendingIndividualDebt(clientId) Then
+
+            MessageBox.Show(DialogMessages.IndividualToGroupDebtWarning(), "Cambio no permitido",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning)
+
+            TxtSearchMembers.Focus()
+            TxtSearchMembers.SelectAll()
+
+            Exit Sub
+
+        End If
 
         Dim rowIndex As Integer = DgvListOfMembers.Rows.Add(fullName)
 
@@ -433,15 +467,22 @@ Public Class FrmFamilyGroup
             Exit Sub
         End If
 
+        ' No permitimos modificar los integrantes si el grupo tiene una deuda pendiente.
+        If _paymentManager.HasPendingGroupDebt(_currentGroupId) Then
+
+            MessageBox.Show(DialogMessages.GroupHasPendingDebtCannotRemoveMember, "Acción no permitida",
+                            MessageBoxButtons.OK, MessageBoxIcon.Stop)
+            Exit Sub
+        End If
+
         Dim fullName As String = DgvListOfMembers.CurrentRow.Cells("ListFullName").Value?.ToString()
 
         Dim response As DialogResult = MessageBox.Show(ConfirmRemoveGroupMember(fullName), "Quitar integrante",
-                                                             MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                                                             MessageBoxDefaultButton.Button2)
+                                                       MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
 
         If response = DialogResult.Yes Then
 
-            '| Al remover la fila, el .Tag asignado a esta se desecha automáticamente
+            '| Al remover la fila, el .Tag asignado se desecha automáticamente
             DgvListOfMembers.Rows.Remove(DgvListOfMembers.CurrentRow)
             DgvListOfMembers.CurrentCell = Nothing
 
@@ -586,7 +627,15 @@ Public Class FrmFamilyGroup
 
 #Region " 2. OPERACIONES DE DATOS Y BACKEND BRIDGE "
 
-
+    ''' <summary>
+    ''' Obtiene la lista de identificadores únicos (IDs) de los miembros
+    ''' actualmente registrados en la grilla del grupo familiar.
+    ''' </summary>
+    ''' <returns>
+    ''' Una lista de enteros (<see cref="List(Of Integer)"/>) que contiene
+    ''' los IDs almacenados en la propiedad <see cref="DataGridViewRow.Tag"/>
+    ''' de cada fila.
+    ''' </returns>
     Private Function GetRegisteredMemberIds() As List(Of Integer)
 
         Dim memberIds As New List(Of Integer)
@@ -620,6 +669,15 @@ Public Class FrmFamilyGroup
     End Sub
 
 
+    ''' <summary>
+    ''' Valida que el nombre del grupo no esté vacío ni duplicado en la base de datos
+    ''' y actualiza la interfaz visual en consecuencia.
+    ''' </summary>
+    ''' <param name="groupName">El texto con el nombre del grupo familiar a validar.</param>
+    ''' <remarks>
+    ''' Modifica la variable de estado <c>_isGroupNameValid</c>, notifica al <see cref="ErrorProvider"/> 
+    ''' y actualiza el estado del botón de guardado invocando a <c>UpdateSaveButtonState()</c>.
+    ''' </remarks>
     Private Sub ValidateAndRenderGroupDuplicates(groupName As String)
 
         If String.IsNullOrWhiteSpace(groupName) Then
@@ -712,6 +770,18 @@ Public Class FrmFamilyGroup
     End Sub
 
 
+    ''' <summary>
+    ''' Realiza una búsqueda predictiva de miembros disponibles
+    ''' según el texto ingresado y despliega la grilla de resultados.
+    ''' </summary>
+    ''' <param name="searchText">El criterio de búsqueda (nombre o fragmento)
+    ''' para filtrar los miembros disponibles.</param>
+    ''' <remarks>
+    ''' Si la búsqueda devuelve registros, muestra la grilla flotante <see cref="DgvSearchMembers"/>
+    ''' y altera el color de fondo de la caja de texto.
+    ''' Si no hay resultados o el parámetro está vacío,
+    ''' oculta la grilla de búsqueda y restablece la interacción de los controles.
+    ''' </remarks>
     Private Sub SearchAndRenderMembersPredictive(searchText As String)
 
         ErrorProvider.SetError(DgvSearchMembers, String.Empty)
@@ -751,7 +821,6 @@ Public Class FrmFamilyGroup
         End Try
 
     End Sub
-
 
 
     ''' <summary>
@@ -838,6 +907,8 @@ Public Class FrmFamilyGroup
         TxtFamilyGroupName.Clear()
         TxtSearchMembers.Clear()
         DgvListOfMembers.Rows.Clear()
+        DgvSearchMembers.DataSource = Nothing
+        DgvSearchMembers.Visible = False
         ChkEmptyGroup.Checked = False
 
         If _currentMode = TransactionMode.NewRecord Then
@@ -891,6 +962,9 @@ Public Class FrmFamilyGroup
         BtnNewGroup.Focus()
 
         FormHelpers.SetBackColor(Color.Azure, TxtFamilyGroupName, NudNumberMembers, LblNumberMembers, TxtSearchMembers)
+
+        _currentGroupId = 0
+        _originalNumberMembers = 0
 
         _isGroupSelected = False
 
@@ -1034,10 +1108,5 @@ Public Class FrmFamilyGroup
     End Enum
 
 #End Region
-
-
-
-
-
 
 End Class

@@ -28,11 +28,8 @@ Public Class FrmClientsPayments
 #End Region
 
 #Region " EVENTOS DEL FORMULARIO (Handlers) "
-    Private Sub FrmClientsPayments_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
-        '| -------------------------
-        '| | CONFIGURACIÓN INICIAL |
-        '| -------------------------
+    Private Sub FrmClientsPayments_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         Try
             DisableButtons()
@@ -52,10 +49,6 @@ Public Class FrmClientsPayments
 
     Private Sub BtnFindClient_Click(sender As Object, e As EventArgs) Handles BtnFindClient.Click
 
-        '| -----------------------------------------
-        '| PREPARAMOS LOS CONTROLES PARA LA BUSQUEDA
-        '| -----------------------------------------
-
         _isCleaning = True
 
         ActivateSearchRecord()
@@ -72,16 +65,10 @@ Public Class FrmClientsPayments
 
     Private Sub CmbFilter_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CmbFilter.SelectedIndexChanged
 
-        '| ---------------------------------------
-        '| | ACTUALIZAR BUSCADOR SEGÚN EL FILTRO |
-        '| ---------------------------------------
-
-        '| Evita ejecutar filtros mientras el formulario está limpiando o restaurando controles.
         If _isCleaning Then Exit Sub
 
         If String.IsNullOrWhiteSpace(CmbFilter.Text) Then
 
-            '| Mensaje informativo.
             TxtSearch.Text = AppMessages.SelectSearchFilter
 
             UpdateSearchVisualFeedback(0)
@@ -96,16 +83,10 @@ Public Class FrmClientsPayments
 
     Private Sub TxtSearch_TextChanged(sender As Object, e As EventArgs) Handles TxtSearch.TextChanged
 
-        '| -----------------------------------
-        '| | FILTRAR CLIENTES EN TIEMPO REAL |
-        '| -----------------------------------
-
-        '| Evita ejecutar filtros mientras el formulario está limpiando o restaurando controles.
         If _isCleaning Then Exit Sub
 
         If String.IsNullOrWhiteSpace(CmbFilter.Text) Then
 
-            '| Mensaje informativo.
             TxtSearch.Text = AppMessages.SelectSearchFilter
 
             UpdateSearchVisualFeedback(0)
@@ -115,16 +96,6 @@ Public Class FrmClientsPayments
 
     End Sub
     Private Sub TxtSearch_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TxtSearch.KeyPress
-
-        '| ------------------------------------
-        '| | VALIDAR EL INGRESO DE CARACTERES |
-        '| ------------------------------------
-        '| * Restringe los caracteres permitidos según el tipo de filtro seleccionado.
-        '|   - Nombre/Apellido: solo letras y algunos caracteres especiales.
-        '|   - Teléfono: solo números y símbolos permitidos para teléfonos.
-        '|
-        '| * Se bloquean º y ª porque algunos teclados españoles los generan accidentalmente
-        '|   al usar búsquedas rápidas.
 
         Select Case CmbFilter.Text.Trim
 
@@ -152,15 +123,13 @@ Public Class FrmClientsPayments
     Private Sub DgvClientList_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvClientList.CellContentClick
     End Sub
     Private Sub DgvClientList_DoubleClick(sender As Object, e As EventArgs) Handles DgvClientList.DoubleClick
+
         LoadClientAndPaymentsData()
+
     End Sub
 
 
     Private Sub RbActive_CheckedChanged(sender As Object, e As EventArgs) Handles RbActive.CheckedChanged
-
-        '| ----------------------------------------
-        '| | MOSTRAR CLIENTES ACTIVOS / INACTIVOS |
-        '| ----------------------------------------
 
         _currentState = If(RbActive.Checked, EntityStatus.Active, EntityStatus.Inactive)
 
@@ -199,11 +168,6 @@ Public Class FrmClientsPayments
 
     Private Sub BtnCancelSearch_Click(sender As Object, e As EventArgs) Handles BtnCancelSearch.Click
 
-        '| ------------------------
-        '| | CANCELAR LA BUSQUEDA |
-        '| ------------------------
-        '| Restablece el estado visual del buscador y limpia el filtro actual.
-
         _isCleaning = True
 
         DisableSearchRecord()
@@ -219,10 +183,6 @@ Public Class FrmClientsPayments
 
     Private Sub BtnNewClient_Click(sender As Object, e As EventArgs) Handles BtnNewClient.Click
 
-        '| --------------------------------------------------
-        '| | REGISTRAR UN NUEVO CLIENTE EN LA BASE DE DATOS |
-        '| --------------------------------------------------
-
         ProcessLabelsRecursive(PnlDataClient, "Cli",
                                    Sub(label) label.Text = "")
         DgvPaymentList.DataSource = Nothing
@@ -235,10 +195,6 @@ Public Class FrmClientsPayments
 
     Private Sub BtnModifyData_Click(sender As Object, e As EventArgs) Handles BtnModifyData.Click
 
-        '| --------------------------------------
-        '| | ACTUALIZAR INFORMACION DEL CLIENTE |
-        '| --------------------------------------
-
         If _selectedClient IsNot Nothing Then
 
             ' Verifica si el cliente tiene deudas pendientes antes de abrir el formulario de edición.
@@ -248,7 +204,7 @@ Public Class FrmClientsPayments
             ' Marcamos la bandera en el objeto que vamos a enviar al formulario de edición
             _selectedClient.HasDebtCustomer = hasDebt
 
-            ' Abrimos el formulario (usando tu método de navegación)
+            ' Abrimos el formulario (usando el método de navegación)
             NavigateToForm.OpenFrmModifyClient(_selectedClient, AddressOf GlobalRefresh)
 
         End If
@@ -258,22 +214,14 @@ Public Class FrmClientsPayments
 
     Private Sub BtnDeleteClient_Click(sender As Object, e As EventArgs) Handles BtnDeleteClient.Click
 
-        '| ---------------------------------
-        '| | ELIMINAR O DESACTIVAR CLIENTE |
-        '| ---------------------------------
-
-        '| Validación de seguridad.
         If _selectedClient Is Nothing Then Exit Sub
 
-        '| Preparamos los parametros para el mensaje.
         Dim fullName As String = $"{LblNomCli.Text} {LblApeCli.Text}"
         Dim customerCode As String = $"CLI - {_selectedClient.IdCli:D3}"
 
-        '| Construcción del mensaje de confirmación.
         Dim result = MessageBox.Show(DeleteOrInactivateCustomerWarning(fullName, customerCode), "Eliminar registro",
                                      MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3)
 
-        '| Procesamos la acción seleccionada.
         Select Case result
 
             '| ELIMINACIÓN TOTAL (Hard Delete)
@@ -330,10 +278,6 @@ Public Class FrmClientsPayments
     End Sub
     Private Sub DgvPaymentList_CellFormatting(sender As Object, e As DataGridViewCellFormattingEventArgs) Handles DgvPaymentList.CellFormatting
 
-        '| ----------------------------------------
-        '| | RESALTA VISUALMENTE PAGOS PENDIENTES |
-        '| ----------------------------------------
-
         If e.RowIndex < 0 Then Exit Sub
 
         Dim dgv = DirectCast(sender, DataGridView)
@@ -353,11 +297,7 @@ Public Class FrmClientsPayments
     End Sub
     Private Sub DgvPaymentList_SelectionChanged(sender As Object, e As EventArgs) Handles DgvPaymentList.SelectionChanged
 
-        '| ---------------------------------------
-        '| | ACTIVAR O DESACTIVAR BOTON DE COBRO |
-        '| ---------------------------------------
         '| Solo se permite seleccionar pagos pendientes.
-
         Dim payment = TryCast(DgvPaymentList.CurrentRow?.DataBoundItem, IndividualPaymentDTO)
 
         If payment Is Nothing Then
@@ -378,10 +318,6 @@ Public Class FrmClientsPayments
 
 
     Private Sub BtnCollectMonth_Click(sender As Object, e As EventArgs) Handles BtnCollectMonth.Click
-
-        '| --------------------------------
-        '| | COBRO DE CUOTA O MENSUALIDAD |
-        '| --------------------------------
 
         Dim selectedPayment = TryCast(DgvPaymentList.CurrentRow?.DataBoundItem, IndividualPaymentDTO)
 
@@ -404,14 +340,8 @@ Public Class FrmClientsPayments
 
     Private Sub BtnNewPayment_Click(sender As Object, e As EventArgs) Handles BtnNewPayment.Click
 
-        '| ----------------------
-        '| | GENERAR NUEVO PAGO |
-        '| ----------------------
-
-        '| Validaciones previas de negocio.
         If Not ValidateClientBeforePayment() Then Exit Sub
 
-        '| Obtener tarifa base correspondiente.
         Dim rate = _clientManager.GetApplicableRate(_selectedClient)
 
         If Not rate.Exists Then
@@ -420,7 +350,7 @@ Public Class FrmClientsPayments
             Exit Sub
         End If
 
-        '| Preparación de variables de cálculo.
+        '| Variables de cálculo.
         Dim paymentMethod = _selectedClient.PaymentMethod.ToUpper()
         Dim proposedDate = CalculateProposedDate(paymentMethod)
         Dim groupPrice = rate.Price
@@ -434,10 +364,8 @@ Public Class FrmClientsPayments
 
         End If
 
-        '| Fabricar el pago final usando función limpia.
         Dim newPayment = CreatePaymentDTO(paymentMethod, proposedDate, groupPrice, rate.Discount)
 
-        '| Lanzar formulario.
         NavigateToForm.OpenFrmCollectMembership(newPayment, AddressOf RefreshPaymentHistory,
                                                 FrmCollectMembership.TransactionMode.NewPayment)
 
@@ -455,6 +383,7 @@ Public Class FrmClientsPayments
     '| ============================================================ |'
 
 #Region " 1. PUNTOS DE ENTRADA Y ORQUESTACIÓN DE CARGA "
+
     ' Métodos públicos o mayores encargados de coordinar
     ' las cargas masivas coordinando datos e interfaz.
 
@@ -545,7 +474,9 @@ Public Class FrmClientsPayments
 
 #End Region
 
+
 #Region " 2. CARGA DE DATOS Y ESTADO VISUAL DEL CLIENTE "
+
     ' Métodos expertos en tomar un cliente específico y volcar su información tanto en el historial como en las etiquetas.
 
     ''' <summary>
@@ -616,12 +547,11 @@ Public Class FrmClientsPayments
 
     End Sub
 
-
-
-
 #End Region
 
+
 #Region " 3. COSMÉTICA, HELPERS VISUALES Y CONTROL DE COMPONENTES UI "
+
     ' Métodos dedicados al control fino de la interfaz: activar o desactivar botones,
     ' cajas de búsqueda y dar retroalimentación visual al usuario en tiempo real.
 
@@ -722,7 +652,9 @@ Public Class FrmClientsPayments
 
 #End Region
 
+
 #Region " 4. REFRESCO DE LISTAS Y GRIDS (Renderizado de Tablas) "
+
     ' Métodos encargados de sincronizar las colecciones de la base de datos
     ' con los controles visuales de la interfaz.
 
@@ -819,7 +751,9 @@ Public Class FrmClientsPayments
 
 #End Region
 
+
 #Region " 5. CONFIGURACIÓN DE FILTROS Y VALIDACIONES "
+
     ' La capa de seguridad que decide si las acciones son permitidas
     ' y cómo se debe filtrar la información.
 
@@ -899,7 +833,9 @@ Public Class FrmClientsPayments
 
 #End Region
 
+
 #Region " 6. FÁBRICA DE DATOS Y CÁLCULOS DE NEGOCIO (Factory) "
+
     ' Funciones puras que procesan fechas, calculan períodos
     ' o construyen nuevas instancias de objetos de pago.
 
@@ -925,6 +861,7 @@ Public Class FrmClientsPayments
         End If
 
     End Function
+
 
     ''' <summary>
     ''' Fabrica el DTO correspondiente según el tipo

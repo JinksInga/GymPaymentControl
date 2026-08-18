@@ -78,8 +78,10 @@
 #End Region
 
 
-#Region " CLIENTES "
+#Region " MÉTODOS DE PAGO "
+
 #End Region
+
 
 #Region " GENERAL "
 #End Region

@@ -25,10 +25,8 @@ Namespace Utils
             ' Clonamos el DTO para trabajar sobre una copia segura
             ' Centralizamos el clonado para proteger los datos originales
             Dim dtoClone = DirectCast(dto.CloneInterface(), IPaymentCalculable)
-            Dim form As New FrmCollectMembership()
-
             ' 3. Configuración MDI
-            form.MdiParent = FrmMdiMain
+            Dim form As New FrmCollectMembership With {.MdiParent = FrmMdiMain}
             form.PreparePayment(dtoClone, mode)
 
             ' 4. Manejo del Refresco
@@ -112,8 +110,8 @@ Namespace Utils
                 ' Si pulsa SÍ o no había cambios, el código sigue hacia abajo y actualiza los datos
             Else
                 ' 3. Si no existe, creamos la instancia nueva
-                frmOpen = New FrmNewModifyClient()
-                frmOpen.MdiParent = FrmMdiMain
+                frmOpen = New FrmNewModifyClient With {.MdiParent = FrmMdiMain}
+
             End If
 
             ' 4. Carga de datos y visualización (común para nuevo o reutilizado)

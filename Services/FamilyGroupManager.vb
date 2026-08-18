@@ -7,7 +7,6 @@ Namespace Services
 
     Public Class FamilyGroupManager
 
-        ' Al heredar, obtenemos el motor de conexión.
         Inherits BaseRepository
 
 
@@ -16,18 +15,15 @@ Namespace Services
         ''' </summary>
         Public Function GetGroupsByNameMatch(groupName As String) As DataTable
 
-            Dim sqlQuery As String = "SELECT * " &
-                                     "FROM grp_familiar " &
+            Dim sqlQuery As String = "SELECT * FROM grp_familiar " &
                                      "WHERE nom_grp LIKE @nom_grp " &
                                      "ORDER BY nom_grp"
 
-            ' Preparamos el parámetro de forma segura para evitar inyección SQL y el fallo de la comilla (')
             Dim parameters As New List(Of MySqlParameter) From
                 {
                     New MySqlParameter("@nom_grp", $"%{groupName}%")
                 }
 
-            ' Delegamos la ejecución completa a la infraestructura del búnker
             Return ExecuteDataTable(sqlQuery, parameters)
 
         End Function
@@ -75,7 +71,7 @@ Namespace Services
         Public Function InsertFamilyGroup(groupName As String, numberMembers As Integer,
                                           registeredMembers As List(Of Integer),
                                           groupStatus As EntityStatus,
-                                          ByRef newGroupId As Integer) As FamilyGroupSaveResult 'As Boolean
+                                          ByRef newGroupId As Integer) As FamilyGroupSaveResult
 
             Using connection As MySqlConnection = GetConnection()
 
@@ -95,7 +91,6 @@ Namespace Services
 
                             transaction.Rollback()
                             Return FamilyGroupSaveResult.GroupRateNotFound
-                            'Throw New InvalidOperationException($"No existe ninguna tarifa registrada para {numberMembers} integrantes.")
 
                         End If
 
@@ -144,12 +139,13 @@ Namespace Services
                         If registeredMembers.Count > 0 Then
 
                             Dim sqlUpdateClients As String = "UPDATE clientes " &
-                                                             "SET mpg_cli = @mpg_cli, id_grp = @id_grp " &
+                                                             "SET mpg_cli = @mpg_cli, std_cli = @std_cli, id_grp = @id_grp " &
                                                              "WHERE id_cli = @id_cli;"
 
                             Using command As New MySqlCommand(sqlUpdateClients, connection, transaction)
 
                                 command.Parameters.Add("@mpg_cli", MySqlDbType.VarChar).Value = PaymentMethods.Grupal
+                                command.Parameters.Add("@std_cli", MySqlDbType.Byte).Value = CByte(groupStatus)
                                 command.Parameters.Add("@id_grp", MySqlDbType.Int32).Value = generatedGroupId
                                 Dim clientParam As MySqlParameter = command.Parameters.Add("@id_cli", MySqlDbType.Int32)
 
@@ -165,9 +161,9 @@ Namespace Services
                         End If
 
                         transaction.Commit()
-                        Return FamilyGroupSaveResult.Success ' True
+                        Return FamilyGroupSaveResult.Success
 
-                    Catch 'ex As Exception
+                    Catch
                         transaction.Rollback()
                         Throw
                     End Try
@@ -184,7 +180,7 @@ Namespace Services
         Public Function UpdateFamilyGroup(groupId As Integer,
                                           groupName As String, numberMembers As Integer,
                                           registeredMembers As List(Of Integer),
-                                          groupStatus As EntityStatus) As FamilyGroupSaveResult 'As Boolean
+                                          groupStatus As EntityStatus) As FamilyGroupSaveResult
 
             Using connection As MySqlConnection = GetConnection()
 
@@ -204,7 +200,6 @@ Namespace Services
 
                             transaction.Rollback()
                             Return FamilyGroupSaveResult.GroupRateNotFound
-                            'Throw New InvalidOperationException($"No existe ninguna tarifa registrada para {numberMembers} integrantes.")
 
                         End If
 
@@ -273,9 +268,9 @@ Namespace Services
 
                         transaction.Commit()
 
-                        Return FamilyGroupSaveResult.Success 'True
+                        Return FamilyGroupSaveResult.Success
 
-                    Catch 'ex As Exception
+                    Catch
                         transaction.Rollback()
                         Throw
                     End Try
@@ -331,7 +326,7 @@ Namespace Services
 
                         Return True
 
-                    Catch 'ex As Exception
+                    Catch
                         transaction.Rollback()
                         Throw
                     End Try

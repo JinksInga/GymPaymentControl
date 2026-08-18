@@ -1,4 +1,5 @@
-﻿Imports GymPaymentControl.Constants
+﻿Imports GymPaymentControl.BusinessRules
+Imports GymPaymentControl.Constants
 Imports GymPaymentControl.Enums
 Imports GymPaymentControl.Models
 Imports GymPaymentControl.Services
@@ -82,7 +83,7 @@ Public Class FrmNewModifyClient
             Dim isSaveMode As Boolean = BtnSaveCustomerData.Enabled
 
             ' Construimos el cuerpo del mensaje.
-            Dim answer = MessageBox.Show(UnsavedChangesWarning(If(isSaveMode, "guardados", "actualizados"), If(isSaveMode, "guardar", "actualizar")),
+            Dim answer = MessageBox.Show(DialogMessages.UnsavedChangesWarning(If(isSaveMode, "guardados", "actualizados"), If(isSaveMode, "guardar", "actualizar")),
                                          "Cambios sin guardar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
 
             '* SI : ¡DETENEMOS el cierre de la ventana!
@@ -229,24 +230,79 @@ Public Class FrmNewModifyClient
 
     Private Sub RbDailyPayment_CheckedChanged(sender As Object, e As EventArgs) Handles RbDailyPayment.CheckedChanged
 
-        If RbDailyPayment.Checked Then
-            ' 1. Configuramos UI
-            GbListaGrupoFamiliar.Text = "Lista de pagos diarios:"
-            TxtListGroupsDailyPayment.Clear()
-            DgvListGroupsDailyPayment.Enabled = True
+        If Not RbDailyPayment.Checked Then Exit Sub
 
-            ' 2. Cargamos datos con nuestra Función Camaleón
-            ConfigureGridColumns(PaymentMethods.Daily)
+        ' ============================================================
+        ' 1. CONFIGURAR INTERFAZ
+        ' ============================================================
+
+        GbListaGrupoFamiliar.Text = "Lista de pagos diarios:"
+        TxtListGroupsDailyPayment.Clear()
+        DgvListGroupsDailyPayment.Enabled = True
+
+
+        ' ============================================================
+        ' 2. CARGAR TARIFAS DIARIAS
+        ' ============================================================
+
+        ConfigureGridColumns(PaymentMethods.Daily)
+        DgvListGroupsDailyPayment.DataSource = _clientManager.GetDailyPrice()
+
+        ' ============================================================
+        ' 3. COMPROBAR SI EXISTE ALGUNA TARIFA
+        ' ============================================================
+
+        If DgvListGroupsDailyPayment.Rows.Count = 0 Then
+
+            Dim response As DialogResult =
+            MessageBox.Show(
+                "No existe ninguna tarifa para los pagos diarios." &
+                vbCrLf & vbCrLf &
+                "¿Desea crear una nueva tarifa?",
+                "Tarifa no encontrada",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button2)
+
+            If response <> DialogResult.Yes Then
+                RbDailyPayment.Checked = False
+                Exit Sub
+            End If
+
+            ' ========================================================
+            ' 4. CREAR NUEVA TARIFA DIARIA
+            ' ========================================================
+
+            Using frm As New FrmPricesAndDiscounts()
+
+                frm.IsDailyRateRequest = True
+                If frm.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
+                TxtListGroupsDailyPayment.Text = frm.CreatedRateName
+
+            End Using
+
+            ' ========================================================
+            ' 5. RECARGAR TARIFAS
+            ' ========================================================
+
             DgvListGroupsDailyPayment.DataSource = _clientManager.GetDailyPrice()
 
-            ' Si estamos en modo edición y tenemos la "Foto" original
-            If _originalDataCustomer IsNot Nothing Then
-                SelectCurrentPrice(_originalDataCustomer.PaymentMethod)
-            Else
-                ' Si es NUEVO, mantenemos el comportamiento de limpieza absoluta
-                DgvListGroupsDailyPayment.ClearSelection()
-                DgvListGroupsDailyPayment.CurrentCell = Nothing
-            End If
+        End If
+
+        ' ============================================================
+        ' 6. SELECCIÓN SEGÚN EL MODO DEL FORMULARIO
+        ' ============================================================
+
+        If _originalDataCustomer IsNot Nothing Then
+
+            ' ACTUALIZAR ' Si estamos en modo edición y tenemos la "Foto" original
+            SelectCurrentPrice(_originalDataCustomer.PaymentMethod)
+
+        Else
+
+            ' NUEVO' Si es NUEVO, mantenemos el comportamiento de limpieza absoluta
+            DgvListGroupsDailyPayment.ClearSelection()
+            DgvListGroupsDailyPayment.CurrentCell = Nothing
 
         End If
 
@@ -271,41 +327,53 @@ Public Class FrmNewModifyClient
 
     Private Sub RbGroupPayment_CheckedChanged(sender As Object, e As EventArgs) Handles RbGroupPayment.CheckedChanged
 
-        ' Si el sistema está cargando los datos iniciales, salimos sin validar nada
         If _isSwitching Then Exit Sub
 
         If RbGroupPayment.Checked Then
+            ' =========================
+            ' ENTRADA AL GRUPO FAMILIAR
+            ' =========================
 
-            ' 2. Verificamos si estamos en edición y si hay deuda
-            If _originalDataCustomer IsNot Nothing AndAlso _originalDataCustomer.HasDebtCustomer Then
-                ' 3. Preparamos el mensaje
-                MessageBox.Show(PendingDebtWarning("Para hacer el cambio de método de pago"),
-                                "Acción denegada", MessageBoxButtons.OK, MessageBoxIcon.Stop)
+            If _originalDataCustomer IsNot Nothing Then
 
-                ' 4. REVERSIÓN: Volvemos al método que tiene el "Clone"
-                RestorePaymentMethod()
-                Return
+                Dim canChange As Boolean = PaymentMethodRules.CanChangePaymentMethod(_originalDataCustomer.PaymentMethod,
+                                                                  PaymentMethods.Grupal, _originalDataCustomer.HasDebtCustomer)
+                If Not canChange Then
+
+                    MessageBox.Show(DialogMessages.IndividualToGroupDebtWarning(), "Cambio de método no permitido",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                    RestorePaymentMethod()
+
+                    Return
+
+                End If
+
             End If
 
-            ' Preparar Interfaz
+            ' Preparar interfaz
             TxtListGroupsDailyPayment.Clear()
             LblNumberMembers.Text = ""
             GbListaGrupoFamiliar.Text = "Lista de grupos familiares:"
-
             BtnAddGroup.Enabled = True
             TxtListGroupsDailyPayment.Enabled = True
             DgvListGroupsDailyPayment.Enabled = True
 
             ' Cargar datos
             ConfigureGridColumns(PaymentMethods.Grupal)
-            DgvListGroupsDailyPayment.DataSource = _clientManager.GetNameGroupFamily()
-            DgvListGroupsDailyPayment.CurrentCell = Nothing
+            DgvListGroupsDailyPayment.DataSource =
+            _clientManager.GetNameGroupFamily()
 
+            DgvListGroupsDailyPayment.CurrentCell = Nothing
             TxtListGroupsDailyPayment.Focus()
+
         Else
+            ' =========================
+            ' SALIDA DEL GRUPO FAMILIAR
+            ' =========================
 
             If BtnSaveCustomerData.Enabled Then
-                ' NUEVO/GUARDAR : Simplemente deshabilitamos
+
+                ' NUEVO/GUARDAR
                 BtnAddGroup.Enabled = False
                 TxtListGroupsDailyPayment.Enabled = False
                 TxtListGroupsDailyPayment.BackColor = Color.Azure
@@ -313,15 +381,28 @@ Public Class FrmNewModifyClient
                 ResetGroupUI(True)
 
             Else
-                ' MODIFICAR/ACTUALIZAR : NO dejamos cambiar el método de pago
-                MessageBox.Show(GroupPaymentChangeNotAllowed, "Error al actualizar",
-                                MessageBoxButtons.OK, MessageBoxIcon.Warning)
-                _isSwitching = True
-                RbGroupPayment.Checked = True
-                _isSwitching = False
 
+                ' MODIFICAR/ACTUALIZAR
+                If _originalDataCustomer Is Nothing Then Exit Sub
+
+                Dim newPaymentMethod As String = If(RbMonthlyPayment.Checked, PaymentMethods.Monthly, PaymentMethods.Daily)
+
+                Dim canChange As Boolean = PaymentMethodRules.CanChangePaymentMethod(_originalDataCustomer.PaymentMethod,
+                                                                                     newPaymentMethod,
+                                                                                     _originalDataCustomer.HasDebtCustomer)
+                If Not canChange Then
+
+                    MessageBox.Show(DialogMessages.GroupToIndividualDebtWarning(), "Cambio de método no permitido",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning)
+
+                    _isSwitching = True
+                    RbGroupPayment.Checked = True
+                    _isSwitching = False
+
+                    Return
+
+                End If
             End If
-
         End If
 
     End Sub
@@ -334,8 +415,7 @@ Public Class FrmNewModifyClient
 
         If frmGroup Is Nothing Then
             ' Si no existe, lo creamos
-            frmGroup = New FrmFamilyGroup()
-            frmGroup.MdiParent = FrmMdiMain
+            frmGroup = New FrmFamilyGroup With {.MdiParent = FrmMdiMain}
             frmGroup.Show()
         Else
             ' Si ya existe, lo traemos al frente y le damos el foco
@@ -355,19 +435,23 @@ Public Class FrmNewModifyClient
 
         If Not RbGroupPayment.Checked Then Exit Sub
 
-        ' 1. Filtrar el Grid mientras el usuario escribe
         ConfigureGridColumns(PaymentMethods.Grupal)
+
         Dim searchText = TxtListGroupsDailyPayment.Text.Trim()
+
         DgvListGroupsDailyPayment.DataSource = _clientManager.SearchFamilyGroup(searchText)
 
-        ' 2. Verificación de texto vacío y Limpieza total
+        '| Verificación de texto vacío y Limpieza total
         If String.IsNullOrWhiteSpace(searchText) Then
+
             ResetGroupUI(True)
             DgvListGroupsDailyPayment.CurrentCell = Nothing
+
             Exit Sub
+
         End If
 
-        ' 3. Buscar coincidencia exacta en los resultados
+        '| Buscar coincidencia exacta en los resultados
         Dim matchRow = DgvListGroupsDailyPayment.Rows.Cast(Of DataGridViewRow)().
                        FirstOrDefault(Function(r) r.Cells("colNameDailyGroup").Value?.ToString() = searchText)
 
@@ -388,6 +472,7 @@ Public Class FrmNewModifyClient
         Else
             ' --- SIN COINCIDENCIA EXACTA ---
             ResetGroupUI(False)
+
         End If
 
         ' Siempre reiniciamos la intención de expandir al cambiar el texto
@@ -398,20 +483,65 @@ Public Class FrmNewModifyClient
 
     Private Sub BtnExpandCapacity_Click(sender As Object, e As EventArgs) Handles BtnExpandCapacity.Click
 
-        ' Preparamos el mensaje
-        If MsgBox(ConfirmAddExtraGroupMember(_groupName, _groupMemberLimit), vbExclamation _
-                  + vbYesNo + vbDefaultButton2, "Comprobar datos") = vbYes Then
+        '| * CONFIRMAR LA AMPLIACIÓN DEL CUPO
 
-            _currentGroupMaxMembers += 1
-            _shouldExpandGroup = True
+        Dim response As DialogResult = MessageBox.Show(DialogMessages.ConfirmAddExtraGroupMember(_groupName, _groupMemberLimit),
+                                                       "Comprobar datos",
+                                                       MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                                                       MessageBoxDefaultButton.Button2)
+        If response <> DialogResult.Yes Then Exit Sub
 
-            ' UI Feedback
-            LblNumberMembers.ForeColor = Color.FromArgb(255, 128, 0) 'Color.Orange
-            LblNumberMembers.Text = "1 Cupo pendiente por registrar."
-            BtnExpandCapacity.Enabled = False
-            ErrorProvider.Clear()
+        '| * COMPROBAR EL PERÍODO DE INSCRIPCIÓN : Si el cliente se está inscribiendo durante el mes actual,
+        '|   no permitimos incorporarlo mediante una ampliación. Se compara MES + AÑO para evitar falsos
+        '|   positivos entre el mismo mes de años diferentes.
+
+        Dim registrationDate As DateTime = DtpRegistrationDate.Value.Date
+        Dim currentDate As DateTime = Date.Today
+
+        Dim isCurrentPeriod As Boolean = registrationDate.Month = currentDate.Month AndAlso registrationDate.Year = currentDate.Year
+
+        If isCurrentPeriod Then
+
+            MessageBox.Show(DialogMessages.ShowCurrentPeriodMemberInclusionWarning,
+                            "Incorporación al grupo familiar",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Exit Sub
 
         End If
+
+        '| * COMPROBAR QUE EXISTE TARIFA PARA EL NUEVO NÚMERO DE INTEGRANTES
+
+        Dim newNumberMembers As Integer = _groupMemberLimit + 1
+
+        If Not _clientManager.HasGroupRate(newNumberMembers) Then
+
+            Dim rateResponse As DialogResult = MessageBox.Show(DialogMessages.AskBeforeRegisterNewRate(newNumberMembers),
+                                                               "Tarifa no encontrada",
+                                                               MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                                                               MessageBoxDefaultButton.Button2)
+            If rateResponse <> DialogResult.Yes Then Exit Sub
+
+            Using frm As New FrmPricesAndDiscounts()
+
+                frm.IsGroupRateRequest = True
+                frm.SuggestedNumberMembers = newNumberMembers
+
+                If frm.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
+
+            End Using
+
+        End If
+
+        '| * AMPLIAR CAPACIDAD
+
+        _currentGroupMaxMembers = newNumberMembers
+        _shouldExpandGroup = True
+
+        LblNumberMembers.ForeColor = Color.FromArgb(255, 128, 0)
+        LblNumberMembers.Text = "1 Cupo pendiente por registrar."
+
+        BtnExpandCapacity.Enabled = False
+        ErrorProvider.Clear()
 
     End Sub
 
@@ -422,7 +552,9 @@ Public Class FrmNewModifyClient
 
         ' Verificaciones
         If e.RowIndex < 0 Then Exit Sub
+
         Dim row As DataGridViewRow = DgvListGroupsDailyPayment.Rows(e.RowIndex)
+
         If row Is Nothing Then Exit Sub
 
         ' PAGO DIARIO
@@ -439,6 +571,7 @@ Public Class FrmNewModifyClient
             _registeredMembers = CInt(row.Cells("colMembersReg").Value)
 
             TxtListGroupsDailyPayment.Text = _groupName
+
         End If
 
     End Sub
@@ -446,7 +579,7 @@ Public Class FrmNewModifyClient
 
     Private Sub BtnSaveCustomerData_Click(sender As Object, e As EventArgs) Handles BtnSaveCustomerData.Click
 
-        '| * Validación de la información del cliente antes de guardar el registro.
+        '| * VALIDACIONES DEL FORMULARIO : Datos del cliente antes de guardar el registro.
         If Not ValidateForm("guardar") Then Exit Sub
         If Not ValidateGroupCapacity("guardar", BtnExpandCapacity) Then Exit Sub
 
@@ -455,13 +588,10 @@ Public Class FrmNewModifyClient
         '| -------------------
 
         Try
-            ' Creamos el "bolso" con los datos, recolectamos datos usando la función CreateClientPaymentDTO
-            Dim data As ClientPaymentDTO = GetClientDataFromForm(isUpdate:=False) 'CreateClientPaymentDTO()
+            Dim data As ClientPaymentDTO = GetClientDataFromForm(isUpdate:=False)
 
-            ' Enviamos al Manager (Se encarga de la BBDD)
             _clientManager.RegisterClientPayment(data)
 
-            ' Mostramos el mensaje de confirmación usando el IdNewClient
             ShowSuccessMessage(data.IdNewClient)
 
         Catch ex As Exception
@@ -473,18 +603,14 @@ Public Class FrmNewModifyClient
 
     Private Sub BtnUpdateCustomerData_Click(sender As Object, e As EventArgs) Handles BtnUpdateCustomerData.Click
 
-        '| * Validación de la información del cliente antes de actualizar el registro.
+        '| * VALIDACIONES DEL FORMULARIO : Datos del cliente antes de actualizar el registro.
         If Not ValidateForm("actualizar") Then Exit Sub
 
-        '| ------------------------
-        '| PROCESO DE ACTUALIZACIÓN
-        '| ------------------------
+        '| * RECOLECTAR DATOS : Crear el DTO con los nuevos cambios.
+        Dim data As ClientPaymentDTO = GetClientDataFromForm(isUpdate:=True)
 
-        ' Crear el DTO con los nuevos cambios, recolectamos datos usando la función UpdateClientPaymentDTO
-        Dim data As ClientPaymentDTO = GetClientDataFromForm(isUpdate:=True) 'UpdateClientPaymentDTO()
-
-        ' 2. Lógica Refinada: Solo es nueva inscripción si el cliente NO tenía grupo 
-        ' y ahora se le ha asignado uno (data.IdGroup > 0)
+        '| * DETERMINAR SI ES UNA NUEVA INCORPORACIÓN A GRUPO : Si el cliente NO tenía grupo
+        '|   se le ha asigna uno (data.IdGroup > 0)
         Dim isNewEnrollment As Boolean = False
 
         If (_customerData.IdGroup Is Nothing OrElse _customerData.IdGroup = 0) AndAlso
@@ -492,23 +618,25 @@ Public Class FrmNewModifyClient
             isNewEnrollment = True
         End If
 
-        ' 3. Si el cliente YA TENÍA el mismo ID de grupo, isNewEnrollment DEBE ser False
-        ' para que el Manager no ejecute la suma +1
+        '| * SI YA PERTENECE A UN GRUPO : isNewEnrollment DEBE ser False para que el Manager
+        '|   no ejecute la suma +1
         If _customerData.IdGroup = data.IdGroup Then
             isNewEnrollment = False
         End If
 
+        '| ------------------------
+        '| PROCESO DE ACTUALIZACIÓN
+        '| ------------------------
+
         Try
-            ' El método en tu ClientManager se llama UpdateClientProcess
             Dim success = _clientManager.UpdateClientProcess(data, isNewEnrollment, _shouldExpandGroup)
 
             If success Then
-                ' Mostramos el mensaje de confirmación usando el IdNewClient
                 ShowSuccessMessage(data.IdNewClient)
-
             Else
                 MessageBox.Show("Error al actualizar los datos.", "Error")
             End If
+
 
         Catch ex As Exception
             MessageBox.Show("Error UPDATE cliente:" & vbCrLf & ex.Message, "Error al actualizar")
@@ -628,12 +756,12 @@ Public Class FrmNewModifyClient
     ''' </param>
     Public Sub PrepareToModifyClient(clientData As IndividualPaymentDTO)
 
-        _isSwitching = True ' Levantamos el semáforo
+        _isSwitching = True ' Levantamos el semáforo.
 
-        ' Guardamos los datos originales
-        _originalDataCustomer = clientData.Clone()
+        _originalDataCustomer = clientData.Clone() ' Guardamos los datos originales.
 
-        ' 1. Llenamos los campos con la información recibida
+        '| * DATOS DEL CLIENTE 1. Llenamos los campos con la información recibida
+
         _customerData.IdNewClient = clientData.IdCli
         TxtFirstName.Text = clientData.FirstName
         TxtLastName.Text = clientData.LastName
@@ -644,14 +772,16 @@ Public Class FrmNewModifyClient
         DtpRegistrationDate.Value = clientData.RegistrationDate
         _customerData.IdGroup = clientData.IdGroup
 
-        ' 2. Estado (Activo/Inactivo)
+        '| * ESTADO : (Activo/Inactivo)
+
         If clientData.State = EntityStatus.Active Then
             RbActiveStatus.Checked = True
         Else
             RbInactiveState.Checked = True
         End If
 
-        ' 3. Método de Pago
+        '| * MÉTODO DE PAGO
+
         Select Case clientData.PaymentMethod
             Case PaymentMethods.Monthly
                 RbMonthlyPayment.Checked = True
@@ -666,7 +796,9 @@ Public Class FrmNewModifyClient
 
         End Select
 
-        ' 4. Ajustes Visuales
+        '| * AJUSTES VISUALES
+
+        ChkRegistrationDate.Enabled = False ' MODO UPDATE : La fecha de inscripción NO se puede modificar.
         BtnSaveCustomerData.Enabled = False
         BtnSaveCustomerData.BackColor = Color.Silver
         BtnUpdateCustomerData.Enabled = True
@@ -674,6 +806,7 @@ Public Class FrmNewModifyClient
         ' Evita que los eventos CheckedChanged se ejecuten mientras el formulario se carga programáticamente.
         ' Bajamos el semáforo para que el usuario ya pueda interactuar
         _isSwitching = False
+
     End Sub
 
 
@@ -910,16 +1043,41 @@ Public Class FrmNewModifyClient
 
 
     ''' <summary>
-    ''' Actualiza la interfaz visual cuando
-    ''' un grupo familiar alcanza el límite de integrantes.
+    ''' Método que actualiza el estado visual y la disponibilidad de la
+    ''' ampliación de capacidad del grupo familiar según su ocupación
+    ''' y la situación actual del cliente.
     ''' </summary>
     Private Sub UpdateExpansionUI(isFull As Boolean)
 
-        If isFull Then
-            LblNumberMembers.ForeColor = Color.FromArgb(192, 0, 0) 'COLOR ROJO
-            BtnExpandCapacity.Enabled = True
-            ErrorProvider.SetError(BtnExpandCapacity, FullFamilyGroup(_groupName))
+        ' Por defecto, el botón permanece desactivado.
+        BtnExpandCapacity.Enabled = False
+        ErrorProvider.SetError(BtnExpandCapacity, String.Empty)
+
+        If Not isFull Then
+            LblNumberMembers.ForeColor = SystemColors.ControlText
+            Exit Sub
         End If
+
+        ' El grupo está completo.
+        LblNumberMembers.ForeColor = Color.FromArgb(192, 0, 0)
+
+        ' Un cliente que ya pertenece a un grupo
+        ' nunca puede solicitar una ampliación.
+        Dim clientAlreadyBelongsToGroup As Boolean = False
+
+        If _originalDataCustomer IsNot Nothing Then
+            clientAlreadyBelongsToGroup = _originalDataCustomer.IdGroup.HasValue AndAlso
+                                          _originalDataCustomer.IdGroup.Value > 0
+        End If
+
+        If clientAlreadyBelongsToGroup Then Exit Sub
+
+        ' Grupo completo + cliente sin grupo = puede ampliar.
+        BtnExpandCapacity.Enabled = True
+
+        ErrorProvider.SetError(
+        BtnExpandCapacity,
+        DialogMessages.FullFamilyGroup(_groupName))
 
     End Sub
 
@@ -989,7 +1147,7 @@ Public Class FrmNewModifyClient
         Dim actionText As String = If(BtnSaveCustomerData.Enabled, "GUARDADOS", "ACTUALIZADOS")
 
         '| Mensaje de confirmación.
-        MessageBox.Show(OperationSuccessMessage(EntityNames.Client, fullName, idFormatted, actionText),
+        MessageBox.Show(DialogMessages.OperationSuccessMessage(EntityNames.Client, fullName, idFormatted, actionText),
                         "Operación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         '| Notificar al formulario, esto ejecutará la función que pasamos por AddressOf.
@@ -1036,5 +1194,6 @@ Public Class FrmNewModifyClient
         Return True
 
     End Function
+
 
 End Class

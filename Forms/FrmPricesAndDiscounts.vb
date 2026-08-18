@@ -64,7 +64,9 @@ Public Class FrmPricesAndDiscounts
 
     ' --- Parámetros de Apertura desde Otros Formularios ---
     Public Property IsGroupRateRequest As Boolean
+    Public Property IsDailyRateRequest As Boolean
     Public Property SuggestedNumberMembers As Integer?
+    Public Property CreatedRateName As String
 
 #End Region
 
@@ -514,7 +516,7 @@ Public Class FrmPricesAndDiscounts
 
     Private Sub BtnSaveRate_Click(sender As Object, e As EventArgs) Handles BtnSaveRate.Click
 
-        '  DETECCIÓN DE DUPLICADOS EN EL DATAGRIDVIEW
+        '| * DETECCIÓN DE DUPLICADOS EN EL DATAGRIDVIEW
         If FindAndSelectRowByName(LblPaymentMethod.Text) Then
             MessageBox.Show(DuplicatedTariffNameWarning("GUARDAR la nueva", LblPaymentMethod.Text),
                             "Error de registro", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -522,7 +524,7 @@ Public Class FrmPricesAndDiscounts
             Exit Sub
         End If
 
-        ' GUARDAR USANDO DTO Y TARIFFMANAGER
+        '| * GUARDAR USANDO DTO Y TARIFFMANAGER
         Try
             Dim newTariffDto As New TariffDTO() With
                 {
@@ -545,7 +547,7 @@ Public Class FrmPricesAndDiscounts
         Dim paymentMethod As String = GetNamePaymentMethod()
         Dim messageBody As String = String.Empty
 
-        ' CONSTRUIR EL CUERPO DEL MENSAJE
+        '| * CONSTRUIR EL CUERPO DEL MENSAJE
         Select Case paymentMethod
 
             Case PaymentMethods.IndividualClasses, PaymentMethods.MonthlyFeeSupplies
@@ -578,9 +580,7 @@ Public Class FrmPricesAndDiscounts
 
         MessageBox.Show(messageBody, "Nuevo registro", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
-        ' =======================================================
-        ' | SI LA TARIFA FUE SOLICITADA DESDE GRUPOS FAMILIARES |
-        ' =======================================================
+        '| * GRUPOS FAMILIARES : Tarifa solicitada desde FrmNewModifyClient.
         If IsGroupRateRequest Then
 
             Me.DialogResult = DialogResult.OK
@@ -589,10 +589,18 @@ Public Class FrmPricesAndDiscounts
 
         End If
 
-        ' =====================================================
-        ' | CONTINUA EL FLUJO NORMAL DE FrmPricesAndDiscounts |
-        ' =====================================================
+        '| * TARIFA DIARIA : Tarifa solicitada desde FrmNewModifyClient.
+        If IsDailyRateRequest Then
 
+            CreatedRateName = LblPaymentMethod.Text
+
+            Me.DialogResult = DialogResult.OK
+            Me.Close()
+            Return
+
+        End If
+
+        '| * CONTINUA EL FLUJO NORMAL DE FrmPricesAndDiscounts
         _currentMode = Nothing
 
         FetchAndRenderTariffsGridUI()
@@ -1316,12 +1324,16 @@ Public Class FrmPricesAndDiscounts
 
 
     ''' <summary>
-    ''' Reinicializa todas las variables lógicas de estado y banderas de validación interna a sus valores neutros de fábrica.
+    ''' Reinicializa todas las variables lógicas de estado
+    ''' y banderas de validación interna a sus valores neutros de fábrica.
     ''' </summary>
     ''' <remarks>
-    ''' Este método purga la memoria RAM del formulario desactivando el modo de transacción (<italic>_currentMode = Nothing</italic>) 
-    ''' y poniendo en <italic>False</italic> los semáforos de validación. Se invoca de forma estratégica durante los procesos 
-    ''' de limpieza general, cancelaciones o inmediatamente después de una persistencia exitosa en la base de datos.
+    ''' Este método purga la memoria RAM del formulario desactivando
+    ''' el modo de transacción (<italic>_currentMode = Nothing</italic>) 
+    ''' y poniendo en <italic>False</italic> los semáforos de validación.
+    ''' Se invoca de forma estratégica durante los procesos 
+    ''' de limpieza general, cancelaciones o inmediatamente
+    ''' después de una persistencia exitosa en la base de datos.
     ''' </remarks>
     Private Sub ResetStateVariables()
 
@@ -1436,7 +1448,8 @@ Public Class FrmPricesAndDiscounts
 
 
     ''' <summary>
-    ''' Gestiona de forma centralizada la visibilidad y disponibilidad de los controles de la pantalla 
+    ''' Gestiona de forma centralizada la visibilidad y
+    ''' disponibilidad de los controles de la pantalla 
     ''' según el estado de la transacción actual.
     ''' </summary>
     ''' <param name="isEditing">
@@ -1475,17 +1488,23 @@ Public Class FrmPricesAndDiscounts
 
 
     ''' <summary>
-    ''' Recalcula y renderiza en la interfaz el neto final a pagar a partir del valor de descuento ingresado por el usuario.
+    ''' Recalcula y renderiza en la interfaz el neto final a pagar
+    ''' a partir del valor de descuento ingresado por el usuario.
     ''' </summary>
-    ''' <param name="currentDiscountValue">El valor numérico limpio del descuento que se está aplicando en la RAM.</param>
+    ''' <param name="currentDiscountValue">El valor numérico limpio
+    ''' del descuento que se está aplicando en la RAM.</param>
     ''' <remarks>
-    ''' Esta función reacciona en caliente a los cambios del descuento aplicando las siguientes estrategias matemáticas:
+    ''' Esta función reacciona en caliente a los cambios del descuento
+    ''' aplicando las siguientes estrategias matemáticas:
     ''' <list type="bullet">
     ''' <item>
-    ''' <description><bold>Descuento por Edad:</bold> Resta el descuento directamente de la mensualidad fija establecida.</description>
+    ''' <description><bold>Descuento por Edad:</bold> Resta el descuento
+    ''' directamente de la mensualidad fija establecida.</description>
     ''' </item>
     ''' <item>
-    ''' <description><bold>Grupo Familiar:</bold> Calcula el precio total del grupo (Mensualidad x Integrantes), lo renderiza en <italic>TxtTotal</italic>, y luego le resta el descuento para pintar el neto en <italic>TxtToPay</italic>.</description>
+    ''' <description><bold>Grupo Familiar:</bold> Calcula el precio total del grupo
+    ''' (Mensualidad x Integrantes), lo renderiza en <italic>TxtTotal</italic>,
+    ''' y luego le resta el descuento para pintar el neto en <italic>TxtToPay</italic>.</description>
     ''' </item>
     ''' </list>
     ''' </remarks>
@@ -1511,7 +1530,8 @@ Public Class FrmPricesAndDiscounts
 
 
     ''' <summary>
-    ''' Actualiza la etiqueta informativa agregando el precio actual en tiempo real según el tipo de tarifa.
+    ''' Actualiza la etiqueta informativa agregando el precio actual
+    ''' en tiempo real según el tipo de tarifa.
     ''' </summary>
     Private Sub UpdateDynamicTariffLabel()
 
@@ -1562,17 +1582,24 @@ Public Class FrmPricesAndDiscounts
 
 
     ''' <summary>
-    ''' Recalcula de forma inversa y renderiza en la interfaz el descuento otorgado a partir del importe neto final a pagar ingresado por el usuario.
+    ''' Recalcula de forma inversa y renderiza en la interfaz el descuento otorgado
+    ''' a partir del importe neto final a pagar ingresado por el usuario.
     ''' </summary>
-    ''' <param name="currentToPayValue">El valor numérico limpio del total a pagar que se está evaluando en la RAM.</param>
+    ''' <param name="currentToPayValue">El valor numérico limpio del total a pagar
+    ''' que se está evaluando en la RAM.</param>
     ''' <remarks>
-    ''' Esta función permite la edición bidireccional en la pantalla. Si el usuario decide digitar directamente cuánto quiere cobrar, el sistema deduce el descuento implícito según el método activo:
+    ''' Esta función permite la edición bidireccional en la pantalla.
+    ''' Si el usuario decide digitar directamente cuánto quiere cobrar,
+    ''' el sistema deduce el descuento implícito según el método activo:
     ''' <list type="bullet">
     ''' <item>
-    ''' <description><bold>Descuento por Edad:</bold> Halla el descuento restando el valor digitado a la mensualidad fija y lo inyecta formateado en <italic>TxtDiscount</italic>.</description>
+    ''' <description><bold>Descuento por Edad:</bold> Halla el descuento restando el valor
+    ''' digitado a la mensualidad fija y lo inyecta formateado en <italic>TxtDiscount</italic>.</description>
     ''' </item>
     ''' <item>
-    ''' <description><bold>Grupo Familiar:</bold> Determina el subtotal base del grupo, calcula la diferencia con respecto al neto digitado y renderiza el descuento resultante en <italic>TxtDiscount</italic>.</description>
+    ''' <description><bold>Grupo Familiar:</bold> Determina el subtotal base del grupo,
+    ''' calcula la diferencia con respecto al neto digitado y
+    ''' renderiza el descuento resultante en <italic>TxtDiscount</italic>.</description>
     ''' </item>
     ''' </list>
     ''' </remarks>

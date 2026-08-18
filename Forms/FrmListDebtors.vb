@@ -6,52 +6,47 @@ Imports GymPaymentControl.UIHelpers
 Imports GymPaymentControl.Utils
 
 Public Class FrmListDebtors
-    '
-    Private ReadOnly _paymentManager As New PaymentManager()
-    Private ReadOnly _fontSummary As Font = New Font("Arial", 10, FontStyle.Bold)
-    Private _isFiltering As Boolean ' = False
 
-    ' Variables para guardar la carga completa original
+
+#Region " VARIABLES DE ESTADO Y CONSTANTES "
+
+    Private ReadOnly _paymentManager As New PaymentManager()
+
     Private listIndividualPayment As List(Of IndividualPaymentDTO)
     Private listGroupPayment As List(Of GroupPaymentDTO)
-    ''
-    ''
-    ''
+
+    Private _isFiltering As Boolean
+
+    Private ReadOnly _fontSummary As Font = New Font("Arial", 10, FontStyle.Bold)
+
+#End Region
+
+
+#Region " EVENTOS DEL FORMULARIO (Handlers) "
+
     Private Sub FrmListDebtors_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
-        '|
-        '|
-        '|
-
         LblErrorProvider.Text = String.Empty
+
         UploadIndividualDebts()
+
         UploadGroupDebts()
 
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub CmbFilter_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CmbFilter.SelectedIndexChanged
-        '
-
-        TxtSearch.Focus() 'ENVIAR ENFOQUE AL TEXBOX
-
+        TxtSearch.Focus()
     End Sub
-    ''
-    ''
-    ''
-    Private Sub TxtSearch_TextChanged(sender As Object, e As EventArgs) Handles TxtSearch.TextChanged
 
-        '|
-        '|
-        '|
+
+    Private Sub TxtSearch_TextChanged(sender As Object, e As EventArgs) Handles TxtSearch.TextChanged
 
         Dim searchCriteria As String = TxtSearch.Text.Trim()
 
         ' --- BÚSQUEDA INDIVIDUAL ---
         If RbPayIndividual.Checked AndAlso listIndividualPayment IsNot Nothing Then
 
-            ' Iniciamos el modo "silencio"
             _isFiltering = True
 
             Dim filteredRecords =
@@ -82,13 +77,12 @@ Public Class FrmListDebtors
             DgvIndividual.DataSource = Nothing
             DgvIndividual.DataSource = filteredRecords
 
-            'COMPROBAR SI HAY REGISTROS EN LA GRILLA
             If DgvIndividual.RowCount > 0 Then
-                ' Limpiamos cualquier error previo antes de mover la celda
+
                 ErrorProvider.Clear()
 
                 Select Case CmbFilter.SelectedIndex
-                    Case 0 : DgvIndividual.CurrentCell = DgvIndividual.Item(0, 0)'NOMBRE
+                    Case 0 : DgvIndividual.CurrentCell = DgvIndividual.Item(0, 0) 'NOMBRE
                     Case 1 : DgvIndividual.CurrentCell = DgvIndividual.Item(1, 0) 'APELLIDO
                 End Select
 
@@ -99,14 +93,13 @@ Public Class FrmListDebtors
 
             End If
 
-            _isFiltering = False ' Fin del modo silencio
+            _isFiltering = False
 
         End If
 
         ' --- BÚSQUEDA GRUPAL ---
         If RbPayGroup.Checked AndAlso listGroupPayment IsNot Nothing Then
 
-            ' Iniciamos el modo "silencio"
             _isFiltering = True
 
             Dim filteredRecords =
@@ -135,13 +128,12 @@ Public Class FrmListDebtors
             DgvFamilyGroup.DataSource = Nothing
             DgvFamilyGroup.DataSource = filteredRecords
 
-            'COMPROBAR SI HAY REGISTROS EN LA GRILLA
             If DgvFamilyGroup.RowCount > 0 Then
-                ' Limpiamos cualquier error previo antes de mover la celda
+
                 ErrorProvider.Clear()
 
                 Select Case CmbFilter.SelectedIndex
-                    Case 0 : DgvFamilyGroup.CurrentCell = DgvFamilyGroup.Item(0, 0)'INTEGRANTES
+                    Case 0 : DgvFamilyGroup.CurrentCell = DgvFamilyGroup.Item(0, 0) 'INTEGRANTES
                     Case 1 : DgvFamilyGroup.CurrentCell = DgvFamilyGroup.Item(1, 0) 'NOMBRE DEL GRUPO
                 End Select
 
@@ -152,22 +144,17 @@ Public Class FrmListDebtors
 
             End If
 
-            _isFiltering = False ' Fin del modo silencio
+            _isFiltering = False
 
         End If
 
-        UpdateStatusBar(searchCriteria) ' Actualizar conteo
-        '
+        UpdateStatusBar(searchCriteria)
+
     End Sub
     Private Sub UpdateStatusBar(criterio As String)
 
-        '|
-        '|
-        '|
-        ' Detectamos qué DGV estamos usando
         Dim dgvActivo = If(RbPayIndividual.Checked, DgvIndividual, DgvFamilyGroup)
 
-        ' Usamos la interfaz común para contar sin importar el tipo de DTO
         Dim lista = TryCast(dgvActivo.DataSource, IEnumerable(Of IPaymentSummary))
 
         If lista Is Nothing Then
@@ -186,107 +173,77 @@ Public Class FrmListDebtors
         End If
 
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub BtnClean_Click(sender As Object, e As EventArgs) Handles BtnClean.Click
 
-        '|
-        '|
-        '|
-        '
         TxtSearch.Clear()
         TxtSearch.Focus()
 
     End Sub
-    ''
-    ''
-    ''
-    Private Sub RbPayIndividual_CheckedChanged(sender As Object, e As EventArgs) Handles RbPayIndividual.CheckedChanged
 
-        '|
-        '|
-        '|
+
+    Private Sub RbPayIndividual_CheckedChanged(sender As Object, e As EventArgs) Handles RbPayIndividual.CheckedChanged
 
         If RbPayIndividual.Checked Then
 
-            ' 1. Visualización
             RbPayIndividual.BringToFront()
             DgvIndividual.Visible = True
             DgvFamilyGroup.Visible = False
 
-            ' 1. Limpiamos el texto sin disparar filtros innecesarios si es posible
             TxtSearch.Clear()
 
-            ' 2. En lugar de ir a la BD, refrescamos el enlace con la lista que ya tenemos
-            ' Esto limpia cualquier filtro que haya quedado pegado en el Grid
             DgvIndividual.DataSource = Nothing
             DgvIndividual.DataSource = listIndividualPayment
 
-            ' 3. Ajustes finales de UI
             CmbFilter.Items.Clear()
             CmbFilter.Items.AddRange({"   NOMBRE", "   APELLIDO"})
             CmbFilter.SelectedIndex = 0
 
             TxtSearch.Focus()
 
-            ' 4. 
             DgvIndividual.CurrentCell = Nothing
             BtnCollectMonth.Enabled = False
 
             UpdateStatusBar("")
+
         End If
 
     End Sub
-    ''
-    ''
-    ''
-    Private Sub RbPayGroup_CheckedChanged(sender As Object, e As EventArgs) Handles RbPayGroup.CheckedChanged
 
-        '|
-        '|
-        '|
+
+    Private Sub RbPayGroup_CheckedChanged(sender As Object, e As EventArgs) Handles RbPayGroup.CheckedChanged
 
         If RbPayGroup.Checked Then
 
-            ' 1. Visualización
             RbPayGroup.BringToFront()
             DgvIndividual.Visible = False
             DgvFamilyGroup.Visible = True
 
-            ' 3. Limpiar búsqueda anterior
             TxtSearch.Clear()
 
-            ' 2. En lugar de ir a la BD, refrescamos el enlace con la lista que ya tenemos
-            ' Esto limpia cualquier filtro que haya quedado pegado en el Grid
             DgvFamilyGroup.DataSource = Nothing
             DgvFamilyGroup.DataSource = listGroupPayment
 
-            ' 2. Configurar ComboBox
             CmbFilter.Items.Clear()
             CmbFilter.Items.AddRange({"   INTEGRANTES", "   NOMBRE GRUPO"})
             CmbFilter.SelectedIndex = 0
 
             TxtSearch.Focus()
 
-            ' 4. 
             DgvFamilyGroup.CurrentCell = Nothing
             BtnCollectMonth.Enabled = False
 
             UpdateStatusBar("")
+
         End If
 
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub DgvIndividual_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvIndividual.CellContentClick
     End Sub
     Private Sub DgvIndividual_CellFormatting(sender As Object, e As DataGridViewCellFormattingEventArgs) Handles DgvIndividual.CellFormatting
-
-        '|
-        '|
-        '|
 
         If e.RowIndex < 0 Then Exit Sub
 
@@ -294,7 +251,6 @@ Public Class FrmListDebtors
         Dim row = TryCast(dataGridView.Rows(e.RowIndex).DataBoundItem, IndividualPaymentDTO)
         If row Is Nothing OrElse Not row.IsSummaryRow Then Exit Sub
 
-        ' Estilo base para fila resumen
         e.CellStyle.ForeColor = Color.OrangeRed
         e.CellStyle.BackColor = Color.LightSalmon
         e.CellStyle.SelectionBackColor = Color.LightSalmon
@@ -325,12 +281,6 @@ Public Class FrmListDebtors
     End Sub
     Private Sub DgvIndividual_DataBindingComplete(sender As Object, e As DataGridViewBindingCompleteEventArgs) Handles DgvIndividual.DataBindingComplete
 
-        '|
-        '|
-        '|
-        ' Recorremos las filas una vez que los datos están cargados
-        ' Limpiar selección después de cargar los datos
-
         Dim dataGridView = DirectCast(sender, DataGridView)
         For Each row As DataGridViewRow In dataGridView.Rows
             Dim rowSumary = TryCast(row.DataBoundItem, IndividualPaymentDTO)
@@ -342,56 +292,45 @@ Public Class FrmListDebtors
     End Sub
     Private Sub DgvIndividual_SelectionChanged(sender As Object, e As EventArgs) Handles DgvIndividual.SelectionChanged
 
-        '|
-        '|
-        '|
-        ' Si estamos buscando, no queremos que aparezcan iconos de error
         If _isFiltering Then Exit Sub
+
         CheckRowDataGridView(DgvIndividual, LblErrorProvider, BtnCollectMonth, ErrorProvider, AppMessages.SelectRecord)
 
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub DgvFamilyGroup_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DgvFamilyGroup.CellContentClick
     End Sub
     Private Sub DgvFamilyGroup_CellFormatting(sender As Object, e As DataGridViewCellFormattingEventArgs) Handles DgvFamilyGroup.CellFormatting
-
-        '|
-        '|
-        '|
 
         If e.RowIndex < 0 Then Exit Sub
 
         Dim dataGridView = DirectCast(sender, DataGridView)
         Dim row = TryCast(dataGridView.Rows(e.RowIndex).DataBoundItem, GroupPaymentDTO)
 
-        ' Si la fila es nula o NO es una fila de resumen (naranja), no aplicamos cambios especiales
         If row Is Nothing OrElse Not row.IsSummaryRow Then Exit Sub
 
-        ' 2. Estilo visual para la fila de resumen
         e.CellStyle.ForeColor = Color.OrangeRed
         e.CellStyle.BackColor = Color.LightSalmon
         e.CellStyle.SelectionBackColor = Color.LightSalmon
-        e.CellStyle.Font = _fontSummary ' Asegúrate de tener esta variable definida
+        e.CellStyle.Font = _fontSummary
 
-        ' 3. Personalización de celdas según tus marcas de colores
         Select Case dataGridView.Columns(e.ColumnIndex).Name
 
-        ' --- MARCAS EN ROJO: Deben quedar vacías ---
             Case "PrcPgsGf", "DscPgsGf"
+
                 e.Value = ""
                 e.FormattingApplied = True
 
-        ' --- MARCA VERDE (TOTAL): Mostrar "DEBE" ---
             Case "TtlPgsGf"
+
                 e.Value = "DEBE"
                 e.FormattingApplied = True
 
-        ' --- MARCA VERDE (Nº DE DIAS): Mostrar sumatoria de registros ---
             Case "daysOfMonthGrp"
+
                 Dim amount = row.NumberMonths
-                ' Lógica: "1 MES" si es uno, "X MESES" si son varios
+
                 e.Value = If(amount = 1, "1 MES", $"{amount} MESES")
                 e.FormattingApplied = True
 
@@ -400,9 +339,6 @@ Public Class FrmListDebtors
     End Sub
     Private Sub DgvFamilyGroup_DataBindingComplete(sender As Object, e As DataGridViewBindingCompleteEventArgs) Handles DgvFamilyGroup.DataBindingComplete
 
-        '|
-        '|
-        '|
         ' Activa el salto de línea en la columna de INTEGRANTES (ajusta el índice si no es la 0)
         ' Permite que las filas crezcan a lo alto para mostrar todo el texto
         With DgvFamilyGroup
@@ -417,16 +353,15 @@ Public Class FrmListDebtors
 
     End Sub
     Private Sub DgvFamilyGroup_SelectionChanged(sender As Object, e As EventArgs) Handles DgvFamilyGroup.SelectionChanged
-        '
-        ' Si estamos buscando, no queremos que aparezcan iconos de error
+
         If _isFiltering Then Exit Sub
 
-        CheckRowDataGridView(DgvFamilyGroup, LblErrorProvider, BtnCollectMonth, ErrorProvider, AppMessages.SelectRecord)
+        CheckRowDataGridView(DgvFamilyGroup, LblErrorProvider, BtnCollectMonth,
+                             ErrorProvider, AppMessages.SelectRecord)
 
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub BtnCollectMonth_Click(sender As Object, e As EventArgs) Handles BtnCollectMonth.Click
 
         If RbPayIndividual.Checked Then
@@ -434,9 +369,12 @@ Public Class FrmListDebtors
             Dim selectedPayment = TryCast(DgvIndividual.CurrentRow?.DataBoundItem, IndividualPaymentDTO)
 
             If selectedPayment IsNot Nothing AndAlso Not selectedPayment.IsSummaryRow Then
-                ' Aquí le pasamos la función que refresca los deudores individuales
+
+                '| Pasamos la función que refresca los deudores individuales
                 OpenFrmCollectMembership(selectedPayment, AddressOf RefreshDgvIndividual)
+
             Else
+
                 MessageBox.Show(SelectCorrectRow, "Seleccionar registro",
                                 MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
@@ -448,29 +386,28 @@ Public Class FrmListDebtors
             Dim selectedPayment = TryCast(DgvFamilyGroup.CurrentRow?.DataBoundItem, GroupPaymentDTO)
 
             If selectedPayment IsNot Nothing AndAlso Not selectedPayment.IsSummaryRow Then
-                ' Aquí le pasamos la función que refresca los deudores grupales
+
+                '| Pasamos la función que refresca los deudores grupales
                 OpenFrmCollectMembership(selectedPayment, AddressOf RefreshDgvFamilyGroup)
+
             Else
+
                 MessageBox.Show(SelectCorrectRow, "Seleccionar registro",
                                 MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
+
         End If
 
     End Sub
-    ''
-    ''
-    ''
-    Private Sub BtnPaymentGenerator_Click(sender As Object, e As EventArgs) Handles BtnPaymentGenerator.Click
 
-        '|
-        '|
-        '|
+
+    Private Sub BtnPaymentGenerator_Click(sender As Object, e As EventArgs) Handles BtnPaymentGenerator.Click
 
         Try
             Dim newMonth = Date.Now.ToString("MMMM").ToUpper
             Dim generator As New PaymentGenerator()
 
-            ' 1. PRIMERO VALIDAMOS (Sin guardar nada aún)
+            ' 1. PRIMERO VALIDAMOS (Sin guardar nada)
             ' Usamos la función de chequeo que no inserta registros
             If Not generator.HasPendingMassivePayments() Then
 
@@ -492,10 +429,10 @@ Public Class FrmListDebtors
                 MessageBox.Show($"Se han generado {recordsCreated} nuevos pagos correctamente.",
                                     "Proceso finalizado", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
-                ' Actualizamos la interfaz
                 RefreshDgvIndividual()
                 RefreshDgvFamilyGroup()
                 UpdateStatusBar("")
+
             End If
 
         Catch ex As Exception
@@ -503,27 +440,20 @@ Public Class FrmListDebtors
         End Try
 
     End Sub
-    ''
-    ''
-    ''
+
+
     Private Sub BtnClose_Click(sender As Object, e As EventArgs) Handles BtnClose.Click
-
-        '|-----------------------------------------------------------------------------
-        '| CERRAR FORMULARIO LISTA DE MOROSOS
-        '|-----------------------------------
-        '| * 
-
         Me.Close()
-
     End Sub
-    ''
-    ''
-    ''
-    Private Sub UploadIndividualDebts()
 
-        '|
-        '|
-        '|
+#End Region
+
+
+    '| ============================================================ |'
+    '|                FUNCIONES Y MÉTODOS AUXILIARES                |'
+    '| ============================================================ |'
+
+    Private Sub UploadIndividualDebts()
 
         Try
             listIndividualPayment = _paymentManager.GetListIndividualDebtors()
@@ -536,14 +466,8 @@ Public Class FrmListDebtors
         End Try
 
     End Sub
-    ''
-    ''
-    ''
-    Private Sub UploadGroupDebts()
 
-        '|
-        '|
-        '|
+    Private Sub UploadGroupDebts()
 
         Try
             listGroupPayment = _paymentManager.GetListGroupDebtors()
@@ -556,14 +480,8 @@ Public Class FrmListDebtors
         End Try
 
     End Sub
-    ''
-    ''
-    ''
-    Private Sub CheckRowDataGridView(dataGridView As DataGridView, label As Label, button As Button, errorProvider As ErrorProvider, errorMessage As String)
 
-        '|
-        '|
-        '|
+    Private Sub CheckRowDataGridView(dataGridView As DataGridView, label As Label, button As Button, errorProvider As ErrorProvider, errorMessage As String)
 
         Dim dto = TryCast(dataGridView.CurrentRow?.DataBoundItem, ISelectableRow)
 
@@ -581,10 +499,6 @@ Public Class FrmListDebtors
 
     Private Sub ConfigureDataGridView(dataGridView As DataGridView, ParamArray currencyFormatColumn As String())
 
-        '|
-        '|
-        '|
-
         dataGridView.AutoGenerateColumns = False
 
         For Each nameColumn In currencyFormatColumn
@@ -595,10 +509,6 @@ Public Class FrmListDebtors
     End Sub
 
     Private Sub LoadDataGridView(Of T)(dataGridView As DataGridView, list As List(Of T))
-
-        '|
-        '|
-        '|
 
         dataGridView.DataSource = Nothing
         dataGridView.DataSource = list

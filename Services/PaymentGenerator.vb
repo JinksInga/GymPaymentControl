@@ -157,6 +157,7 @@ Namespace Services
                 Return Convert.ToInt32(command.ExecuteScalar()) > 0
 
             End Using
+
         End Function
 
 
@@ -194,7 +195,7 @@ Namespace Services
         ''' Obtiene la tarifa grupal según el número de integrantes.
         ''' </summary>
         Friend Function GetGroupRate(connection As MySqlConnection, transaction As MySqlTransaction,
-                                      numberPeople As Integer) As DataRow
+                                     numberPeople As Integer) As DataRow
 
             Dim sqlQuery As String = "SELECT prcio_trfa, dscto_trfa
                                       FROM trfa_dscto

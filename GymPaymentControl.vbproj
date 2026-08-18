@@ -122,6 +122,7 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BusinessRules\PaymentMethodRules.vb" />
     <Compile Include="Constants\EntityNames.vb" />
     <Compile Include="Enums\EntityStatus.vb" />
     <Compile Include="Constants\CustomerStates.vb" />

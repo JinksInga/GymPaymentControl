@@ -23,16 +23,15 @@
         ''' <returns>
         ''' Cadena formateada lista para mostrarse en un cuadro de diálogo de confirmación.
         ''' </returns>
-        Public Function OperationSuccessMessage(entityType As String,
-                                                entityName As String,
-                                                entityCode As String,
-                                                actionText As String) As String
+        Public Function OperationSuccessMessage(entityType As String, entityName As String,
+                                                entityCode As String, actionText As String) As String
 
-            Return $"DATOS DEL {entityType}" & Environment.NewLine & Environment.NewLine &
-                   $"   NOMBRE   :  {entityName}" & Environment.NewLine &
+            Return $"   DATOS DEL {entityType}:" & Environment.NewLine &
+                   "  _____________________________________________" & Environment.NewLine & Environment.NewLine &
+                   $"   NOMBRE  :  {entityName}" & Environment.NewLine &
                    $"   CÓDIGO   :  {entityCode}" & Environment.NewLine &
-                   "   -----------------------------------------------" & Environment.NewLine &
-                   $"   Datos {actionText} correctamente."
+                   "  _____________________________________________" & Environment.NewLine & Environment.NewLine &
+                   $"             Datos {actionText} correctamente."
 
         End Function
 
@@ -175,6 +174,35 @@
         End Function
 
         ''' <summary>
+        ''' Mensaje mostrado para informar al usuario que se va a expandir
+        ''' el límite de vacantes de un grupo familiar.
+        ''' </summary>
+        Public Function ConfirmAddExtraGroupMember(groupName As String, groupMemberLimit As Integer) As String
+
+            Return "    Nombre del grupo  : " & groupName & Environment.NewLine &
+                   "    Nº de Integrantes   : " & groupMemberLimit & Environment.NewLine & Environment.NewLine &
+                   "    El grupo seleccionado ya tiene los integrantes completos." & Environment.NewLine &
+                   "    ___________________________________________________________" & Environment.NewLine & Environment.NewLine &
+                   "                        ¿Seguro que quieres añadir otro integrante?"
+
+        End Function
+
+        '============================================================
+        ''' <summary>
+        ''' Muestra una advertencia indicando que un cliente no puede incorporarse al grupo en el período actual 
+        ''' debido a su fecha de inscripción, detallando el procedimiento alternativo para cobro de mensualidad.
+        ''' </summary>
+        Public Function ShowCurrentPeriodMemberInclusionWarning() As String
+
+            Return "No se puede ampliar el grupo para incorporar a este cliente " &
+            "porque su fecha de inscripción pertenece al período actual." & Environment.NewLine & Environment.NewLine &
+            "Si el cliente debe abonar la mensualidad del período actual, " &
+            "regístrelo primero como MENSUAL, realice el pago y posteriormente " &
+            "incorpórelo al grupo familiar."
+
+        End Function
+
+        ''' <summary>
         ''' Mensaje mostrado para informar al usuario que no puede cambiar el método
         ''' de pago de un cliente si este pertenece a un grupo familiar.
         ''' </summary>
@@ -190,18 +218,43 @@
         End Function
 
         ''' <summary>
-        ''' Mensaje mostrado para informar al usuario que se va a expandir
-        ''' el límite de vacantes de un grupo familiar.
+        ''' Mensaje mostrado cuando se intenta pasar de un método de pago
+        ''' individual a GRUPAL existiendo una deuda pendiente.
         ''' </summary>
-        Public Function ConfirmAddExtraGroupMember(groupName As String, groupMemberLimit As Integer) As String
+        Public Function IndividualToGroupDebtWarning() As String
 
-            Return "    Nombre del grupo  : " & groupName & Environment.NewLine &
-                   "    Nº de Integrantes   : " & groupMemberLimit & Environment.NewLine & Environment.NewLine &
-                   "    El grupo seleccionado ya tiene los integrantes completos." & Environment.NewLine &
-                   "    ___________________________________________________________" & Environment.NewLine & Environment.NewLine &
-                   "                        ¿Seguro que quieres añadir otro integrante?"
+            Return "No se puede cambiar a GRUPAL mientras exista una deuda pendiente." & Environment.NewLine & Environment.NewLine &
+                   "Debe cobrarse primero la deuda pendiente del cliente."
 
         End Function
+        ''' <summary>
+        ''' Mensaje mostrado cuando se intenta pasar de GRUPAL a un método
+        ''' de pago individual existiendo una deuda pendiente.
+        ''' </summary>
+        Public Function GroupToIndividualDebtWarning() As String
+
+            Return "No se puede cambiar de GRUPAL a un método de pago individual " &
+                   "mientras exista una deuda pendiente." & Environment.NewLine & Environment.NewLine &
+                   "Debe cobrarse primero la deuda pendiente del grupo."
+
+        End Function
+        ''' <summary>
+        ''' Devuelve el mensaje de advertencia que informa que no se
+        ''' pueden modificar los integrantes de un grupo familiar
+        ''' debido a la presencia de deudas pendientes.
+        ''' </summary>
+        ''' <returns>
+        ''' Cadena de texto (<see cref="String"/>) estructurada con la explicación
+        ''' de la restricción y la acción requerida.
+        ''' </returns>
+        Public Function GroupHasPendingDebtCannotRemoveMember() As String
+
+            Return "No se puede cambiar los integrantes de un grupo familiar " &
+                   "mientras exista una deuda pendiente." & Environment.NewLine & Environment.NewLine &
+                   "Debe cobrarse primero la deuda pendiente del grupo."
+
+        End Function
+        '============================================================
 
 #End Region
 
@@ -338,6 +391,24 @@
         ' Constantes relacionados con las operaciones de grupos familiares.
         Public Const FamilyGroupDeletedSuccessfully As String = "El grupo familiar se ha eliminado correctamente."
         Public Const SelectMemberFromListRemove As String = "Selecciona un integrante de la lista para poder quitarlo."
+
+        ''' <summary>
+        ''' Muestra un mensaje de advertencia cuando se amplía la capacidad de un grupo familiar,
+        ''' informando que el ajuste tarifario aplicará a partir del siguiente período.
+        ''' </summary>
+        Public Function ShowCapacityExpansionWarning() As String
+
+            Return " Capacidad del grupo ampliada." & Environment.NewLine & Environment.NewLine &
+                   " • Las cuotas emitidas o pagadas del período actual no" & Environment.NewLine &
+                   "   sufren modificaciones." & Environment.NewLine & Environment.NewLine &
+                   " • La nueva capacidad se tomará en cuenta para el cálculo de" & Environment.NewLine &
+                   "   la mensualidad del siguiente período." & Environment.NewLine & Environment.NewLine &
+                   " • ATENCIÓN : El nuevo integrante no realizará ningún pago" & Environment.NewLine &
+                   "   hasta el siguiente período de facturación." & Environment.NewLine & Environment.NewLine &
+                   " ¿Continuamos con la ampliación?"
+
+        End Function
+
 
         ''' <summary>
         ''' Genera el mensaje de confirmación mostrado antes de eliminar

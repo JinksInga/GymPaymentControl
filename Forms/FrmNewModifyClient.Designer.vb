@@ -274,15 +274,14 @@ Partial Class FrmNewModifyClient
         '
         Me.LblNumberMembers.BackColor = System.Drawing.Color.Azure
         Me.LblNumberMembers.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.LblNumberMembers.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblNumberMembers.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.LblNumberMembers.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(0, Byte), Integer))
         Me.LblNumberMembers.Location = New System.Drawing.Point(12, 55)
         Me.LblNumberMembers.Margin = New System.Windows.Forms.Padding(12, 6, 0, 6)
         Me.LblNumberMembers.Name = "LblNumberMembers"
-        Me.LblNumberMembers.Padding = New System.Windows.Forms.Padding(8, 0, 0, 0)
         Me.LblNumberMembers.Size = New System.Drawing.Size(204, 26)
         Me.LblNumberMembers.TabIndex = 2
-        Me.LblNumberMembers.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.LblNumberMembers.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'TxtListGroupsDailyPayment
         '
@@ -582,11 +581,11 @@ Partial Class FrmNewModifyClient
         Me.BtnCancelRegistration.ForeColor = System.Drawing.Color.Brown
         Me.BtnCancelRegistration.Image = Global.GymPaymentControl.My.Resources.Resources.ic_cancel_28x28
         Me.BtnCancelRegistration.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnCancelRegistration.Location = New System.Drawing.Point(4, 352)
-        Me.BtnCancelRegistration.Margin = New System.Windows.Forms.Padding(4, 0, 4, 24)
+        Me.BtnCancelRegistration.Location = New System.Drawing.Point(8, 328)
+        Me.BtnCancelRegistration.Margin = New System.Windows.Forms.Padding(8, 0, 8, 0)
         Me.BtnCancelRegistration.Name = "BtnCancelRegistration"
         Me.BtnCancelRegistration.Padding = New System.Windows.Forms.Padding(0, 3, 0, 0)
-        Me.BtnCancelRegistration.Size = New System.Drawing.Size(144, 64)
+        Me.BtnCancelRegistration.Size = New System.Drawing.Size(136, 64)
         Me.BtnCancelRegistration.TabIndex = 2
         Me.BtnCancelRegistration.Text = "&Cancelar"
         Me.BtnCancelRegistration.TextAlign = System.Drawing.ContentAlignment.BottomCenter
@@ -594,41 +593,37 @@ Partial Class FrmNewModifyClient
         '
         'BtnSaveCustomerData
         '
-        Me.BtnSaveCustomerData.BackColor = System.Drawing.SystemColors.Control
-        Me.BtnSaveCustomerData.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer))
-        Me.BtnSaveCustomerData.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.BtnSaveCustomerData.BackColor = System.Drawing.Color.Silver
         Me.BtnSaveCustomerData.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnSaveCustomerData.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer))
+        Me.BtnSaveCustomerData.ForeColor = System.Drawing.SystemColors.ControlText
         Me.BtnSaveCustomerData.Image = Global.GymPaymentControl.My.Resources.Resources.ic_save_28x28
         Me.BtnSaveCustomerData.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnSaveCustomerData.Location = New System.Drawing.Point(4, 32)
-        Me.BtnSaveCustomerData.Margin = New System.Windows.Forms.Padding(4, 32, 4, 0)
+        Me.BtnSaveCustomerData.Location = New System.Drawing.Point(8, 54)
+        Me.BtnSaveCustomerData.Margin = New System.Windows.Forms.Padding(8, 0, 8, 0)
         Me.BtnSaveCustomerData.Name = "BtnSaveCustomerData"
-        Me.BtnSaveCustomerData.Padding = New System.Windows.Forms.Padding(0, 3, 0, 0)
-        Me.BtnSaveCustomerData.Size = New System.Drawing.Size(144, 64)
+        Me.BtnSaveCustomerData.Padding = New System.Windows.Forms.Padding(0, 4, 0, 2)
+        Me.BtnSaveCustomerData.Size = New System.Drawing.Size(136, 64)
         Me.BtnSaveCustomerData.TabIndex = 0
         Me.BtnSaveCustomerData.Text = "&Guardar"
         Me.BtnSaveCustomerData.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnSaveCustomerData.UseVisualStyleBackColor = False
+        Me.BtnSaveCustomerData.UseVisualStyleBackColor = True
         '
         'BtnUpdateCustomerData
         '
-        Me.BtnUpdateCustomerData.BackColor = System.Drawing.SystemColors.Control
-        Me.BtnUpdateCustomerData.FlatAppearance.BorderColor = System.Drawing.Color.ForestGreen
-        Me.BtnUpdateCustomerData.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.BtnUpdateCustomerData.BackColor = System.Drawing.Color.Silver
         Me.BtnUpdateCustomerData.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnUpdateCustomerData.ForeColor = System.Drawing.Color.Green
+        Me.BtnUpdateCustomerData.ForeColor = System.Drawing.SystemColors.ControlText
         Me.BtnUpdateCustomerData.Image = Global.GymPaymentControl.My.Resources.Resources.ic_update_28x27
         Me.BtnUpdateCustomerData.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnUpdateCustomerData.Location = New System.Drawing.Point(4, 128)
-        Me.BtnUpdateCustomerData.Margin = New System.Windows.Forms.Padding(4, 32, 4, 0)
+        Me.BtnUpdateCustomerData.Location = New System.Drawing.Point(8, 52)
+        Me.BtnUpdateCustomerData.Margin = New System.Windows.Forms.Padding(8, 0, 8, 0)
         Me.BtnUpdateCustomerData.Name = "BtnUpdateCustomerData"
-        Me.BtnUpdateCustomerData.Padding = New System.Windows.Forms.Padding(0, 4, 0, 0)
-        Me.BtnUpdateCustomerData.Size = New System.Drawing.Size(144, 64)
+        Me.BtnUpdateCustomerData.Padding = New System.Windows.Forms.Padding(0, 6, 0, 2)
+        Me.BtnUpdateCustomerData.Size = New System.Drawing.Size(136, 64)
         Me.BtnUpdateCustomerData.TabIndex = 1
         Me.BtnUpdateCustomerData.Text = "&Actualizar"
         Me.BtnUpdateCustomerData.TextAlign = System.Drawing.ContentAlignment.BottomCenter
-        Me.BtnUpdateCustomerData.UseVisualStyleBackColor = False
+        Me.BtnUpdateCustomerData.UseVisualStyleBackColor = True
         '
         'PnlBotonera
         '
@@ -636,8 +631,8 @@ Partial Class FrmNewModifyClient
         Me.PnlBotonera.BackColor = System.Drawing.Color.Silver
         Me.PnlBotonera.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.PnlBotonera.Controls.Add(Me.BtnCancelRegistration)
-        Me.PnlBotonera.Controls.Add(Me.BtnUpdateCustomerData)
         Me.PnlBotonera.Controls.Add(Me.BtnSaveCustomerData)
+        Me.PnlBotonera.Controls.Add(Me.BtnUpdateCustomerData)
         Me.PnlBotonera.Dock = System.Windows.Forms.DockStyle.Right
         Me.PnlBotonera.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.PnlBotonera.Location = New System.Drawing.Point(989, 0)

@@ -80,8 +80,6 @@ Namespace Services
                         ' Declaramos la interfaz común para que sirva para ambos casos
                         Dim paymentDto As IPaymentCalculable
 
-                        'Dim precioFinal As Decimal = If(data.IsGroup, tariff.Price * data.GroupMembers, tariff.Price)
-
                         If data.IsGroup Then
                             ' Si es grupal, usamos el DTO de grupos familiares
                             paymentDto = New GroupPaymentDTO With
@@ -294,11 +292,17 @@ Namespace Services
                                  transaction As MySqlTransaction,
                                  data As ClientPaymentDTO) As RateResult
 
-            Dim result As New RateResult With {.Exists = False, .Price = 0, .Discount = 0}
-            Dim sqlQuery As String ' = ""
+            Dim result As New RateResult With
+                {
+                    .Exists = False,
+                    .Price = 0,
+                    .Discount = 0
+                }
+            Dim sqlQuery As String
 
             ' 1. Determinar la consulta principal
             Select Case data.PaymentMethod
+
                 Case PaymentMethods.Monthly
                     sqlQuery = "SELECT prcio_trfa, dscto_trfa FROM trfa_dscto WHERE emin_trfa <= @val AND emax_trfa >= @val LIMIT 1"
 
@@ -341,6 +345,7 @@ Namespace Services
             End If
 
             Return result
+
         End Function
 
         ' Función auxiliar para no repetir código de lectura
@@ -578,5 +583,48 @@ Namespace Services
         End Function
 
 
+        '===============================================================================================
+        Public Function HasGroupRate(numberMembers As Integer) As Boolean
+
+            Using connection As MySqlConnection = GetConnection()
+
+                connection.Open()
+
+                Dim paymentGenerator As New Services.PaymentGenerator()
+
+                Dim tariffRow As DataRow = paymentGenerator.GetGroupRate(connection, Nothing, numberMembers)
+
+                Return tariffRow IsNot Nothing
+
+            End Using
+
+        End Function
+
+        Public Function HasPendingGroupDebt(groupId As Integer) As Boolean
+
+            Const sqlQuery As String = "SELECT EXISTS (SELECT 1 " &
+                                       "FROM pagos " &
+                                       "WHERE id_grp = @id_grp " &
+                                       "AND (frm_pgs IS NULL OR frm_pgs = ''))"
+
+            Using connection = GetConnection()
+
+                Using command As New MySqlCommand(sqlQuery, connection)
+
+                    command.Parameters.Add("@id_grp", MySqlDbType.Int32).Value = groupId
+
+                    connection.Open()
+
+                    Return Convert.ToBoolean(command.ExecuteScalar())
+
+                End Using
+
+            End Using
+
+        End Function
+        '===============================================================================================
+
+
     End Class
+
 End Namespace
