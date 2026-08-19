@@ -53,8 +53,7 @@ Public Class FrmClientsPayments
 
         ActivateSearchRecord()
         DisableButtons()
-        ProcessLabelsRecursive(PnlDataClient, "Cli",
-                                   Sub(label) label.Text = "")
+        ProcessLabelsRecursive(PnlDataClient, "Cli", Sub(label) label.Text = "")
         DgvPaymentList.DataSource = Nothing
         FilterAndRenderClientGridUI()
 
@@ -183,8 +182,7 @@ Public Class FrmClientsPayments
 
     Private Sub BtnNewClient_Click(sender As Object, e As EventArgs) Handles BtnNewClient.Click
 
-        ProcessLabelsRecursive(PnlDataClient, "Cli",
-                                   Sub(label) label.Text = "")
+        ProcessLabelsRecursive(PnlDataClient, "Cli", Sub(label) label.Text = "")
         DgvPaymentList.DataSource = Nothing
         DisableButtons()
 
@@ -457,18 +455,37 @@ Public Class FrmClientsPayments
 
 
     ''' <summary>
-    ''' Actualiza la lista general de clientes disponible
-    ''' para búsquedas y operaciones del formulario.
+    ''' Carga y actualiza la lista local de clientes desde
+    ''' la base de datos para su uso en el formulario.
     ''' </summary>
     ''' <remarks>
-    ''' También habilita o deshabilita el botón de búsqueda
-    ''' dependiendo de si existen clientes registrados.
+    ''' Si la consulta es exitosa, evalúa la presencia de registros
+    ''' para habilitar el botón de búsqueda. 
+    ''' En caso de error de conexión o lectura, captura la excepción,
+    ''' resetea el estado de la lista, 
+    ''' inhabilita la búsqueda por seguridad y notifica al usuario
+    ''' mediante <see cref="MessageBox"/>.
     ''' </remarks>
     Private Sub FetchClientsFromDatabase()
 
-        BtnFindClient.Enabled = _clientManager.HasClients()
+        Try
+            BtnFindClient.Enabled = _clientManager.HasClients()
 
-        If BtnFindClient.Enabled Then _clientList = _clientManager.GetClientsForSearch()
+            If BtnFindClient.Enabled Then
+                _clientList = _clientManager.GetClientsForSearch()
+            Else
+                _clientList?.Clear()
+            End If
+
+        Catch ex As Exception
+            ' Deshabilitar controles por seguridad.
+            BtnFindClient.Enabled = False
+            ' Evitar operar con datos corruptos/inexistentes.
+            _clientList?.Clear()
+
+            MessageBox.Show("ERROR AL CONSULTAR LA BBDD : " & vbCrLf & ex.Message)
+
+        End Try
 
     End Sub
 

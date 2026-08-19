@@ -582,7 +582,7 @@ Partial Class FrmNewModifyClient
         Me.BtnCancelRegistration.Image = Global.GymPaymentControl.My.Resources.Resources.ic_cancel_28x28
         Me.BtnCancelRegistration.ImageAlign = System.Drawing.ContentAlignment.TopCenter
         Me.BtnCancelRegistration.Location = New System.Drawing.Point(8, 328)
-        Me.BtnCancelRegistration.Margin = New System.Windows.Forms.Padding(8, 0, 8, 0)
+        Me.BtnCancelRegistration.Margin = New System.Windows.Forms.Padding(8, 0, 8, 48)
         Me.BtnCancelRegistration.Name = "BtnCancelRegistration"
         Me.BtnCancelRegistration.Padding = New System.Windows.Forms.Padding(0, 3, 0, 0)
         Me.BtnCancelRegistration.Size = New System.Drawing.Size(136, 64)
@@ -598,8 +598,8 @@ Partial Class FrmNewModifyClient
         Me.BtnSaveCustomerData.ForeColor = System.Drawing.SystemColors.ControlText
         Me.BtnSaveCustomerData.Image = Global.GymPaymentControl.My.Resources.Resources.ic_save_28x28
         Me.BtnSaveCustomerData.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnSaveCustomerData.Location = New System.Drawing.Point(8, 54)
-        Me.BtnSaveCustomerData.Margin = New System.Windows.Forms.Padding(8, 0, 8, 0)
+        Me.BtnSaveCustomerData.Location = New System.Drawing.Point(8, 55)
+        Me.BtnSaveCustomerData.Margin = New System.Windows.Forms.Padding(8, 48, 8, 0)
         Me.BtnSaveCustomerData.Name = "BtnSaveCustomerData"
         Me.BtnSaveCustomerData.Padding = New System.Windows.Forms.Padding(0, 4, 0, 2)
         Me.BtnSaveCustomerData.Size = New System.Drawing.Size(136, 64)
@@ -615,8 +615,8 @@ Partial Class FrmNewModifyClient
         Me.BtnUpdateCustomerData.ForeColor = System.Drawing.SystemColors.ControlText
         Me.BtnUpdateCustomerData.Image = Global.GymPaymentControl.My.Resources.Resources.ic_update_28x27
         Me.BtnUpdateCustomerData.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.BtnUpdateCustomerData.Location = New System.Drawing.Point(8, 52)
-        Me.BtnUpdateCustomerData.Margin = New System.Windows.Forms.Padding(8, 0, 8, 0)
+        Me.BtnUpdateCustomerData.Location = New System.Drawing.Point(8, 55)
+        Me.BtnUpdateCustomerData.Margin = New System.Windows.Forms.Padding(8, 48, 8, 0)
         Me.BtnUpdateCustomerData.Name = "BtnUpdateCustomerData"
         Me.BtnUpdateCustomerData.Padding = New System.Windows.Forms.Padding(0, 6, 0, 2)
         Me.BtnUpdateCustomerData.Size = New System.Drawing.Size(136, 64)

@@ -19,27 +19,33 @@ Imports GymPaymentControl.Utils
 ''' </summary>
 Public Class FrmNewModifyClient
 
-#Region " VARIABLES DE ESTADO Y CONSTANTES "
+#Region " CAMPOS DE ESTADO Y VARIABLES DE SESIÓN "
 
-    ' Herramientas
+    ' --- Instancias de Servicios y DTOs ---
     Private ReadOnly _clientManager As New ClientManager()
     Private _customerData As New ClientPaymentDTO()
     Private _originalDataCustomer As IndividualPaymentDTO
 
-    ' Privada para guardar la "llave" del refresco con parámetro
-    Private _onSuccessAction As Action(Of Integer)
+    ' --- Control de Flujo y Navegación ---
+    Private _currentMode As TransactionMode
 
-    ' Variables de "Estado"
+    ' --- Flags de Estado y Banderas de UI ---
     Private _isSaving As Boolean = False
     Private _isSwitching As Boolean = False
     Private _shouldExpandGroup As Boolean
 
-    ' Variables de Memoria
+    ' --- Variables de Memoria Temporal e Indicadores de Grupo ---
     Private _selectedGroupId As Integer? = Nothing
     Private _currentGroupMaxMembers As Integer = 0
     Private _groupName As String
     Private _groupMemberLimit As Integer
     Private _registeredMembers As Integer
+
+    ''' <summary>
+    ''' Delegado de refresco invocado para notificar
+    ''' al formulario padre tras una operación exitosa.
+    ''' </summary>
+    Private _onSuccessAction As Action(Of Integer)
 
 #End Region
 
@@ -232,47 +238,29 @@ Public Class FrmNewModifyClient
 
         If Not RbDailyPayment.Checked Then Exit Sub
 
-        ' ============================================================
-        ' 1. CONFIGURAR INTERFAZ
-        ' ============================================================
-
+        '| * CONFIGURAR INTERFAZ
         GbListaGrupoFamiliar.Text = "Lista de pagos diarios:"
         TxtListGroupsDailyPayment.Clear()
         DgvListGroupsDailyPayment.Enabled = True
 
-
-        ' ============================================================
-        ' 2. CARGAR TARIFAS DIARIAS
-        ' ============================================================
-
+        '| * CARGAR TARIFAS DIARIAS
         ConfigureGridColumns(PaymentMethods.Daily)
         DgvListGroupsDailyPayment.DataSource = _clientManager.GetDailyPrice()
 
-        ' ============================================================
-        ' 3. COMPROBAR SI EXISTE ALGUNA TARIFA
-        ' ============================================================
-
+        '| * COMPROBAR SI EXISTE ALGUNA TARIFA
         If DgvListGroupsDailyPayment.Rows.Count = 0 Then
 
-            Dim response As DialogResult =
-            MessageBox.Show(
-                "No existe ninguna tarifa para los pagos diarios." &
-                vbCrLf & vbCrLf &
-                "¿Desea crear una nueva tarifa?",
-                "Tarifa no encontrada",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2)
-
+            Dim response As DialogResult = MessageBox.Show("No existe ninguna tarifa para los pagos diarios." & vbCrLf & vbCrLf &
+                                                           "¿Desea crear una nueva tarifa?",
+                                                           "Tarifa no encontrada",
+                                                           MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                                                           MessageBoxDefaultButton.Button2)
             If response <> DialogResult.Yes Then
                 RbDailyPayment.Checked = False
                 Exit Sub
             End If
 
-            ' ========================================================
-            ' 4. CREAR NUEVA TARIFA DIARIA
-            ' ========================================================
-
+            '| * CREAR NUEVA TARIFA DIARIA
             Using frm As New FrmPricesAndDiscounts()
 
                 frm.IsDailyRateRequest = True
@@ -281,26 +269,19 @@ Public Class FrmNewModifyClient
 
             End Using
 
-            ' ========================================================
-            ' 5. RECARGAR TARIFAS
-            ' ========================================================
-
+            '| * RECARGAR TARIFAS
             DgvListGroupsDailyPayment.DataSource = _clientManager.GetDailyPrice()
 
         End If
 
-        ' ============================================================
-        ' 6. SELECCIÓN SEGÚN EL MODO DEL FORMULARIO
-        ' ============================================================
-
+        '| * SELECCIÓN SEGÚN EL MODO DEL FORMULARIO
         If _originalDataCustomer IsNot Nothing Then
 
-            ' ACTUALIZAR ' Si estamos en modo edición y tenemos la "Foto" original
+            '| * ACTUALIZAR: Si estamos en modo edición y tenemos la "Foto" original
             SelectCurrentPrice(_originalDataCustomer.PaymentMethod)
-
         Else
 
-            ' NUEVO' Si es NUEVO, mantenemos el comportamiento de limpieza absoluta
+            '| * NUEVO: Mantenemos el comportamiento de limpieza absoluta
             DgvListGroupsDailyPayment.ClearSelection()
             DgvListGroupsDailyPayment.CurrentCell = Nothing
 
@@ -330,92 +311,112 @@ Public Class FrmNewModifyClient
         If _isSwitching Then Exit Sub
 
         If RbGroupPayment.Checked Then
-            ' =========================
-            ' ENTRADA AL GRUPO FAMILIAR
-            ' =========================
 
+            ' =============================
+            ' | ENTRADA AL GRUPO FAMILIAR |
+            ' =============================
             If _originalDataCustomer IsNot Nothing Then
 
                 Dim canChange As Boolean = PaymentMethodRules.CanChangePaymentMethod(_originalDataCustomer.PaymentMethod,
                                                                   PaymentMethods.Grupal, _originalDataCustomer.HasDebtCustomer)
                 If Not canChange Then
 
-                    MessageBox.Show(DialogMessages.IndividualToGroupDebtWarning(), "Cambio de método no permitido",
+                    MessageBox.Show(DialogMessages.IndividualToGroupDebtWarning(), "Aviso importante",
                                     MessageBoxButtons.OK, MessageBoxIcon.Warning)
                     RestorePaymentMethod()
-
                     Return
 
                 End If
 
             End If
 
-            ' Preparar interfaz
+            '| * PREPARACIÓN DELA INTERFAZ
             TxtListGroupsDailyPayment.Clear()
             LblNumberMembers.Text = ""
             GbListaGrupoFamiliar.Text = "Lista de grupos familiares:"
+
             BtnAddGroup.Enabled = True
             TxtListGroupsDailyPayment.Enabled = True
             DgvListGroupsDailyPayment.Enabled = True
 
-            ' Cargar datos
+            '| * CARGAR DATOS
             ConfigureGridColumns(PaymentMethods.Grupal)
-            DgvListGroupsDailyPayment.DataSource =
-            _clientManager.GetNameGroupFamily()
-
+            DgvListGroupsDailyPayment.DataSource = _clientManager.GetNameGroupFamily()
             DgvListGroupsDailyPayment.CurrentCell = Nothing
+
             TxtListGroupsDailyPayment.Focus()
 
         Else
-            ' =========================
-            ' SALIDA DEL GRUPO FAMILIAR
-            ' =========================
 
-            If BtnSaveCustomerData.Enabled Then
+            If _originalDataCustomer Is Nothing Then Exit Sub
 
-                ' NUEVO/GUARDAR
-                BtnAddGroup.Enabled = False
-                TxtListGroupsDailyPayment.Enabled = False
-                TxtListGroupsDailyPayment.BackColor = Color.Azure
-                LblNumberMembers.Text = ""
-                ResetGroupUI(True)
+            '| * SI EL CLIENTE YA PERTENECE A UN GRUPO FAMILIAR
+            '|   El cambio debe realizarse desde el formulario FrmFamilyGroup.
+            If _originalDataCustomer.IdGroup.HasValue AndAlso _originalDataCustomer.IdGroup.Value > 0 Then
 
-            Else
+                MessageBox.Show(DialogMessages.GroupPaymentChangeNotAllowed(), "Aviso importante",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                _isSwitching = True
+                RbGroupPayment.Checked = True
+                _isSwitching = False
+                Return
 
-                ' MODIFICAR/ACTUALIZAR
-                If _originalDataCustomer Is Nothing Then Exit Sub
+            End If
 
-                Dim newPaymentMethod As String = If(RbMonthlyPayment.Checked, PaymentMethods.Monthly, PaymentMethods.Daily)
+            ' =============================
+            ' | SALIDA DEL GRUPO FAMILIAR |
+            ' =============================
+            Select Case _currentMode
 
-                Dim canChange As Boolean = PaymentMethodRules.CanChangePaymentMethod(_originalDataCustomer.PaymentMethod,
+                Case TransactionMode.NewRecord
+
+                    BtnAddGroup.Enabled = False
+                    TxtListGroupsDailyPayment.Enabled = False
+                    TxtListGroupsDailyPayment.BackColor = Color.Azure
+                    LblNumberMembers.Text = ""
+                    ResetGroupUI(True)
+
+                Case TransactionMode.EditRecord
+
+                    If _originalDataCustomer Is Nothing Then Exit Sub
+
+                    Dim newPaymentMethod As String = If(RbMonthlyPayment.Checked, PaymentMethods.Monthly, PaymentMethods.Daily)
+
+                    Dim canChange As Boolean = PaymentMethodRules.CanChangePaymentMethod(_originalDataCustomer.PaymentMethod,
                                                                                      newPaymentMethod,
                                                                                      _originalDataCustomer.HasDebtCustomer)
-                If Not canChange Then
+                    If Not canChange Then
 
-                    MessageBox.Show(DialogMessages.GroupToIndividualDebtWarning(), "Cambio de método no permitido",
+                        MessageBox.Show(DialogMessages.GroupToIndividualDebtWarning(), "Aviso importante",
                                     MessageBoxButtons.OK, MessageBoxIcon.Warning)
 
-                    _isSwitching = True
-                    RbGroupPayment.Checked = True
-                    _isSwitching = False
+                        _isSwitching = True
+                        RbGroupPayment.Checked = True
+                        _isSwitching = False
 
-                    Return
+                        Return
 
-                End If
-            End If
+                    End If
+
+            End Select
+
         End If
 
     End Sub
 
 
     Private Sub BtnAddGroup_Click(sender As Object, e As EventArgs) Handles BtnAddGroup.Click
-        'FrmFamilyGroup.Show()
+
         ' Buscamos si ya está abierto
         Dim frmGroup = FrmMdiMain.MdiChildren.OfType(Of FrmFamilyGroup)().FirstOrDefault()
 
         If frmGroup Is Nothing Then
             ' Si no existe, lo creamos
-            frmGroup = New FrmFamilyGroup With {.MdiParent = FrmMdiMain}
+            frmGroup = New FrmFamilyGroup With
+                {
+                    .MdiParent = FrmMdiMain,
+                    .IsNewGroupWithNoMembers = True
+                }
             frmGroup.Show()
         Else
             ' Si ya existe, lo traemos al frente y le damos el foco
@@ -484,33 +485,13 @@ Public Class FrmNewModifyClient
     Private Sub BtnExpandCapacity_Click(sender As Object, e As EventArgs) Handles BtnExpandCapacity.Click
 
         '| * CONFIRMAR LA AMPLIACIÓN DEL CUPO
-
         Dim response As DialogResult = MessageBox.Show(DialogMessages.ConfirmAddExtraGroupMember(_groupName, _groupMemberLimit),
                                                        "Comprobar datos",
                                                        MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
                                                        MessageBoxDefaultButton.Button2)
         If response <> DialogResult.Yes Then Exit Sub
 
-        '| * COMPROBAR EL PERÍODO DE INSCRIPCIÓN : Si el cliente se está inscribiendo durante el mes actual,
-        '|   no permitimos incorporarlo mediante una ampliación. Se compara MES + AÑO para evitar falsos
-        '|   positivos entre el mismo mes de años diferentes.
-
-        Dim registrationDate As DateTime = DtpRegistrationDate.Value.Date
-        Dim currentDate As DateTime = Date.Today
-
-        Dim isCurrentPeriod As Boolean = registrationDate.Month = currentDate.Month AndAlso registrationDate.Year = currentDate.Year
-
-        If isCurrentPeriod Then
-
-            MessageBox.Show(DialogMessages.ShowCurrentPeriodMemberInclusionWarning,
-                            "Incorporación al grupo familiar",
-                            MessageBoxButtons.OK, MessageBoxIcon.Warning)
-            Exit Sub
-
-        End If
-
         '| * COMPROBAR QUE EXISTE TARIFA PARA EL NUEVO NÚMERO DE INTEGRANTES
-
         Dim newNumberMembers As Integer = _groupMemberLimit + 1
 
         If Not _clientManager.HasGroupRate(newNumberMembers) Then
@@ -533,7 +514,6 @@ Public Class FrmNewModifyClient
         End If
 
         '| * AMPLIAR CAPACIDAD
-
         _currentGroupMaxMembers = newNumberMembers
         _shouldExpandGroup = True
 
@@ -583,10 +563,19 @@ Public Class FrmNewModifyClient
         If Not ValidateForm("guardar") Then Exit Sub
         If Not ValidateGroupCapacity("guardar", BtnExpandCapacity) Then Exit Sub
 
+        '| * VALIDACIÓN DE AMPLIACIÓN
+        If _shouldExpandGroup Then
+
+            Dim result As DialogResult = MessageBox.Show(ShowCapacityExpansionWarning, "Aviso importante",
+                                                         MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
+                                                         MessageBoxDefaultButton.Button2)
+            If result = DialogResult.Cancel Then Exit Sub
+
+        End If
+
         '| -------------------
         '| PROCESO DE GUARDADO
         '| -------------------
-
         Try
             Dim data As ClientPaymentDTO = GetClientDataFromForm(isUpdate:=False)
 
@@ -627,7 +616,6 @@ Public Class FrmNewModifyClient
         '| ------------------------
         '| PROCESO DE ACTUALIZACIÓN
         '| ------------------------
-
         Try
             Dim success = _clientManager.UpdateClientProcess(data, isNewEnrollment, _shouldExpandGroup)
 
@@ -647,7 +635,7 @@ Public Class FrmNewModifyClient
 
     Private Sub BtnCancelRegistration_Click(sender As Object, e As EventArgs) Handles BtnCancelRegistration.Click
 
-        ' Close disparará el evento FormClosinghaciendo haciendo las comprobaciones necesarias
+        ' Close disparará el evento FormClosing haciendo las comprobaciones necesarias
         ' para determinar si hay cambios pendientes por guardar o actualizar.
         Me.Close()
 
@@ -661,63 +649,14 @@ Public Class FrmNewModifyClient
     '|                FUNCIONES Y MÉTODOS AUXILIARES                |'
     '| ============================================================ |'
 
+#Region " 1. CONFIGURACIÓN E INICIALIZACIÓN "
+
     ''' <summary>
-    ''' Método para recibir la acción desde el módulo
+    ''' Asigna el delegado de refresco que será invocado al finalizar
+    ''' exitosamente el registro o edición.
     ''' </summary>
     Public Sub SetRefreshAction(action As Action(Of Integer))
         _onSuccessAction = action
-    End Sub
-
-
-    ''' <summary>
-    ''' Engañamos al vigilante.
-    ''' La llave maestra que silencia el FormClosing
-    ''' </summary>
-    Public Sub ForceClose()
-        _isSaving = True
-        Me.Close()
-    End Sub
-
-
-    ''' <summary>
-    ''' Configura los límites y valores iniciales del
-    ''' selector de fecha de nacimiento.
-    ''' </summary>
-    Private Sub ConfigureBirthDatePicker()
-
-        Dim today As Date = Date.Today
-
-        ' Límites para la fecha de nacimiento
-        DtpBirthdate.MinDate = New Date(today.Year - 90, 1, 1)
-        DtpBirthdate.MaxDate = today
-
-        ' ESTO SOLO SI ES UN REGISTRO NUEVO
-        If BtnSaveCustomerData.Enabled Then
-            ' Asignamos una fecha sugerida (25 años atrás)
-            DtpBirthdate.Value = New Date(today.Year - 25, 7, 1)
-            ' Limpiamos y preparamos para el nuevo registro
-            LblCustomerAge.Text = ""
-            LblCustomerAge.BackColor = Color.Azure
-        End If
-
-    End Sub
-
-
-    ''' <summary>
-    ''' Configura los límites y valores iniciales del
-    ''' selector de fecha de registro.
-    ''' </summary>
-    Private Sub ConfigureRegistrationDatePicker()
-
-        Dim today As Date = Date.Today
-
-        ' Límites para la fecha de registro
-        DtpRegistrationDate.MinDate = New Date(today.Year - 2, 1, 1)
-        DtpRegistrationDate.MaxDate = New Date(today.Year + 2, 12, 31)
-
-        ' Comprueba si estamos en modo "NUEVO/GUARDAR"
-        If BtnSaveCustomerData.Enabled Then DtpRegistrationDate.Value = today
-
     End Sub
 
 
@@ -728,15 +667,15 @@ Public Class FrmNewModifyClient
     ''' </summary>
     Public Sub PrepareForNewClient()
 
+        _currentMode = TransactionMode.NewRecord
+
         ' Resetear el DTO para que no tenga datos del cliente anterior
         _customerData = New ClientPaymentDTO()
-        ' Borramos los datos de la copia
         _originalDataCustomer = Nothing
 
         ' Configurar botones
-        BtnSaveCustomerData.Enabled = True
-        BtnUpdateCustomerData.Enabled = False
-        BtnUpdateCustomerData.BackColor = Color.Silver
+        BtnSaveCustomerData.Visible = True
+        BtnUpdateCustomerData.Visible = False
 
         ' Configurar fechas por defecto
         DtpBirthdate.Format = DateTimePickerFormat.Custom
@@ -752,9 +691,11 @@ Public Class FrmNewModifyClient
     ''' También conserva una copia del estado original para detectar cambios.
     ''' </summary>
     ''' <param name="clientData">
-    ''' Datos originales del cliente seleccionados para edición.
+    ''' DTO con datos originales del cliente seleccionados para edición.
     ''' </param>
     Public Sub PrepareToModifyClient(clientData As IndividualPaymentDTO)
+
+        _currentMode = TransactionMode.EditRecord
 
         _isSwitching = True ' Levantamos el semáforo.
 
@@ -799,9 +740,8 @@ Public Class FrmNewModifyClient
         '| * AJUSTES VISUALES
 
         ChkRegistrationDate.Enabled = False ' MODO UPDATE : La fecha de inscripción NO se puede modificar.
-        BtnSaveCustomerData.Enabled = False
-        BtnSaveCustomerData.BackColor = Color.Silver
-        BtnUpdateCustomerData.Enabled = True
+        BtnSaveCustomerData.Visible = False
+        BtnUpdateCustomerData.Visible = True
 
         ' Evita que los eventos CheckedChanged se ejecuten mientras el formulario se carga programáticamente.
         ' Bajamos el semáforo para que el usuario ya pueda interactuar
@@ -811,21 +751,92 @@ Public Class FrmNewModifyClient
 
 
     ''' <summary>
-    ''' Obtiene la información ingresada en el formulario
-    ''' y construye un objeto ClientPaymentDTO.
+    ''' Configura los límites y valores iniciales del
+    ''' selector de fecha de nacimiento.
+    ''' </summary>
+    Private Sub ConfigureBirthDatePicker()
+
+        Dim today As Date = Date.Today
+
+        ' Límites para la fecha de nacimiento
+        DtpBirthdate.MinDate = New Date(today.Year - 90, 1, 1)
+        DtpBirthdate.MaxDate = today
+
+        ' ESTO SOLO SI ES UN REGISTRO NUEVO
+        If BtnSaveCustomerData.Enabled Then
+
+            ' Asignamos una fecha sugerida (25 años atrás)
+            DtpBirthdate.Value = New Date(today.Year - 25, 7, 1)
+            ' Limpiamos y preparamos para el nuevo registro
+            LblCustomerAge.Text = ""
+            LblCustomerAge.BackColor = Color.Azure
+
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Configura los límites y valores iniciales del
+    ''' selector de fecha de registro.
+    ''' </summary>
+    Private Sub ConfigureRegistrationDatePicker()
+
+        Dim today As Date = Date.Today
+
+        ' Límites para la fecha de registro
+        DtpRegistrationDate.MinDate = New Date(today.Year - 2, 1, 1)
+        DtpRegistrationDate.MaxDate = New Date(today.Year + 2, 12, 31)
+
+        ' Comprueba si estamos en modo "NUEVO/GUARDAR"
+        If BtnSaveCustomerData.Enabled Then DtpRegistrationDate.Value = today
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Asigna dinámicamente los eventos de validación
+    ''' y cambio visual a los controles TextBox del formulario.
+    ''' </summary>
+    Private Sub SetupTextBoxEvents()
+
+        ' Creamos una lista de los TextBox que queremos validar
+        Dim requiredFields As TextBox() = {TxtFirstName, TxtLastName, TxtListGroupsDailyPayment}
+        Dim optionalFields As TextBox() = {TxtPhone, TxtAddress} 'TxtEmail,
+
+        For Each textBox In requiredFields
+            ' Suscribimos el evento GotFocus (Cambio a Beige)
+            AddHandler textBox.GotFocus, Sub(s, e) DirectCast(s, TextBox).BackColor = Color.Beige
+            ' Suscribimos el evento LostFocus (Validación y Azure)
+            AddHandler textBox.LostFocus, Sub(s, e) ValidateCustomerNameUI(DirectCast(s, TextBox), Me.ErrorProvider)
+        Next
+
+        For Each textBox In optionalFields
+            ' Suscribimos el evento GotFocus (Cambio a Beige)
+            AddHandler textBox.GotFocus, Sub(s, e) DirectCast(s, TextBox).BackColor = Color.Beige
+            ' Suscribimos el evento LostFocus (Validación y Azure)
+            AddHandler textBox.LostFocus, Sub(s, e) ValidateOptionalFieldUI(DirectCast(s, TextBox), Me.ErrorProvider)
+        Next
+
+    End Sub
+
+#End Region
+
+
+#Region " 2. MAPPING Y TRANSFORMACIÓN DE DATOS "
+
+    ''' <summary>
+    ''' Obtiene la información ingresada en el formulario y construye un objeto ClientPaymentDTO.
     ''' </summary>
     ''' <param name="isUpdate">
-    ''' Indica si los datos corresponden a una actualización
-    ''' de cliente existente.
+    ''' Indica si los datos corresponden a una actualización de cliente existente.
     ''' </param>
     ''' <returns>
-    ''' Objeto ClientPaymentDTO con los datos actuales
-    ''' del formulario.
+    ''' Objeto ClientPaymentDTO con los datos actuales del formulario.
     ''' </returns>
     ''' <remarks>
-    ''' Este método centraliza el mapeo entre los controles
-    ''' de la interfaz y el DTO utilizado por la lógica
-    ''' de negocio.
+    ''' Este método centraliza el mapeo entre los controles de la interfaz y
+    ''' el DTO utilizado por la lógica de negocio.
     '''
     ''' También asigna automáticamente:
     ''' - Método de pago.
@@ -875,13 +886,37 @@ Public Class FrmNewModifyClient
 
 
     ''' <summary>
+    ''' Obtiene el método de pago actualmente seleccionado en el formulario.
+    ''' </summary>
+    ''' <returns>
+    ''' Nombre del método de pago seleccionado:
+    ''' - MENSUAL
+    ''' - GRUPAL
+    ''' - DIARIO
+    ''' </returns>
+    Private Function GetCurrentPaymentMethod() As String
+
+        If RbMonthlyPayment.Checked Then Return PaymentMethods.Monthly
+
+        If RbGroupPayment.Checked Then Return PaymentMethods.Grupal
+
+        If RbDailyPayment.Checked Then Return TxtListGroupsDailyPayment.Text.Trim()
+
+        Return "DESCONOCIDO"
+
+    End Function
+
+#End Region
+
+
+#Region " 3. LÓGICA DE NEGOCIO Y ESTADO DEL FORMULARIO "
+
+    ''' <summary>
     ''' Comprueba si existen cambios no guardados en el formulario
     ''' comparando los valores actuales con la copia original del cliente.
     ''' </summary>
-    ''' <returns>
-    ''' True si existe al menos una modificación pendiente;
-    ''' de lo contrario, False.
-    ''' </returns>
+    ''' <returns><c>True</c> si existe al menos una modificación pendiente;
+    ''' de lo contrario, <c>False</c></returns>
     Public Function HasUnsavedChanges() As Boolean
 
         ' CASO NUEVO: Si no hay foto original, usamos la lógica de "campos vacíos"
@@ -920,60 +955,82 @@ Public Class FrmNewModifyClient
 
 
     ''' <summary>
-    ''' Restaura el método de pago original del cliente
-    ''' evitando disparar eventos recursivos.
+    ''' Cierra el formulario omitiendo los controles
+    ''' defensivos de cambios pendientes.
     ''' </summary>
-    Private Sub RestorePaymentMethod()
-
-        ' Bloqueamos eventos temporalmente para no entrar en bucles
-        RemoveHandler RbGroupPayment.CheckedChanged, AddressOf RbGroupPayment_CheckedChanged
-
-        ' Consultamos nuestro "Clone" para saber qué radio button marcar
-        Select Case _originalDataCustomer.PaymentMethod
-            Case PaymentMethods.Monthly
-                RbMonthlyPayment.Checked = True
-
-            Case Else '"DIARIO"
-                RbDailyPayment.Checked = True
-                TxtListGroupsDailyPayment.Text = _originalDataCustomer.PaymentMethod
-
-        End Select
-
-        ' Re-conectamos el evento para futuras interacciones
-        AddHandler RbGroupPayment.CheckedChanged, AddressOf RbGroupPayment_CheckedChanged
-
-        ' NOTA IMPORTANTE
-        ' StartsWith es como un detective de texto: pregunta si una cadena de texto comienza
-        ' por una palabra o letra específica.
-        ' Case _originalDataCustomer.PaymentMethod.StartsWith("DIARIO")
+    Public Sub ForceClose()
+        _isSaving = True
+        Me.Close()
     End Sub
 
+#End Region
+
+
+#Region " 4. VALIDACIONES Y MENSAJES "
 
     ''' <summary>
-    ''' Obtiene el método de pago actualmente seleccionado en el formulario.
+    ''' Ejecuta las validaciones principales del formulario antes
+    ''' de registrar o actualizar la información del cliente.
     ''' </summary>
-    ''' <returns>
-    ''' El método de pago seleccionado:
-    ''' - MENSUAL
-    ''' - GRUPAL
-    ''' - Pago diario seleccionado
-    ''' </returns>
-    Private Function GetCurrentPaymentMethod() As String
+    ''' <param name="actionText"> Texto descriptivo de la acción actual.
+    ''' Ejemplo: "guardar" o "actualizar".</param>
+    ''' <returns><c>True</c> si todas las validaciones fueron superadas correctamente;
+    ''' de lo contrario, <c>False</c>.</returns>
+    ''' <remarks>
+    ''' Esta función centraliza las validaciones relacionadas con:
+    ''' - Campos obligatorios.
+    ''' - Edad mínima permitida.
+    ''' - Método de pago seleccionado.
+    ''' - Selección de tarifas o grupos familiares.
+    ''' - Disponibilidad de cupos en grupos familiares.
+    '''
+    ''' El proceso se detiene inmediatamente al encontrar una validación inválida.
+    ''' </remarks>
+    Private Function ValidateForm(actionText As String) As Boolean
 
-        If RbMonthlyPayment.Checked Then
-            Return PaymentMethods.Monthly
-
-        ElseIf RbGroupPayment.Checked Then
-            Return PaymentMethods.Grupal
-
-        ElseIf RbDailyPayment.Checked Then
-            Return TxtListGroupsDailyPayment.Text.Trim()
-        End If
-
-        Return "DESCONOCIDO"
+        If Not ValidateRequiredField("NOMBRE", actionText, TxtFirstName) Then Return False
+        If Not ValidateRequiredField("APELLIDO", actionText, TxtLastName) Then Return False
+        If Not ValidateCustomerAge(actionText, LblCustomerAge, DtpBirthdate) Then Return False
+        If Not ValidateEmail(actionText, TxtEmail) Then Return False
+        If Not ValidatePaymentMethod(actionText, RbDailyPayment, RbMonthlyPayment, RbGroupPayment) Then Return False
+        If Not ValidateRequiredSelection(PaymentMethods.Daily, actionText, TxtListGroupsDailyPayment, RbDailyPayment) Then Return False
+        If Not ValidateRequiredSelection(PaymentMethods.FamilyGroup, actionText, TxtListGroupsDailyPayment, RbGroupPayment) Then Return False
+        Return True
 
     End Function
 
+
+    ''' <summary>
+    ''' Notifica el éxito de la operación, después de registrar o actualizar,
+    ''' ejecuta el delegado de refresco y cierra el formulario.
+    ''' </summary>
+    ''' <param name="customerCode">
+    ''' Identificador del cliente procesado.
+    ''' </param>
+    Private Sub ShowSuccessMessage(customerCode As Integer)
+
+        '| Cuerpo del texto.
+        Dim fullName As String = $"{TxtFirstName.Text} {TxtLastName.Text}"
+        Dim idFormatted As String = $"CLI - {customerCode:000}"
+        Dim actionText As String = If(BtnSaveCustomerData.Enabled, "GUARDADOS", "ACTUALIZADOS")
+
+        '| Mensaje de confirmación.
+        MessageBox.Show(DialogMessages.OperationSuccessMessage(EntityNames.Client, fullName, idFormatted, actionText),
+                        "Operación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+        '| Notificar al formulario, esto ejecutará la función que pasamos por AddressOf.
+        _onSuccessAction?.Invoke(customerCode)
+
+        '| Cerrar el formulario
+        _isSaving = True
+        Me.Close()
+
+    End Sub
+
+#End Region
+
+
+#Region " 5. GESTIÓN VISUAL Y CONTROLES "
 
     ''' <summary>
     ''' Configura las columnas del DataGridView según
@@ -1022,7 +1079,6 @@ Public Class FrmNewModifyClient
         DgvListGroupsDailyPayment.CurrentCell = Nothing
 
         ' 2. Buscamos el valor en el Grid
-        ' (Asumo que la columna con el nombre "DIARIO X" es la primera o tiene un nombre específico)
         For Each row As DataGridViewRow In DgvListGroupsDailyPayment.Rows
 
             If row.Cells("colNameDailyGroup").Value?.ToString() = contractedPayment Then
@@ -1043,10 +1099,12 @@ Public Class FrmNewModifyClient
 
 
     ''' <summary>
-    ''' Método que actualiza el estado visual y la disponibilidad de la
-    ''' ampliación de capacidad del grupo familiar según su ocupación
+    ''' Actualiza el estado visual y la disponibilidad de la ampliación
+    ''' de capacidad del grupo familiar según su ocupación
     ''' y la situación actual del cliente.
     ''' </summary>
+    ''' <param name="isFull">Indica si el grupo familiar
+    ''' alcanzó su cupo máximo.</param>
     Private Sub UpdateExpansionUI(isFull As Boolean)
 
         ' Por defecto, el botón permanece desactivado.
@@ -1061,23 +1119,17 @@ Public Class FrmNewModifyClient
         ' El grupo está completo.
         LblNumberMembers.ForeColor = Color.FromArgb(192, 0, 0)
 
-        ' Un cliente que ya pertenece a un grupo
-        ' nunca puede solicitar una ampliación.
-        Dim clientAlreadyBelongsToGroup As Boolean = False
-
-        If _originalDataCustomer IsNot Nothing Then
-            clientAlreadyBelongsToGroup = _originalDataCustomer.IdGroup.HasValue AndAlso
-                                          _originalDataCustomer.IdGroup.Value > 0
-        End If
+        ' Un cliente que ya pertenece a un grupo nunca puede solicitar una ampliación.
+        Dim clientAlreadyBelongsToGroup As Boolean = (_originalDataCustomer IsNot Nothing) AndAlso
+                                                      _originalDataCustomer.IdGroup.HasValue AndAlso
+                                                     (_originalDataCustomer.IdGroup.Value > 0)
 
         If clientAlreadyBelongsToGroup Then Exit Sub
 
         ' Grupo completo + cliente sin grupo = puede ampliar.
         BtnExpandCapacity.Enabled = True
 
-        ErrorProvider.SetError(
-        BtnExpandCapacity,
-        DialogMessages.FullFamilyGroup(_groupName))
+        ErrorProvider.SetError(BtnExpandCapacity, DialogMessages.FullFamilyGroup(_groupName))
 
     End Sub
 
@@ -1086,10 +1138,9 @@ Public Class FrmNewModifyClient
     ''' Restablece el estado visual y lógico relacionado
     ''' con la selección de grupos familiares.
     ''' </summary>
-    ''' <param name="clearLabel">
-    ''' Indica si el texto informativo debe limpiarse
-    ''' completamente o mostrar el mensaje de búsqueda.
-    ''' </param>
+    ''' <param name="clearLabel">Indica si el texto informativo
+    ''' debe limpiarse completamente o mostrar
+    ''' el mensaje de búsqueda.</param>
     Private Sub ResetGroupUI(clearLabel As Boolean)
 
         _selectedGroupId = 0
@@ -1104,96 +1155,48 @@ Public Class FrmNewModifyClient
 
 
     ''' <summary>
-    ''' Asigna dinámicamente los eventos de validación
-    ''' y cambio visual a los controles TextBox del formulario.
+    ''' Restaura el método de pago original del cliente
+    ''' evitando disparar eventos recursivos.
     ''' </summary>
-    Private Sub SetupTextBoxEvents()
+    Private Sub RestorePaymentMethod()
 
-        ' Creamos una lista de los TextBox que queremos validar
-        Dim requiredFields As TextBox() = {TxtFirstName, TxtLastName, TxtListGroupsDailyPayment}
-        Dim optionalFields As TextBox() = {TxtPhone, TxtAddress} 'TxtEmail,
+        ' Bloqueamos eventos temporalmente para no entrar en bucles
+        RemoveHandler RbGroupPayment.CheckedChanged, AddressOf RbGroupPayment_CheckedChanged
 
-        For Each textBox In requiredFields
-            ' Suscribimos el evento GotFocus (Cambio a Beige)
-            AddHandler textBox.GotFocus, Sub(s, e) DirectCast(s, TextBox).BackColor = Color.Beige
-            ' Suscribimos el evento LostFocus (Validación y Azure)
-            AddHandler textBox.LostFocus, Sub(s, e) ValidateCustomerNameUI(DirectCast(s, TextBox), Me.ErrorProvider)
-        Next
+        ' Consultamos nuestro "Clone" para saber qué radio button marcar
+        Select Case _originalDataCustomer.PaymentMethod
+            Case PaymentMethods.Monthly
+                RbMonthlyPayment.Checked = True
 
-        For Each textBox In optionalFields
-            ' Suscribimos el evento GotFocus (Cambio a Beige)
-            AddHandler textBox.GotFocus, Sub(s, e) DirectCast(s, TextBox).BackColor = Color.Beige
-            ' Suscribimos el evento LostFocus (Validación y Azure)
-            AddHandler textBox.LostFocus, Sub(s, e) ValidateOptionalFieldUI(DirectCast(s, TextBox), Me.ErrorProvider)
-        Next
+            Case Else '"DIARIO"
+                RbDailyPayment.Checked = True
+                TxtListGroupsDailyPayment.Text = _originalDataCustomer.PaymentMethod
 
+        End Select
+
+        ' Re-conectamos el evento para futuras interacciones
+        AddHandler RbGroupPayment.CheckedChanged, AddressOf RbGroupPayment_CheckedChanged
+
+        ' NOTA IMPORTANTE
+        ' StartsWith es como un detective de texto: pregunta si una cadena de texto comienza
+        ' por una palabra o letra específica.
+        ' Case _originalDataCustomer.PaymentMethod.StartsWith("DIARIO")
     End Sub
 
+#End Region
+
+
+#Region " 6. ESTRUCTURAS Y ENUMS AUXILIARES "
 
     ''' <summary>
-    ''' Muestra un mensaje de confirmación después
-    ''' de registrar o actualizar correctamente un cliente.
-    ''' También notifica al formulario principal para refrescar
-    ''' la información y cierra la ventana actual.
+    ''' Modos de transacción soportados por la interfaz de gestión de clientes.
     ''' </summary>
-    ''' <param name="customerCode">
-    ''' Identificador del cliente procesado.
-    ''' </param>
-    Private Sub ShowSuccessMessage(customerCode As Integer)
+    Public Enum TransactionMode
+        NewRecord
+        EditRecord
+    End Enum
 
-        '| Cuerpo del texto.
-        Dim fullName As String = $"{TxtFirstName.Text} {TxtLastName.Text}"
-        Dim idFormatted As String = $"CLI - {customerCode:000}"
-        Dim actionText As String = If(BtnSaveCustomerData.Enabled, "GUARDADOS", "ACTUALIZADOS")
-
-        '| Mensaje de confirmación.
-        MessageBox.Show(DialogMessages.OperationSuccessMessage(EntityNames.Client, fullName, idFormatted, actionText),
-                        "Operación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
-        '| Notificar al formulario, esto ejecutará la función que pasamos por AddressOf.
-        _onSuccessAction?.Invoke(customerCode)
-
-        '| Cerrar el formulario
-        _isSaving = True
-        Me.Close()
-
-    End Sub
-
-
-    ''' <summary>
-    ''' Ejecuta las validaciones principales del formulario antes
-    ''' de registrar o actualizar la información del cliente.
-    ''' </summary>
-    ''' <param name="actionText">
-    ''' Texto descriptivo de la acción actual. Ejemplo: "guardar" o "actualizar".
-    ''' </param>
-    ''' <returns>
-    ''' True si todas las validaciones fueron superadas correctamente;
-    ''' de lo contrario, False.
-    ''' </returns>
-    ''' <remarks>
-    ''' Esta función centraliza las validaciones relacionadas con:
-    ''' - Campos obligatorios.
-    ''' - Edad mínima permitida.
-    ''' - Método de pago seleccionado.
-    ''' - Selección de tarifas o grupos familiares.
-    ''' - Disponibilidad de cupos en grupos familiares.
-    '''
-    ''' El proceso se detiene inmediatamente al encontrar
-    ''' una validación inválida.
-    ''' </remarks>
-    Private Function ValidateForm(actionText As String) As Boolean
-
-        If Not ValidateRequiredField("NOMBRE", actionText, TxtFirstName) Then Return False
-        If Not ValidateRequiredField("APELLIDO", actionText, TxtLastName) Then Return False
-        If Not ValidateCustomerAge(actionText, LblCustomerAge, DtpBirthdate) Then Return False
-        If Not ValidateEmail(actionText, TxtEmail) Then Return False
-        If Not ValidatePaymentMethod(actionText, RbDailyPayment, RbMonthlyPayment, RbGroupPayment) Then Return False
-        If Not ValidateRequiredSelection(PaymentMethods.Daily, actionText, TxtListGroupsDailyPayment, RbDailyPayment) Then Return False
-        If Not ValidateRequiredSelection(PaymentMethods.FamilyGroup, actionText, TxtListGroupsDailyPayment, RbGroupPayment) Then Return False
-        Return True
-
-    End Function
+#End Region
 
 
 End Class

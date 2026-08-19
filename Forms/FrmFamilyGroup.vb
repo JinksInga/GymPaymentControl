@@ -24,6 +24,7 @@ Public Class FrmFamilyGroup
     Private _isGroupSelected As Boolean
 
     ' --- Propiedad pública de salida ---
+    Public Property IsNewGroupWithNoMembers As Boolean
     Public Property NewGroupName As String
 
 #End Region
@@ -102,7 +103,7 @@ Public Class FrmFamilyGroup
             If currentCapacity > _originalNumberMembers Then
 
                 Dim result As DialogResult = MessageBox.Show(ShowCapacityExpansionWarning, "Aviso importante",
-                                                             MessageBoxButtons.OKCancel, MessageBoxIcon.Information,
+                                                             MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
                                                              MessageBoxDefaultButton.Button2)
                 If result = DialogResult.Cancel Then Exit Sub
 
@@ -994,6 +995,9 @@ Public Class FrmFamilyGroup
 
         GbGroupInformation.Enabled = True
         GbMembersOfGroup.Enabled = True
+
+        ChkEmptyGroup.Checked = IsNewGroupWithNoMembers
+        ChkEmptyGroup.Enabled = Not IsNewGroupWithNoMembers
 
         TxtFamilyGroupName.Focus()
 

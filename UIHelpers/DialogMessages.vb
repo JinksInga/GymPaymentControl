@@ -35,6 +35,38 @@
 
         End Function
 
+
+        ''' <summary>
+        ''' Mensaje mostrado cuando se intenta pasar de un método de pago
+        ''' individual (DIARIO / MENSUAL) a GRUPAL existiendo una deuda pendiente.
+        ''' </summary>
+        Public Function IndividualToGroupDebtWarning() As String
+
+            Return " Operación denegada." & Environment.NewLine & Environment.NewLine &
+                   "   No se puede cambiar el método de pago individual" & Environment.NewLine &
+                   "   (DIARIO / MENSUAL) a GRUPAL mientras exista una deuda." & Environment.NewLine & Environment.NewLine &
+                   "   Debe cobrarse primero la deuda pendiente del CLIENTE."
+
+        End Function
+
+
+        ''' <summary>
+        ''' Muestra un mensaje de advertencia cuando se amplía la capacidad de un grupo familiar,
+        ''' informando que el ajuste tarifario aplicará a partir del siguiente período.
+        ''' </summary>
+        Public Function ShowCapacityExpansionWarning() As String
+
+            Return " Capacidad del grupo ampliada." & Environment.NewLine & Environment.NewLine &
+                   " • Las cuotas emitidas o pagadas del período actual no" & Environment.NewLine &
+                   "   sufren modificaciones." & Environment.NewLine & Environment.NewLine &
+                   " • La nueva capacidad se tomará en cuenta para el cálculo" & Environment.NewLine &
+                   "   de la mensualidad del siguiente período." & Environment.NewLine & Environment.NewLine &
+                   " ⚠️ ATENCIÓN ⚠️ El nuevo integrante no realizará ningún" & Environment.NewLine &
+                   "   pago hasta el siguiente período de facturación." & Environment.NewLine & Environment.NewLine &
+                   " ¿Continuamos con la ampliación?"
+
+        End Function
+
 #End Region
 
 
@@ -173,6 +205,7 @@
 
         End Function
 
+
         ''' <summary>
         ''' Mensaje mostrado para informar al usuario que se va a expandir
         ''' el límite de vacantes de un grupo familiar.
@@ -187,74 +220,38 @@
 
         End Function
 
-        '============================================================
-        ''' <summary>
-        ''' Muestra una advertencia indicando que un cliente no puede incorporarse al grupo en el período actual 
-        ''' debido a su fecha de inscripción, detallando el procedimiento alternativo para cobro de mensualidad.
-        ''' </summary>
-        Public Function ShowCurrentPeriodMemberInclusionWarning() As String
 
-            Return "No se puede ampliar el grupo para incorporar a este cliente " &
-            "porque su fecha de inscripción pertenece al período actual." & Environment.NewLine & Environment.NewLine &
-            "Si el cliente debe abonar la mensualidad del período actual, " &
-            "regístrelo primero como MENSUAL, realice el pago y posteriormente " &
-            "incorpórelo al grupo familiar."
-
-        End Function
-
-        ''' <summary>
-        ''' Mensaje mostrado para informar al usuario que no puede cambiar el método
-        ''' de pago de un cliente si este pertenece a un grupo familiar.
-        ''' </summary>
-        Public Function GroupPaymentChangeNotAllowed() As String
-
-            Return "     NO SE PUEDE CAMBIAR EL MÉTODO DE PAGO" & Environment.NewLine &
-                   "     El cliente pertenece a un grupo familiar." & Environment.NewLine &
-                   "   ___________________________________________________" & Environment.NewLine & Environment.NewLine &
-                   "     Si quieres hacer el cambio tienes dos opciones:" & Environment.NewLine & Environment.NewLine &
-                   "       * MODIFICAR el grupo familiar." & Environment.NewLine &
-                   "       * ELIMINAR el grupo familiar."
-
-        End Function
-
-        ''' <summary>
-        ''' Mensaje mostrado cuando se intenta pasar de un método de pago
-        ''' individual a GRUPAL existiendo una deuda pendiente.
-        ''' </summary>
-        Public Function IndividualToGroupDebtWarning() As String
-
-            Return "No se puede cambiar a GRUPAL mientras exista una deuda pendiente." & Environment.NewLine & Environment.NewLine &
-                   "Debe cobrarse primero la deuda pendiente del cliente."
-
-        End Function
         ''' <summary>
         ''' Mensaje mostrado cuando se intenta pasar de GRUPAL a un método
         ''' de pago individual existiendo una deuda pendiente.
         ''' </summary>
         Public Function GroupToIndividualDebtWarning() As String
 
-            Return "No se puede cambiar de GRUPAL a un método de pago individual " &
-                   "mientras exista una deuda pendiente." & Environment.NewLine & Environment.NewLine &
-                   "Debe cobrarse primero la deuda pendiente del grupo."
+            Return " Operación denegada." & Environment.NewLine & Environment.NewLine &
+                   "   No se puede cambiar de GRUPAL a un método de pago" & Environment.NewLine &
+                   "   individual (DIARIO / MENSUAL) mientras exista una deuda." & Environment.NewLine & Environment.NewLine &
+                   "   Debe cobrarse primero la deuda pendiente del GRUPO."
 
         End Function
+
+
         ''' <summary>
-        ''' Devuelve el mensaje de advertencia que informa que no se
-        ''' pueden modificar los integrantes de un grupo familiar
-        ''' debido a la presencia de deudas pendientes.
+        ''' Informa al usuario que no puede cambiar el método de pago
+        ''' de un cliente si este pertenece a un grupo familiar.
         ''' </summary>
-        ''' <returns>
-        ''' Cadena de texto (<see cref="String"/>) estructurada con la explicación
-        ''' de la restricción y la acción requerida.
-        ''' </returns>
-        Public Function GroupHasPendingDebtCannotRemoveMember() As String
+        Public Function GroupPaymentChangeNotAllowed() As String
 
-            Return "No se puede cambiar los integrantes de un grupo familiar " &
-                   "mientras exista una deuda pendiente." & Environment.NewLine & Environment.NewLine &
-                   "Debe cobrarse primero la deuda pendiente del grupo."
+            Return " Operación denegada." & Environment.NewLine & Environment.NewLine &
+                   "   El cliente pertenece a un grupo familiar y no se puede" & Environment.NewLine &
+                   "   cambiar el método de pago de GRUPAL a individual" & Environment.NewLine &
+                   "   (DIARIO o MENSUAL)." & Environment.NewLine &
+                   " _________________________________________________________" & Environment.NewLine & Environment.NewLine &
+                   "   Tienes dos opciones para realizar el cambio desde" & Environment.NewLine &
+                   "   el formulario 'GRUPO FAMILIAR':" & Environment.NewLine & Environment.NewLine &
+                   "     1. MODIFICAR el grupo." & Environment.NewLine &
+                   "     2. ELIMINAR el grupo."
 
         End Function
-        '============================================================
 
 #End Region
 
@@ -392,23 +389,6 @@
         Public Const FamilyGroupDeletedSuccessfully As String = "El grupo familiar se ha eliminado correctamente."
         Public Const SelectMemberFromListRemove As String = "Selecciona un integrante de la lista para poder quitarlo."
 
-        ''' <summary>
-        ''' Muestra un mensaje de advertencia cuando se amplía la capacidad de un grupo familiar,
-        ''' informando que el ajuste tarifario aplicará a partir del siguiente período.
-        ''' </summary>
-        Public Function ShowCapacityExpansionWarning() As String
-
-            Return " Capacidad del grupo ampliada." & Environment.NewLine & Environment.NewLine &
-                   " • Las cuotas emitidas o pagadas del período actual no" & Environment.NewLine &
-                   "   sufren modificaciones." & Environment.NewLine & Environment.NewLine &
-                   " • La nueva capacidad se tomará en cuenta para el cálculo de" & Environment.NewLine &
-                   "   la mensualidad del siguiente período." & Environment.NewLine & Environment.NewLine &
-                   " • ATENCIÓN : El nuevo integrante no realizará ningún pago" & Environment.NewLine &
-                   "   hasta el siguiente período de facturación." & Environment.NewLine & Environment.NewLine &
-                   " ¿Continuamos con la ampliación?"
-
-        End Function
-
 
         ''' <summary>
         ''' Genera el mensaje de confirmación mostrado antes de eliminar
@@ -476,6 +456,25 @@
         End Function
 
 
+        ''' <summary>
+        ''' Devuelve el mensaje de advertencia que informa que no se
+        ''' pueden modificar los integrantes de un grupo familiar
+        ''' debido a la presencia de deudas pendientes.
+        ''' </summary>
+        ''' <returns>
+        ''' Cadena de texto (<see cref="String"/>) estructurada con la explicación
+        ''' de la restricción y la acción requerida.
+        ''' </returns>
+        Public Function GroupHasPendingDebtCannotRemoveMember() As String
+
+            Return " Deuda pendiente." & Environment.NewLine & Environment.NewLine &
+                   " No se puede cambiar los integrantes de un grupo familiar" & Environment.NewLine &
+                   " mientras exista una deuda pendiente." & Environment.NewLine &
+                   " Debe cobrarse primero la deuda pendiente del grupo."
+
+        End Function
+
+
 #End Region
 
 
@@ -493,6 +492,23 @@
         End Function
 
 #End Region
+
+
+        '''' <summary>
+        '''' Muestra una advertencia indicando que un cliente no puede incorporarse al grupo en el período actual 
+        '''' debido a su fecha de inscripción, detallando el procedimiento alternativo para cobro de mensualidad.
+        '''' </summary>
+        'Public Function ShowCurrentPeriodMemberInclusionWarning() As String
+
+        '    Return "  Información de ampliación" & Environment.NewLine & Environment.NewLine &
+        '           "  No se puede ampliar el grupo para incorporar a este cliente" & Environment.NewLine &
+        '           "  porque su fecha de inscripción pertenece al período actual." & Environment.NewLine & Environment.NewLine &
+        '           "  Si el cliente debe abonar la mensualidad del período actual," & Environment.NewLine &
+        '           "  regístrelo primero como MENSUAL, realice el pago y" & Environment.NewLine &
+        '           "  posteriormente incorpórelo al grupo familiar."
+
+        'End Function
+
 
     End Module
 End Namespace
