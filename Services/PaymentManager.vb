@@ -7,112 +7,61 @@ Imports MySql.Data.MySqlClient
 
 Namespace Services
 
-    ' Servicio encargado de:
-    ' - Obtener pagos pendientes (individuales y grupales)
-    ' - Aplicar reglas de negocio (cálculos, prorrateos)
-    ' - Construir filas de resumen para presentación
+    ''' <summary>
+    ''' Servicio de dominio encargado de consultar deudas pendientes, 
+    ''' procesar reglas de negocio para el cálculo de cobros
+    ''' y gestionar la persistencia de transacciones de pago.
+    ''' </summary>
     Public Class PaymentManager
 
         ' Al heredar, obtenemos el motor de conexión.
         Inherits BaseRepository
 
-        ' Propiedad de solo lectura que permite leer la cadena de conexión desde fuera de la clase, sin permitir su modificación.
+        ''' <summary>
+        ''' Obtiene la cadena de conexión configurada en el repositorio base.
+        ''' </summary>
         Public ReadOnly Property ConnectionString As String
             Get
                 Return _connectionString
             End Get
         End Property
 
-        ' =====================================================
-        ' ========== PAGOS INDIVIDUALES =======================
-        ' =====================================================
+#Region " PAGOS INDIVIDUALES "
 
-        ' Método público:
-        ' Devuelve la lista final de morosos individuales,
-        ' incluyendo filas de resumen por cliente.
+        ''' <summary>
+        ''' Recupera el listado completo de deudores individuales activos,
+        ''' calculando sus importes y adjuntando filas de resumen por cada cliente.
+        ''' </summary>
+        ''' <returns>Una lista de <see cref="IndividualPaymentDTO"/> formateada para su presentación en UI.</returns>
         Public Function GetListIndividualDebtors() As List(Of IndividualPaymentDTO)
-            ' 1. Obtener datos base desde la BBDD
+
             Dim baseData = GetBaseDataIndividual()
-            ' 2. Aplicar reglas de negocio y cálculos
             CalculateIndividualPayments(baseData)
-            ' 3. Construir lista final con filas de resumen
+
             Return BuildFinalIndividualList(baseData)
 
         End Function
 
 
         ''' <summary>
-        ''' Determina si un cliente tiene actualmente alguna deuda individual pendiente.
-        ''' Solo se consideran pagos asociados directamente al cliente y no los pagos
-        ''' correspondientes a un grupo familiar.
+        ''' Obtiene desde la base de datos la lista de pagos individuales
+        ''' pendientes de cobro (clientes activos, sin grupo, sin pago finalizado).
         ''' </summary>
-        Public Function HasPendingIndividualDebt(clientId As Integer) As Boolean
-
-            Const sqlQuery As String = "SELECT EXISTS (SELECT 1 " &
-                                       "FROM pagos " &
-                                       "WHERE id_cli = @id_cli " &
-                                       "AND (frm_pgs IS NULL OR frm_pgs = ''))"
-
-            Using connection As MySqlConnection = GetConnection()
-
-                Using command As New MySqlCommand(sqlQuery, connection)
-
-                    command.Parameters.Add("@id_cli", MySqlDbType.Int32).Value = clientId
-
-                    connection.Open()
-
-                    Return Convert.ToBoolean(command.ExecuteScalar())
-
-                End Using
-
-            End Using
-
-        End Function
-
-
-        Public Function HasPendingGroupDebt(groupId As Integer) As Boolean
-
-            Const sqlQuery As String = "SELECT EXISTS (SELECT 1 " &
-                                       "FROM pagos " &
-                                       "WHERE id_grp = @id_grp " &
-                                       "AND (frm_pgs IS NULL OR frm_pgs = ''))"
-
-            Using connection = GetConnection()
-
-                Using command As New MySqlCommand(sqlQuery, connection)
-
-                    command.Parameters.Add("@id_grp", MySqlDbType.Int32).Value = groupId
-
-                    connection.Open()
-
-                    Return Convert.ToBoolean(command.ExecuteScalar())
-
-                End Using
-
-            End Using
-
-        End Function
-
-
-        ' Obtiene los pagos individuales pendientes desde la base de datos
-        ' (clientes activos, sin grupo, sin pago finalizado)
         Private Function GetBaseDataIndividual() As List(Of IndividualPaymentDTO)
 
             Dim listIndividualPayment As New List(Of IndividualPaymentDTO)
 
-            Dim sqlQuery As String =
-    "SELECT c.nom_cli, c.ape_cli, c.fdn_cli, " &
-    "       p.id_pgs, p.fdi_pgs, p.mtd_pgs, " &
-    "       p.prc_pgs, p.dsc_pgs, p.id_cli " &
-    "FROM clientes c " &
-    "INNER JOIN pagos p ON c.id_cli = p.id_cli " &
-    "WHERE (p.frm_pgs IS NULL OR p.frm_pgs = '') " &
-    "ORDER BY p.id_cli, p.fdi_pgs"
+            Dim sqlQuery As String = "SELECT c.nom_cli, c.ape_cli, c.fdn_cli, " &
+                                            "p.id_pgs, p.fdi_pgs, p.mtd_pgs, " &
+                                            "p.prc_pgs, p.dsc_pgs, p.id_cli " &
+                                     "FROM clientes c " &
+                                     "INNER JOIN pagos p ON c.id_cli = p.id_cli " &
+                                     "WHERE (p.frm_pgs IS NULL OR p.frm_pgs = '') " &
+                                     "ORDER BY p.id_cli, p.fdi_pgs"
 
             Using connection = GetConnection()
 
                 Using command As New MySqlCommand(sqlQuery, connection)
-
                     connection.Open()
 
                     Using dataReader = command.ExecuteReader()
@@ -121,14 +70,14 @@ Namespace Services
                             ' Mapeo de datos a DTO
                             Dim dto As New IndividualPaymentDTO With
                                 {
-                                    .IdPgs = dataReader("id_pgs"),
-                                    .IdCli = dataReader("id_cli"),
-                                    .FirstName = dataReader("nom_cli").ToString(),
-                                    .LastName = dataReader("ape_cli").ToString(),
+                                    .IdPgs = dataReader.GetInt32("id_pgs"),
+                                    .IdCli = dataReader.GetInt32("id_cli"),
+                                    .FirstName = dataReader.GetString("nom_cli"),
+                                    .LastName = dataReader.GetString("ape_cli"),
                                     .Age = CalculateClientAge(dataReader.GetDateTime("fdn_cli")),
-                                    .MtdPgs = dataReader("mtd_pgs").ToString(),
-                                    .PrcPgs = Convert.ToDecimal(dataReader("prc_pgs")),
-                                    .DscPgs = Convert.ToDecimal(dataReader("dsc_pgs")),
+                                    .MtdPgs = dataReader.GetString("mtd_pgs"),
+                                    .PrcPgs = dataReader.GetDecimal("prc_pgs"),'Convert.ToDecimal(dataReader("prc_pgs")),
+                                    .DscPgs = dataReader.GetDecimal("dsc_pgs"),'Convert.ToDecimal(dataReader("dsc_pgs")),
                                     .FdiPgs = dataReader.GetDateTime("fdi_pgs")
                                 }
                             ' Formato de fecha largo para presentación
@@ -146,7 +95,10 @@ Namespace Services
 
         End Function
 
-        ' Aplica cálculos a todos los pagos individuales
+
+        ''' <summary>
+        ''' Aplica la lógica de cálculo de montos finales a cada ítem de pago individual.
+        ''' </summary>
         Private Sub CalculateIndividualPayments(items As List(Of IndividualPaymentDTO))
 
             For Each item In items
@@ -155,8 +107,11 @@ Namespace Services
 
         End Sub
 
-        ' Construye la lista final agrupando por cliente
-        ' y añadiendo una fila resumen por cada uno
+
+        ''' <summary>
+        ''' Agrupa los pagos individuales por cliente e
+        ''' inyecta la fila de resumen por cada uno.
+        ''' </summary>
         Private Function BuildFinalIndividualList(baseData As List(Of IndividualPaymentDTO)
                                              ) As List(Of IndividualPaymentDTO)
 
@@ -173,7 +128,11 @@ Namespace Services
 
         End Function
 
-        ' Crea la fila resumen (fila naranja) de un cliente
+
+        ''' <summary>
+        ''' Crea la entidad DTO que representa la fila de resumen visual
+        ''' para un cliente individual.
+        ''' </summary>
         Private Function CreateIndividualSummaryRow(group As IGrouping(Of Integer, IndividualPaymentDTO)
                                          ) As IndividualPaymentDTO
 
@@ -188,13 +147,16 @@ Namespace Services
 
         End Function
 
-        ' =====================================================
-        ' ========== PAGOS GRUPALES ===========================
-        ' =====================================================
+#End Region
 
-        ' Método público:
-        ' Devuelve la lista final de morosos grupales,
-        ' incluyendo filas de resumen por grupo familiar.
+
+#Region " PAGOS GRUPALES "
+
+        ''' <summary>
+        ''' Recupera el listado completo de grupos familiares deudores,
+        ''' calculando sus importes y adjuntando filas de resumen por grupo.
+        ''' </summary>
+        ''' <returns>Una lista de <see cref="GroupPaymentDTO"/> formateada para su presentación en UI.</returns>
         Public Function GetListGroupDebtors() As List(Of GroupPaymentDTO)
 
             Dim baseData = GetBaseDataGroup()
@@ -204,22 +166,24 @@ Namespace Services
 
         End Function
 
-        ' Obtiene los pagos grupales pendientes desde la BBDD
+
+        ''' <summary>
+        ''' Obtiene desde la base de datos la lista base de pagos grupales pendientes de cobro.
+        ''' </summary>
         Private Function GetBaseDataGroup() As List(Of GroupPaymentDTO)
 
             Dim listGroupPayment As New List(Of GroupPaymentDTO)
 
-            Dim sqlQuery As String =
-    "SELECT GROUP_CONCAT(c.nom_cli SEPARATOR ', ') AS INTEGRANTES, " &
-    "       g.id_grp, g.nom_grp, " &
-    "       p.fdi_pgs, p.mtd_pgs, " &
-    "       p.prc_pgs, p.dsc_pgs, p.id_pgs " &
-    "FROM clientes c " &
-    "INNER JOIN grp_familiar g ON c.id_grp = g.id_grp " &
-    "INNER JOIN pagos p ON g.id_grp = p.id_grp " &
-    "WHERE (p.frm_pgs IS NULL OR p.frm_pgs = '') " &
-    "GROUP BY p.id_pgs " &
-    "ORDER BY g.id_grp, p.fdi_pgs ASC"
+            Dim sqlQuery As String = "SELECT GROUP_CONCAT(c.nom_cli SEPARATOR ', ') AS INTEGRANTES, " &
+                                     "g.id_grp, g.nom_grp, " &
+                                     "p.fdi_pgs, p.mtd_pgs, " &
+                                     "p.prc_pgs, p.dsc_pgs, p.id_pgs " &
+                                     "FROM clientes c " &
+                                     "INNER JOIN grp_familiar g ON c.id_grp = g.id_grp " &
+                                     "INNER JOIN pagos p ON g.id_grp = p.id_grp " &
+                                     "WHERE (p.frm_pgs IS NULL OR p.frm_pgs = '') " &
+                                     "GROUP BY p.id_pgs " &
+                                     "ORDER BY g.id_grp, p.fdi_pgs ASC"
 
             Using connection = GetConnection()
 
@@ -233,13 +197,13 @@ Namespace Services
 
                             Dim dto As New GroupPaymentDTO With
                                 {
-                                    .IdPgs = dataReader("id_pgs"),
-                                    .IdGrp = dataReader("id_grp"),
-                                    .GroupName = dataReader("nom_grp").ToString(),
-                                    .GroupMembers = dataReader("INTEGRANTES").ToString(),
-                                    .MtdPgs = dataReader("mtd_pgs"),
-                                    .PrcPgs = Convert.ToDecimal(dataReader("prc_pgs")),
-                                    .DscPgs = Convert.ToDecimal(dataReader("dsc_pgs")),
+                                    .IdPgs = dataReader.GetInt32("id_pgs"),
+                                    .IdGrp = dataReader.GetInt32("id_grp"),
+                                    .GroupName = dataReader.GetString("nom_grp"),
+                                    .GroupMembers = dataReader.GetString("INTEGRANTES"),
+                                    .MtdPgs = dataReader.GetString("mtd_pgs"),
+                                    .PrcPgs = dataReader.GetDecimal("prc_pgs"),'Convert.ToDecimal(dataReader("prc_pgs")),
+                                    .DscPgs = dataReader.GetDecimal("dsc_pgs"),'Convert.ToDecimal(dataReader("dsc_pgs")),
                                     .FdiPgs = dataReader.GetDateTime("fdi_pgs")
                                 }
                             dto.LongDate = FormatDateUppercase(dto.FdiPgs)
@@ -255,7 +219,10 @@ Namespace Services
 
         End Function
 
-        ' Aplica cálculos a todos los pagos grupales
+
+        ''' <summary>
+        ''' Aplica la lógica de cálculo de montos finales a cada ítem de pago grupal.
+        ''' </summary>
         Private Sub CalculateGroupPayments(items As List(Of GroupPaymentDTO))
 
             For Each item In items
@@ -264,7 +231,10 @@ Namespace Services
 
         End Sub
 
-        ' Construye la lista final agrupando por grupo familiar
+
+        ''' <summary>
+        ''' Agrupa los pagos por grupo familiar e inyecta la fila de resumen totabilizadora.
+        ''' </summary>
         Private Function BuildFinalGroupList(baseData As List(Of GroupPaymentDTO)
                                              ) As List(Of GroupPaymentDTO)
 
@@ -281,7 +251,10 @@ Namespace Services
 
         End Function
 
-        ' Crea la fila resumen (fila naranja) de un grupo familiar
+
+        ''' <summary>
+        ''' Crea la entidad DTO que representa la fila de resumen visual para un grupo familiar.
+        ''' </summary>
         Private Function CreateGroupSummaryRow(group As IGrouping(Of Integer, GroupPaymentDTO)
                                                 ) As GroupPaymentDTO
 
@@ -294,9 +267,13 @@ Namespace Services
                 }
         End Function
 
+#End Region
+
+
+#Region " PERSISTENCIA Y TRANSACCIONALIDAD "
 
         ''' <summary>
-        ''' Punto único de inserción/actualización de pagos para evitar discrepancias.
+        ''' Punto centralizado de inserción y actualización de registros de pago en la BBDD.
         ''' </summary>
         ''' <remarks>
         ''' Esta función soporta:
@@ -308,6 +285,13 @@ Namespace Services
         ''' Centralizar esta lógica evita inconsistencias entre
         ''' distintos procesos de registro y cobro.
         ''' </remarks>
+        ''' <param name="payment">Objeto que implementa la interfaz <see cref="IPaymentCalculable"/>.</param>
+        ''' <param name="mode">Modo de transacción (<c>NewPayment</c> o <c>UpdatePayment</c>).</param>
+        ''' <param name="idUser">Identificador del usuario que registra la operación.</param>
+        ''' <param name="paymentMethod">Forma o método de pago aplicado (ej. "EFECTIVO", "TARJETA").</param>
+        ''' <param name="externalConn">Conexión MySQL externa opcional para ejecuciones dentro de un bloque transaccional amplio.</param>
+        ''' <param name="externalTrans">Transacción MySQL externa opcional.</param>
+        ''' <returns><c>True</c> si la operación afectó al menos un registro; de lo contrario, <c>False</c>.</returns>
         Public Function SavePaymentTransaction(payment As IPaymentCalculable, mode As TransactionMode,
                                                idUser As Integer, paymentMethod As String,
                                                Optional externalConn As MySqlConnection = Nothing,
@@ -319,56 +303,61 @@ Namespace Services
             Try
                 If conn.State <> ConnectionState.Open Then conn.Open()
 
-                '| =================================================================
                 '| * CONTROL DE DUPLICADOS PARA GRUPOS (Solo aplica en NUEVOS PAGOS)
-                '| =================================================================
-                If mode = TransactionMode.NewPayment AndAlso TypeOf payment Is GroupPaymentDTO Then
+
+                If mode = TransactionMode.NewPayment AndAlso
+                    TypeOf payment Is GroupPaymentDTO Then
 
                     Dim groupPayment = DirectCast(payment, GroupPaymentDTO)
 
-                    Dim sqlCheck As String = "SELECT COUNT(*) FROM pagos WHERE id_grp = @idGrp
-                                              AND MONTH(fdi_pgs) = MONTH(@fdi) AND YEAR(fdi_pgs) = YEAR(@fdi)"
+                    Dim sqlCheck As String = "SELECT COUNT(*) FROM pagos " &
+                                             "WHERE id_grp = @idGrp " &
+                                             "AND MONTH(fdi_pgs) = MONTH(@fdi) " &
+                                             "AND YEAR(fdi_pgs) = YEAR(@fdi)"
 
                     Using cmdCheck As New MySqlCommand(sqlCheck, conn, externalTrans)
 
-                        cmdCheck.Parameters.AddWithValue("@idGrp", groupPayment.IdGrp)
-                        cmdCheck.Parameters.AddWithValue("@fdi", groupPayment.FdiPgs)
+                        cmdCheck.Parameters.Add("@idGrp", MySqlDbType.Int32).Value = groupPayment.IdGrp
+                        cmdCheck.Parameters.Add("@fdi", MySqlDbType.Date).Value = groupPayment.FdiPgs
 
                         Dim exists As Integer = Convert.ToInt32(cmdCheck.ExecuteScalar())
+
                         If exists > 0 Then Return True
 
                     End Using
+
                 End If
 
-                '| =====================================
+
                 '| * LÓGICA DE INSERCIÓN / ACTUALIZACIÓN
-                '| =====================================
 
                 Dim sqlQuery As String
 
                 If mode = TransactionMode.NewPayment Then
-                    sqlQuery = "INSERT INTO pagos (fdi_pgs, fdp_pgs, frm_pgs, mtd_pgs,
-                                                   prc_pgs, dsc_pgs, id_cli, id_grp, id_user)
-                                VALUES (@fdi, @fdp, @frm, @mtd, @prc, @dsc, @idCli, @idGrp, @idUser)"
+                    sqlQuery = "INSERT INTO pagos (fdi_pgs, fdp_pgs, frm_pgs, mtd_pgs, " &
+                                                  "prc_pgs, dsc_pgs, id_cli, id_grp, id_user) " &
+                               "VALUES (@fdi, @fdp, @frm, @mtd, @prc, @dsc, @idCli, @idGrp, @idUser)"
                 Else
-                    sqlQuery = "UPDATE pagos SET fdi_pgs=@fdi, fdp_pgs=@fdp, frm_pgs=@frm, mtd_pgs=@mtd,
-                                prc_pgs=@prc, dsc_pgs=@dsc, id_user=@idUser WHERE id_pgs=@idPgs"
+                    sqlQuery = "UPDATE pagos " &
+                               "SET fdi_pgs=@fdi, fdp_pgs=@fdp, frm_pgs=@frm, mtd_pgs=@mtd, " &
+                                   "prc_pgs=@prc, dsc_pgs=@dsc, id_user=@idUser " &
+                               "WHERE id_pgs=@idPgs"
                 End If
 
                 Using command As New MySqlCommand(sqlQuery, conn, externalTrans)
-                    ' Parámetros Comunes
-                    command.Parameters.AddWithValue("@fdi", payment.FdiPgs)
-                    command.Parameters.AddWithValue("@fdp", payment.FdpPgs)
-                    command.Parameters.AddWithValue("@frm", paymentMethod)
-                    command.Parameters.AddWithValue("@mtd", payment.MtdPgs)
-                    command.Parameters.AddWithValue("@prc", payment.PrcPgs)
-                    command.Parameters.AddWithValue("@dsc", payment.DscPgs)
-                    command.Parameters.AddWithValue("@idUser", idUser)
+
+                    command.Parameters.Add("@fdi", MySqlDbType.Date).Value = payment.FdiPgs
+                    command.Parameters.Add("@fdp", MySqlDbType.Date).Value = payment.FdpPgs 'If(payment.FdpPgs.HasValue, payment.FdpPgs.Value, DBNull.Value)
+                    command.Parameters.Add("@frm", MySqlDbType.VarChar).Value = paymentMethod
+                    command.Parameters.Add("@mtd", MySqlDbType.VarChar).Value = payment.MtdPgs
+                    command.Parameters.Add("@prc", MySqlDbType.Decimal).Value = payment.PrcPgs
+                    command.Parameters.Add("@dsc", MySqlDbType.Decimal).Value = payment.DscPgs
+                    command.Parameters.Add("@idUser", MySqlDbType.Int32).Value = idUser
 
                     If mode = TransactionMode.UpdatePayment Then
-                        command.Parameters.AddWithValue("@idPgs", payment.IdPgs)
+                        command.Parameters.Add("@idPgs", MySqlDbType.Int32).Value = payment.IdPgs
                     Else
-                        ' Lógica de IDs para nuevos registros
+                        ' Asignación dinámica de IDs según la naturaleza del pago.
                         Dim idCli As Object = DBNull.Value
                         Dim idGrp As Object = DBNull.Value
 
@@ -378,25 +367,33 @@ Namespace Services
                             idGrp = DirectCast(payment, GroupPaymentDTO).IdGrp
                         End If
 
-                        command.Parameters.AddWithValue("@idCli", idCli)
-                        command.Parameters.AddWithValue("@idGrp", idGrp)
+                        command.Parameters.Add("@idCli", MySqlDbType.Int32).Value = idCli
+                        command.Parameters.Add("@idGrp", MySqlDbType.Int32).Value = idGrp
                     End If
 
                     Return command.ExecuteNonQuery() > 0
 
                 End Using
 
-            Catch ex As Exception
-                Throw ex
-
+            Catch
+                Throw
             Finally
-                If closeConn AndAlso conn IsNot Nothing Then conn.Dispose()
+
+                If closeConn AndAlso conn IsNot Nothing Then
+                    conn.Dispose()
+                End If
 
             End Try
 
         End Function
 
 
+        ''' <summary>
+        ''' Recupera el historial completo de pagos asociados a un cliente individual o a su grupo familiar.
+        ''' </summary>
+        ''' <param name="idClient">Identificador único del cliente.</param>
+        ''' <param name="idGroup">Identificador opcional del grupo familiar al que pertenece.</param>
+        ''' <returns>Una lista de <see cref="IndividualPaymentDTO"/> que representan los cobros históricos.</returns>
         Public Function GetPaymentHistory(idClient As Integer, idGroup As Integer?) As List(Of IndividualPaymentDTO)
 
             Dim historyList As New List(Of IndividualPaymentDTO)
@@ -416,10 +413,10 @@ Namespace Services
 
                 Using command As New MySqlCommand(sqlQuery, connection)
 
-                    command.Parameters.AddWithValue("@idClient", idClient)
+                    command.Parameters.Add("@idClient", MySqlDbType.Int32).Value = idClient
 
                     If idGroup.HasValue AndAlso idGroup.Value > 0 Then
-                        command.Parameters.AddWithValue("@idGroup", idGroup.Value)
+                        command.Parameters.Add("@idGroup", MySqlDbType.Int32).Value = idGroup.Value
                     End If
 
                     connection.Open()
@@ -457,6 +454,69 @@ Namespace Services
 
         End Function
 
+#End Region
+
+
+#Region " FORMULARIO : FrmFamilyGroup "
+
+        ''' <summary>
+        ''' Determina si un grupo familiar tiene actualmente alguna deuda pendiente sin abonar.
+        ''' </summary>
+        ''' <param name="groupId">Identificador único del grupo familiar.</param>
+        ''' <returns><c>True</c> si el grupo tiene al menos un cobro registrado sin forma de pago; de lo contrario, <c>False</c>.</returns>
+        Public Function HasPendingGroupDebt(groupId As Integer) As Boolean
+
+            Const sqlQuery As String = "SELECT EXISTS (SELECT 1 " &
+                                       "FROM pagos " &
+                                       "WHERE id_grp = @id_grp " &
+                                       "AND (frm_pgs IS NULL OR frm_pgs = ''))"
+
+            Using connection = GetConnection()
+
+                Using command As New MySqlCommand(sqlQuery, connection)
+
+                    command.Parameters.Add("@id_grp", MySqlDbType.Int32).Value = groupId
+                    connection.Open()
+
+                    Return Convert.ToBoolean(command.ExecuteScalar())
+
+                End Using
+            End Using
+
+        End Function
+
+
+        ''' <summary>
+        ''' Determina si un cliente tiene actualmente alguna deuda individual pendiente.
+        ''' Solo se consideran pagos asociados directamente al cliente y no los pagos
+        ''' correspondientes a un grupo familiar.
+        ''' </summary>
+        ''' <param name="clientId">Identificador único del cliente.</param>
+        ''' <returns><c>True</c> si el cliente tiene al menos una mensualidad
+        ''' sin forma de pago asignada; de lo contrario, <c>False</c>.</returns>
+        Public Function HasPendingIndividualDebt(clientId As Integer) As Boolean
+
+            Const sqlQuery As String = "SELECT EXISTS (SELECT 1 " &
+                                       "FROM pagos " &
+                                       "WHERE id_cli = @id_cli " &
+                                       "AND (frm_pgs IS NULL OR frm_pgs = ''))"
+
+            Using connection As MySqlConnection = GetConnection()
+
+                Using command As New MySqlCommand(sqlQuery, connection)
+
+                    command.Parameters.Add("@id_cli", MySqlDbType.Int32).Value = clientId
+                    connection.Open()
+
+                    Return Convert.ToBoolean(command.ExecuteScalar())
+
+                End Using
+            End Using
+
+        End Function
+
+#End Region
 
     End Class
+
 End Namespace

@@ -131,9 +131,7 @@
         ''' <summary>
         ''' Mensaje mostrado para informar que ya existen pagos antes de crear masivamente para evitar duplicados.
         ''' </summary>
-        ''' <param name="newMonth">
-        ''' Mes que tiene pagos masivos registrados.
-        ''' </param>
+        ''' <param name="newMonth">Mes que tiene pagos masivos registrados.</param>
         Public Function DoNotDuplicatePayments(newMonth As String) As String
 
             Return $"   Las membresías de {newMonth} ya están registradas en" & Environment.NewLine &
@@ -145,24 +143,26 @@
         End Function
 
         ''' <summary>
-        ''' Mensaje mostrado para preguntar al usuario si está seguro de crear pagos masivos.
+        ''' Solicita la confirmación del usuario para proceder con el procesamiento masivo de pagos.
         ''' </summary>
-        ''' <param name="newMonth">
-        ''' Mes al que corresponde los nuevos pagos masivos.
-        ''' </param>
+        ''' <param name="newMonth">Mes objetivo sobre el cual se aplicará la generación de cobros.</param>
         Public Function AskBeforeRegisteringPayments(newMonth As String) As String
 
-            Return "                            ¡ ¡ ¡  ATENCIÓN  ! ! !" & Environment.NewLine & Environment.NewLine &
-                   "   Se crearán nuevos pagos de " & newMonth & " para todos los" & Environment.NewLine &
-                   "   clientes y grupos familiares en actividad." & Environment.NewLine &
-                   "   __________________________________________________________" & Environment.NewLine & Environment.NewLine &
-                   "      ¿Desea continuar con la creación masiva de registros?"
+            Return "     ⚠️ ATENCIÓN : Confirmación de Creación Masiva ⚠️" & Environment.NewLine &
+                   " ____________________________________________________________" & Environment.NewLine & Environment.NewLine &
+                   $"  Se generarán los pagos para el mes de {newMonth}." & Environment.NewLine & Environment.NewLine &
+                   "  Esto afectará únicamente a los clientes que cumplan con" & Environment.NewLine &
+                   "  lo siguiente :" & Environment.NewLine & Environment.NewLine &
+                   "    • Pago    : MENSUAL o GRUPAL (Grupos familiares)." & Environment.NewLine &
+                   "    • Estado : ACTIVO (En actividad)." & Environment.NewLine &
+                   " ____________________________________________________________" & Environment.NewLine & Environment.NewLine &
+                   "  ¿Está SEGURO de ejecutar este proceso?"
 
         End Function
 
         ''' <summary>
-        ''' Genera el mensaje de error cuando el usuario selecciona
-        ''' una fila incorrecta. Ejemplo: Fila Resumen.
+        ''' Genera el mensaje de error cuando el usuario selecciona una fila incorrecta.
+        ''' Ejemplo: Fila Resumen.
         ''' </summary>
         Public Function SelectCorrectRow() As String
 

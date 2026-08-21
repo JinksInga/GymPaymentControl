@@ -105,6 +105,7 @@ Namespace Services
 
                         End If
 
+                        '| * Comprobar si son pagos grupales o individuales.
                         If data.IsGroup Then ' DTO de grupos familiares
 
                             paymentDto = New GroupPaymentDTO With
